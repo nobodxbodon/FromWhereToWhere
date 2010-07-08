@@ -1,0 +1,6 @@
+content FromWhereToWhere content/
+overlay chrome://browser/content/browser.xul chrome://FromWhereToWhere/content/overlay.xul
+
+locale fromwheretowhere en-US locale/en-US/
+
+skin fromwheretowhere classic/1.0 skin/

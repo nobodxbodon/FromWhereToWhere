@@ -1,0 +1,12 @@
+@import url(chrome://global/skin/);
+
+
+tree#elementList > treechildren::-moz-tree-cell-text(makeItBlue)
+{
+  color: blue;
+}
+
+tree#elementList > treechildren::-moz-tree-cell-text(makeItRed)
+{
+  color: red;
+}

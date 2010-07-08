@@ -1,0 +1,8 @@
+<?xml version="1.0"?>  
+<overlay id="FromWhereToWhereOverlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script src="openwindow.js" />
+  <menupopup id="menu_ToolsPopup">  
+    <menuitem id="helloworldMenuitem" label="FromWhereToWhere" insertbefore="sanitizeSeparator"  
+     oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();"/>  
+  </menupopup>
+</overlay>  
