@@ -1,4 +1,5 @@
 <!ENTITY contextMenu.openinnewtab "Open Page in New Tab">
+<!ENTITY contextMenu.openlocalcopy "Open Local Copy">
 <!ENTITY button.searchallwords "Search titles with all the words">
 
 <!ENTITY table.title "Title">

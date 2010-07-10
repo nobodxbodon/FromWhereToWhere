@@ -6,8 +6,9 @@
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">  
   
 <popupset>
-  <menupopup id="clipmenu">
+  <menupopup id="clipmenu" onpopupshowing="com.wuxuan.fromwheretowhere.main.showHasLocalCopy()">
     <menuitem label="&contextMenu.openinnewtab;" oncommand="com.wuxuan.fromwheretowhere.main.openlink()"/>
+    <menuitem id="local" label="&contextMenu.openlocalcopy;" oncommand="com.wuxuan.fromwheretowhere.main.openlocal()"/>
   </menupopup>
 </popupset>
 
@@ -24,7 +25,8 @@
   </treecols>
   <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.main.openlink()"/>  
 </tree>  
-  
+
+<script src="sbconnect.js" />
 <script src="treeview.js" />
 
 </window>  

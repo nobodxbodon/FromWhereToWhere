@@ -10,3 +10,10 @@ tree#elementList > treechildren::-moz-tree-cell-text(makeItRed)
 {
   color: red;
 }
+
+tree#elementList > treechildren::-moz-tree-cell-text(makeItCurve)
+{
+  color: olive;
+  font-style: italic;
+  font-family: cursive;
+}

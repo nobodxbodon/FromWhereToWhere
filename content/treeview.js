@@ -112,7 +112,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     
   pub.getCurrentURI = function() {
     if(!window.opener){
-      return null;
+      return "none";
     }
     return window.opener.getBrowser().mCurrentBrowser.currentURI.spec;
   };
@@ -594,12 +594,35 @@ pub.treeView = {
     if(pid==pub.retrievedId){
       props.AppendElement(aserv.getAtom("makeItRed"));
     }
+    if(!com.wuxuan.fromwheretowhere.sb){
+	  exists = null;
+	} else {
+	  exists = com.wuxuan.fromwheretowhere.sb.urlExists(pub.getUrlfromId(this.visibleData[row].placeId));
+	}
+    if(exists!=false){
+      props.AppendElement(aserv.getAtom("makeItCurve"));
+    }
   },
   
   getColumnProperties: function(column, element, prop) {},
   click: function() {}
 };  
+  pub.selectNodeLocal = null;
+  pub.showHasLocalCopy = function(){
+    var localItem = document.getElementById("local");
 
+    var node = this.treeView.visibleData[this.treeView.selection.currentIndex];
+    var exists = com.wuxuan.fromwheretowhere.sb.urlExists(pub.getUrlfromId(node.placeId))
+    //alert(exists);
+    pub.selectNodeLocal = exists;
+    localItem.hidden = (exists === false);
+  };
+  
+  pub.openlocal = function(){
+    var uri = com.wuxuan.fromwheretowhere.sb.getLocalURI(pub.selectNodeLocal);
+    window.open(uri);
+  };
+  
   pub.openlink = function(){
     pub.getURLfromNode(pub.treeView);
   };
