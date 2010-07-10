@@ -17,48 +17,34 @@ com.wuxuan.fromwheretowhere.sb = function(){
   pub.DIR = Components.classes['@mozilla.org/file/directory_service;1'].getService(Components.interfaces.nsIProperties);
   pub.IO = Components.classes['@mozilla.org/network/io-service;1'].getService(Components.interfaces.nsIIOService);
   
-  pub.convertPathToFile = function(aPath)
-	{
-		var aFile = Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile);
-		aFile.initWithPath(aPath);
-		return aFile;
-	};
+  pub.convertPathToFile = function(aPath){
+    var aFile = Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile);
+    aFile.initWithPath(aPath);
+    return aFile;
+  };
 	
-  pub.getScrapBookDir = function()
-	{
-		var dir;
-		try {
-			var isDefault = pub.PREF.getBoolPref("scrapbook.data.default");
-			dir = pub.PREF.getComplexValue("scrapbook.data.path", Components.interfaces.nsIPrefLocalizedString).data;
-			dir = pub.convertPathToFile(dir);
-		} catch(ex) {
-			isDefault = true;
-		}
-		if ( isDefault )
-		{
-			dir = pub.DIR.get("ProfD", Components.interfaces.nsIFile);
-			dir.append("ScrapBook");
-		}
-		return dir;
-	};
+  pub.getScrapBookDir = function(){
+    var dir;
+    try {
+      var isDefault = pub.PREF.getBoolPref("scrapbook.data.default");
+      dir = pub.PREF.getComplexValue("scrapbook.data.path", Components.interfaces.nsIPrefLocalizedString).data;
+      dir = pub.convertPathToFile(dir);
+    } catch(ex) {
+      isDefault = true;
+    }
+    if ( isDefault ){
+      dir = pub.DIR.get("ProfD", Components.interfaces.nsIFile);
+      dir.append("ScrapBook");
+    }
+    return dir;
+    };
 	
-  //pub.sbProfileRoot = pub.getScrapBookDir();
+  pub.sbProfileRoot = pub.getScrapBookDir();
   // tell if SB exists
   //pub.sbExists = false;
   
   pub.init = function(){
-    //alert("root:" + pub.sbProfileRoot);
-    //var filepath=pub.sbProfileRoot.append("scrapbook.rdf");
-    var filepath = "file:///D:/study/web/profile-dev/ScrapBook/scrapbook.rdf";
-    /*if ( !filepath.exists() ){
-      pub.sbExists = false;
-    } else {
-      pub.sbExists = true;
-    }*/
-    /*var fileURL = pub.IO.newFileURI(filepath).spec;
-    alert("path:" + fileURL);
-    var ds = pub.RDF.GetDataSourceBlocking(fileURL);*/
-    
+    var filepath=pub.IO.newFileURI(pub.sbProfileRoot).spec+"scrapbook.rdf";
     var ds=pub.RDF.GetDataSourceBlocking(filepath);
     //alert(ds.URI);
     ds=ds.QueryInterface(Components.interfaces.nsIRDFDataSource);
@@ -68,15 +54,15 @@ com.wuxuan.fromwheretowhere.sb = function(){
   pub.ds = pub.init();
 
   pub.getProperty = function(aRes, aProp)
-	{
-		if ( aRes.Value == "urn:scrapbook:root" ) return "";
-		try {
-			var retVal = pub.ds.GetTarget(aRes, pub.RDF.GetResource(NS_SCRAPBOOK + aProp), true);
-			return retVal.QueryInterface(Components.interfaces.nsIRDFLiteral).Value;
-		} catch(ex) {
-			return "";
-		}
-	};
+  {
+    if ( aRes.Value == "urn:scrapbook:root" ) return "";
+    try {
+      var retVal = pub.ds.GetTarget(aRes, pub.RDF.GetResource(NS_SCRAPBOOK + aProp), true);
+      return retVal.QueryInterface(Components.interfaces.nsIRDFLiteral).Value;
+    } catch(ex) {
+      return "";
+    }
+  };
 	
   pub.urlExists = function(url){
     var num = 0;
@@ -95,9 +81,7 @@ com.wuxuan.fromwheretowhere.sb = function(){
   pub.getLocalURI = function(ele){
     if(!ele) return "";
     var id = pub.getProperty(ele, "id");
-    //var filepath = pub.sbProfileRoot.append("data").append(id).append("index.html");
-    //return pub.IO.newFileURI(filepath).spec;
-    return "file:///D:/study/web/profile-dev/ScrapBook/data/"+id+"/index.html";
+    return pub.IO.newFileURI(pub.sbProfileRoot).spec+"data/"+id+"/index.html"
   }
   return pub;
 }();
