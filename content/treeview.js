@@ -73,13 +73,29 @@ com.wuxuan.fromwheretowhere.main = function(){
     statement.params.pid=pid;
     return pub.queryAll(statement, 32, 0);
   };
+    
+  /* FIX it should return all the ids that are between this id and the next larger id */
+  pub.getNextLargerId = function(id) {
+    var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
+					    where id>:id \
+					    order by abs(id-:id) limit 1");
+    statement.params.id=id;
+    return pub.queryOne(statement, 32, 0);
+  };
   
   pub.getChildren = function(parentId) {
-    var nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
-
-    var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit=:id");
-    statement.params.id=parentId;
-    return pub.queryAll(statement, "str", 0);
+    var nextId = pub.getNextLargerId(parentId);
+    //var nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
+    var statement;
+    if(nextId!=null && nextId!=parentId+1){
+      statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=:id and from_visit<:nextid");
+      statement.params.id=parentId;
+      statement.params.nextid=nextId;
+    } else {
+      statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit=:id");
+      statement.params.id=parentId;
+    }
+    return pub.queryAll(statement, 32, 0);
   };
   
   pub.arrayToSet = function(ls) {
@@ -363,6 +379,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     return urls;
   };
   
+  /* TOOPT: should cache potentialChildren, to save future get! */
   pub.allChildrenfromPid = function(parentNode) {
     var parentLevel = parentNode.level;
     var allChildrenPId = pub.getAllChildrenfromPlaceId(parentNode.placeId);
