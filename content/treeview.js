@@ -395,28 +395,16 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
   /* when detect a Pid that's expanded already, don't open again, and add it here */
   pub.alreadyExpandedPids = [];
   
-  pub.alreadyExpanded = function(pid){
-    for(var i = 0; ; i++){
-      if(pub.alreadyExpandedPids[i]){
-	if(pid==pub.alreadyExpandedPids[i]){
-	  return true;
-	}
-      } else {
-	break;
-      }
-    }
-    pub.alreadyExpandedPids.push(pid);
-    return false;
-  };
-  
   /* go through all invisible node that's expanded, if there exists dup place_id,
   add it to alreadyExpandedPids, and return true */
   pub.existInVisible = function(item) {
-    if(pub.alreadyExpanded(item.placeId)){
-      //alert("existinVi");
+    var pid = item.placeId;
+    if(pub.alreadyExpandedPids.indexOf(pid)!=-1){
       return true;
+    }else{
+      pub.alreadyExpandedPids.push(pid);
+      return false;
     }
-    return false;
   };
   
   pub.createParentNodes = function(pIds) {
