@@ -74,7 +74,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryAll(statement, 32, 0);
   };
     
-  /* FIX it should return all the ids that are between this id and the next larger id */
+  /* TOOPT: as ids are sorted, just get the id with next rowid, should be faster */
   pub.getNextLargerId = function(id) {
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
 					    where id>:id \
@@ -98,14 +98,10 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryAll(statement, 32, 0);
   };
   
-  pub.arrayToSet = function(ls) {
-    for(var i=0; i<ls.length; i++) {
-      for(var j=0; j<i; j++) {
-	if(ls[i]==ls[j]){
-	  ls.splice(i,1);
-	  i--;
-	}
-      }
+  //linear search in array, may improve if in order
+  pub.addInArrayNoDup = function(pid, ls){
+    if(ls.indexOf(pid)==-1){
+      ls.push(pid);
     }
     return ls;
   };
@@ -118,9 +114,11 @@ com.wuxuan.fromwheretowhere.main = function(){
     var ids = pub.getAllIdfromPlaceId(placeId);
     
     for(var j = 0; j<ids.length; j++) {
-      potentialchildren = potentialchildren.concat(pub.getChildren(ids[j]));
+      var newChildren = pub.getChildren(ids[j]);
+      for(var i in newChildren){
+	potentialchildren = pub.addInArrayNoDup(newChildren[i], potentialchildren);
+      }
     }
-    potentialchildren = pub.arrayToSet(potentialchildren);
     //alert(ids + "\n" + potentialchildren);
     return potentialchildren;
   };
@@ -169,7 +167,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   pub.getPlaceIdfromId = function(id){
     var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
 					    where id<=:id \
-					    order by abs(:id-id) limit 1");
+					    order by (:id-id) limit 1");
     statement.params.id=id;
     return pub.queryOne(statement, 32, 0);
   };
@@ -379,7 +377,6 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     return urls;
   };
   
-  /* TOOPT: should cache potentialChildren, to save future get! */
   pub.allChildrenfromPid = function(parentNode) {
     parentNode.isFolded = true;
     var parentLevel = parentNode.level;
@@ -636,14 +633,6 @@ pub.treeView = {
   
   pub.openlink = function(){
     pub.getURLfromNode(pub.treeView);
-  };
-  
-  //linear search in array, may improve
-  pub.addInArrayNoDup = function(pid, ls){
-    if(ls.indexOf(pid)==-1){
-      ls.push(pid);
-    }
-    return ls;
   };
   
   /* return the index if exists, false if doesn't */
