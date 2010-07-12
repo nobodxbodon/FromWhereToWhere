@@ -419,24 +419,12 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     return false;
   };
   
-  /* return the index if exists, false if doesn't */
-  /*pub.existInArray = function(ele, ls){
-    var idx = ls.indexOf(ele);
-    if(idx==-1){
-      return false;
-    } else {
-      return idx;
-    }
-  };*/
-  
   pub.createParentNodes = function(pIds) {
     var nodes = [];
     var allPids = [];
     if(pIds) {
     for(var i=0; i<pIds.length; i++) {
       var placeId = pub.getPlaceIdfromId(pIds[i]);
-      //allPids = pub.addInArrayNoDup(placeId, allPids);
-      //if(pub.existInArray(placeId, allPids)!==false){
       if(allPids.indexOf(placeId)!=-1) {
 	continue;
       } else {
