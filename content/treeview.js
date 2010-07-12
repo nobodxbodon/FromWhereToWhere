@@ -312,7 +312,7 @@ pub.workingThread.prototype = {
       // This is where the working thread does its processing work.
       pub.alreadyExpandedPids = [];
       //CAN'T alert here!!
-      this.item = pub.expandNode(this.item);
+      this.item = pub.allChildrenfromPid(this.item);
       
       // When it's done, call back to the main thread to let it know
       // we're finished.
@@ -381,17 +381,27 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
   
   /* TOOPT: should cache potentialChildren, to save future get! */
   pub.allChildrenfromPid = function(parentNode) {
+    parentNode.isFolded = true;
     var parentLevel = parentNode.level;
     var allChildrenPId = pub.getAllChildrenfromPlaceId(parentNode.placeId);
     var urls = [];
+
     for(var i=0; i<allChildrenPId.length; i++) {
-      var potentialchildren = pub.getAllChildrenfromPlaceId(allChildrenPId[i]);
-      var hasChildren = (potentialchildren!=null) && (potentialchildren.length>0);
-      //alert("children of " + allChildrenPId[i] + ": " + potentialchildren + "\n" + hasChildren);
       var thisid = pub.getIdfromPlaceId(allChildrenPId[i]);
-      urls.push(pub.ReferedHistoryNode(thisid, allChildrenPId[i], pub.getTitlefromId(allChildrenPId[i]), hasChildren, false, [], parentLevel+1));
+      
+      var newChildNode = pub.ReferedHistoryNode(thisid, allChildrenPId[i], pub.getTitlefromId(allChildrenPId[i]), false, false, null, parentLevel+1);
+      
+      //TODO: if opened node was container, get the same properties as that!     
+      if(!pub.existInVisible(newChildNode)){
+	newChildNode = pub.allChildrenfromPid(newChildNode);
+      }
+
+      urls.push(newChildNode);
+      
     }
-    return urls;
+    parentNode.children = urls;
+    parentNode.isContainer = (urls.length>0);
+    return parentNode;
   };
   
   /* when detect a Pid that's expanded already, don't open again, and add it here */
@@ -419,22 +429,6 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
       return true;
     }
     return false;
-  };
-  
-  // TOFIX: the first parent wasn't added in visible, (verycd data in default)
-  pub.expandNode = function(item) {
-    item.isFolded = true;  
-    var toinsert = pub.allChildrenfromPid(item);
-    
-    for (var i = 0; i < toinsert.length; i++) {
-      if(pub.existInVisible(toinsert[i])){
-	continue;
-      } else {
-	toinsert[i] = pub.expandNode(toinsert[i]);
-      }
-    }
-    item.children = toinsert;
-    return item;
   };
   
   pub.createParentNodes = function(pIds) {
