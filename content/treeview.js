@@ -187,14 +187,14 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryOne(statement, 32, 0);
   };
   
-  pub.searchUrlbyKeywords = function(words){
+  pub.searchIdbyKeywords = function(words){
     //SELECT * FROM moz_places where title LIKE '%sqlite%';
     //NESTED in reverse order, with the assumption that the word in front is more frequently used, thus return more items in each SELECT
     var term = "";
     var subterm = "";
   
     if(words.length==1){
-      term = "SELECT url FROM moz_places WHERE TITLE LIKE '%" + words[0] + "%'";
+      term = "SELECT id FROM moz_places WHERE TITLE LIKE '%" + words[0] + "%'";
     } else {
       for(var i = words.length-1; i>=0; i--){
         if(i==words.length-1){
@@ -202,12 +202,12 @@ com.wuxuan.fromwheretowhere.main = function(){
         } else if(i!=0){
           subterm = "SELECT * FROM (" + subterm + ") WHERE TITLE LIKE '%" + words[i] + "%'";
         } else {
-          term = "SELECT url FROM (" + subterm + ") WHERE TITLE LIKE '%" + words[i] + "%'";
+          term = "SELECT id FROM (" + subterm + ") WHERE TITLE LIKE '%" + words[i] + "%'";
         }
       }
     }
     var statement = pub.mDBConn.createStatement(term);
-    return pub.queryAll(statement, "str", 0);
+    return pub.queryAll(statement, 32, 0);
   };
   
   pub.getParentIds = function(retrievedId){
@@ -683,13 +683,8 @@ pub.treeView = {
     /*if(words.length>4){
       alert("Warning: the more keywords, the slower is the querying.");
     }*/
-    // TODO: might improve by search id from keywords directly, save one search!
-    var urls = pub.searchUrlbyKeywords(words);
-    //ids may still point to the same placeId, which should be handled already
-    for(var j=0; j<urls.length; j++){
-      var id = pub.getIdfromUrl(urls[j]);
-      allpids.push(id);
-    }
+    // should improve by search id from keywords directly instead of getting urls first
+    allpids = pub.searchIdbyKeywords(words);
     pub.pidwithKeywords = [].concat(allpids);
     //alert(allpids.length + " pids:\n"+allpids);
     //getParentIds -> pIds, if exists in ids or pIds, don't add to parents
