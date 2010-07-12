@@ -270,15 +270,6 @@ com.wuxuan.fromwheretowhere.main = function(){
     window.open(url);
   };
 
-  pub.checkDupPids = function(placeId, allPids) {
-    for(var i = 0; i<allPids.length; i++) {
-      if(placeId==allPids[i]) {
-	return true;
-      }
-    }
-    return false;
-  };
-  
   pub.splitWithSpaces = function(myString) {
     var words = myString.split(" ");
     for(var i=0; i<words.length; i++){
@@ -428,13 +419,25 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     return false;
   };
   
+  /* return the index if exists, false if doesn't */
+  /*pub.existInArray = function(ele, ls){
+    var idx = ls.indexOf(ele);
+    if(idx==-1){
+      return false;
+    } else {
+      return idx;
+    }
+  };*/
+  
   pub.createParentNodes = function(pIds) {
     var nodes = [];
     var allPids = [];
     if(pIds) {
     for(var i=0; i<pIds.length; i++) {
       var placeId = pub.getPlaceIdfromId(pIds[i]);
-      if(pub.checkDupPids(placeId, allPids)) {
+      //allPids = pub.addInArrayNoDup(placeId, allPids);
+      //if(pub.existInArray(placeId, allPids)!==false){
+      if(allPids.indexOf(placeId)!=-1) {
 	continue;
       } else {
 	allPids.push(placeId);
@@ -592,11 +595,11 @@ pub.treeView = {
   
   getCellProperties: function(row,col,props){
     var pid = this.visibleData[row].placeId;
-    var haveKeywords = pub.existInArray(pid, pub.pidwithKeywords);
+    var haveKeywords = pub.pidwithKeywords.indexOf(pid);
     var aserv=Components.classes["@mozilla.org/atom-service;1"].
                 getService(Components.interfaces.nsIAtomService);
     //CAN'T alert here! 
-    if(haveKeywords!=false || haveKeywords === 0){
+    if(haveKeywords!=-1){
       props.AppendElement(aserv.getAtom("makeItBlue"));
     }
     if(pid==pub.retrievedId){
@@ -633,17 +636,6 @@ pub.treeView = {
   
   pub.openlink = function(){
     pub.getURLfromNode(pub.treeView);
-  };
-  
-  /* return the index if exists, false if doesn't */
-  pub.existInArray = function(ele, ls){
-    if(!ls) return false;
-    for(var i=0; i<ls.length;i++){
-      if(ele==ls[i]){
-	return i;
-      }
-    }
-    return false;
   };
   
   pub.nodefromPlaceid = function(pid) {
