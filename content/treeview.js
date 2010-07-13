@@ -551,7 +551,6 @@ pub.treeView = {
       }
     }  
     else {  
-      // TODO: allChildren needs to return the same nodes as the parents, and carry all the ids
       pub.background.dispatch(new pub.workingThread(1, item, idx), pub.background.DISPATCH_NORMAL);
       this.addSuspensionPoints(item.level, idx);
       
@@ -678,11 +677,11 @@ pub.treeView = {
     //TODO: new thread
     if(words.length==0){
       alert("no keywords input");
+      //cancel "searching..." after "OK", and redisplay the former result      
+      pub.treeView.delSuspensionPoints(-1);
+      pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
       return;
     }
-    /*if(words.length>4){
-      alert("Warning: the more keywords, the slower is the querying.");
-    }*/
     // should improve by search id from keywords directly instead of getting urls first
     allpids = pub.searchIdbyKeywords(words);
     pub.pidwithKeywords = [].concat(allpids);
