@@ -299,7 +299,7 @@ pub.workingThread.prototype = {
   run: function() {
     try {
       // This is where the working thread does its processing work.
-      pub.alreadyExpandedPids = [];
+      pub.alreadyExpandedPids = [this.item.placeId];
       //CAN'T alert here!!
       this.item = pub.allChildrenfromPid(this.item);
       
@@ -501,6 +501,10 @@ pub.treeView = {
       //alert(item);
       return 0;
     }
+    // need to check here. Otherwise if check the children, the first parent won't be recorded as existInVisible.
+    if(pub.existInVisible(item)){
+      return 0;
+    }
     item.isFolded = true;
     //alert("children\n" + item.children);
     for (var i = 0; i < item.children.length; i++) {  
@@ -510,11 +514,7 @@ pub.treeView = {
     var offset = 0;
     for (var i = 0; i < item.children.length; i++) {
       var child = item.children[i];
-      if(pub.existInVisible(child)){
-	continue;
-      } else {
-	offset += this.expandFromNodeInTree(child, idx+i+1+offset);
-      }
+      offset += this.expandFromNodeInTree(child, idx+i+1+offset);
     }
     //only add the length of its own direct children, the children will count in the length of their own children themselves
     this.treeBox.rowCountChanged(idx + 1, item.children.length);
