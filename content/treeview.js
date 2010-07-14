@@ -77,8 +77,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   /* TOOPT: as ids are sorted, just get the id with next rowid, should be faster */
   pub.getNextLargerId = function(id) {
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
-					    where id>:id \
-					    order by abs(id-:id) limit 1");
+					    where id>:id limit 1");
     statement.params.id=id;
     return pub.queryOne(statement, 32, 0);
   };
@@ -167,7 +166,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   pub.getPlaceIdfromId = function(id){
     var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
 					    where id<=:id \
-					    order by (:id-id) limit 1");
+					    order by -id limit 1");
     statement.params.id=id;
     return pub.queryOne(statement, 32, 0);
   };
