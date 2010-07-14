@@ -550,7 +550,8 @@ pub.treeView = {
         this.treeBox.rowCountChanged(idx + 1, -deletecount);  
       }
     }  
-    else {  
+    else {
+      com.wuxuan.fromwheretowhere.sb.urlInit();
       pub.background.dispatch(new pub.workingThread(1, item, idx), pub.background.DISPATCH_NORMAL);
       this.addSuspensionPoints(item.level, idx);
       
@@ -580,12 +581,7 @@ pub.treeView = {
     if(pid==pub.retrievedId){
       props.AppendElement(aserv.getAtom("makeItRed"));
     }
-    if(!com.wuxuan.fromwheretowhere.sb){
-	  exists = null;
-	} else {
-	  exists = com.wuxuan.fromwheretowhere.sb.urlExists(pub.getUrlfromId(this.visibleData[row].placeId));
-	}
-    if(exists!=false){
+    if(com.wuxuan.fromwheretowhere.sb.urls.indexOf(pub.getUrlfromId(this.visibleData[row].placeId))!=-1){
       props.AppendElement(aserv.getAtom("makeItCurve"));
     }
   },
@@ -598,14 +594,13 @@ pub.treeView = {
     var localItem = document.getElementById("local");
 
     var node = this.treeView.visibleData[this.treeView.selection.currentIndex];
-    var exists = com.wuxuan.fromwheretowhere.sb.urlExists(pub.getUrlfromId(node.placeId))
-    //alert(exists);
+    var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(pub.getUrlfromId(node.placeId));
     pub.selectNodeLocal = exists;
-    localItem.hidden = (exists === false);
+    localItem.hidden = (exists == -1);
   };
   
   pub.openlocal = function(){
-    var uri = com.wuxuan.fromwheretowhere.sb.getLocalURI(pub.selectNodeLocal);
+    var uri = com.wuxuan.fromwheretowhere.sb.getLocalURIfromId(com.wuxuan.fromwheretowhere.sb.ids[pub.selectNodeLocal]);
     window.open(uri);
   };
   

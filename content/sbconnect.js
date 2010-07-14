@@ -52,7 +52,10 @@ com.wuxuan.fromwheretowhere.sb = function(){
   };
   
   pub.ds = pub.init();
-
+  
+  pub.urls = [];
+  pub.ids = [];
+  
   pub.getProperty = function(aRes, aProp)
   {
     if ( aRes.Value == "urn:scrapbook:root" ) return "";
@@ -64,24 +67,20 @@ com.wuxuan.fromwheretowhere.sb = function(){
     }
   };
 	
-  pub.urlExists = function(url){
-    var num = 0;
+  pub.urlInit = function(){
     var allres = pub.ds.GetAllResources();
     while(allres.hasMoreElements()){
       var ele = allres.getNext();
-        var src = pub.getProperty(ele, "source");
-        if(src==url){
-            return ele;
-        }
-	num ++;
+      var src = pub.getProperty(ele, "source");
+      var id = pub.getProperty(ele, "id");
+      pub.urls.push(src);
+      pub.ids.push(id);
     }
-    return false;
   };
 
-  pub.getLocalURI = function(ele){
-    if(!ele) return "";
-    var id = pub.getProperty(ele, "id");
+  pub.getLocalURIfromId = function(id){
     return pub.IO.newFileURI(pub.sbProfileRoot).spec+"data/"+id+"/index.html"
-  }
+  };
+  
   return pub;
 }();
