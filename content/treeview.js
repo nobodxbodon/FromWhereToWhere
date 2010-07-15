@@ -74,7 +74,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryAll(statement, 32, 0);
   };
     
-  /* TOOPT: as ids are sorted, just get the id with next rowid, should be faster */
+  /* as ids are sorted, just get the next larger rowid */
   pub.getNextLargerId = function(id) {
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
 					    where id>:id limit 1");
@@ -406,20 +406,49 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     }
   };
   
-  pub.createParentNodes = function(pIds) {
+
+   
+  pub.nodefromPlaceid = function(pid) {
+    var potentialchildren = pub.getAllChildrenfromPlaceId(pid);
+    var hasChildren = (potentialchildren!=null) && (potentialchildren.length>0);
+    var id = pub.getIdfromPlaceId(pid);
+    return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), hasChildren, false, [], 0);
+  };
+  
+  // those without parent are also added, can't only highlight the keywords instead of the whole title?
+  pub.createParentNodesCheckDup = function(pids, allPids) {
     var nodes = [];
-    var allPids = [];
-    if(pIds) {
-    for(var i=0; i<pIds.length; i++) {
-      var placeId = pub.getPlaceIdfromId(pIds[i]);
-      if(allPids.indexOf(placeId)!=-1) {
-	continue;
+    /* partly solve the redundant parents issue */
+    var lastdup = -1;
+    var findtrace = false;
+    if(pids) {
+    for(var i=0; i<pids.length; i++) {
+      var dupidx = allPids.indexOf(pids[i]);
+      //alert(dupidx + " " + lastdup + " " + findtrace);
+      if(dupidx!=-1) {
+	if(lastdup == false) {
+	  lastdup = dupidx;
+	} else if(dupidx==lastdup-1) {
+	  findtrace = true;
+	  lastdup = dupidx;
+	  //if it's the last one and still duplicate, add it because there's no chance to check the next one
+	  //so just assume the next one doesn't duplicate
+	  if(i==pids.length-1){
+	    nodes.push(pub.nodefromPlaceid(pids[i]));
+	  }
+	} else {
+	  nodes.push(pub.nodefromPlaceid(pids[i]));
+	  lastdup = dupidx;
+	  findtrace = false;
+	}
       } else {
-	allPids.push(placeId);
+	if(findtrace){
+	  nodes.push(pub.nodefromPlaceid(pids[i-1]));
+	  findtrace = false;
+	}
+	allPids.push(pids[i]);
+	nodes.push(pub.nodefromPlaceid(pids[i]));
       }
-      var potentialchildren = pub.getAllChildrenfromPlaceId(placeId);
-      var hasChildren = (potentialchildren!=null) && (potentialchildren.length>0);
-      nodes.push(pub.ReferedHistoryNode(pIds[i], placeId, pub.getTitlefromId(placeId), hasChildren, false, [], 0));
     }
     }
     //show "no results" if nothing is found
@@ -427,6 +456,15 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
       nodes.push(pub.ReferedHistoryNode(-1, -1, "No result found", false, false, [], 1));
     }
     return nodes;
+  };
+  
+    // get pid from id, and then the same as createParentNodesCheckDup, only with no initial pid set to check dup
+  pub.createParentNodes = function(pIds) {
+    var pids = [];
+    for(var i=0; i<pIds.length; i++) {
+      pids = pub.addInArrayNoDup(pub.getPlaceIdfromId(pIds[i]), pids);
+    }
+    return pub.createParentNodesCheckDup(pids, []);
   };
   
 // Main Tree definition
@@ -447,9 +485,7 @@ pub.treeView = {
   getCellText: function(idx, column) {
     if(this.visibleData[idx]) {
       if(column.id == "element") {
-	//TOFIX: weird issue of indexOf, even exists in pidwithKeywords, it returns -1!?
-	//pub.pidwithKeywords+"|"+this.visibleData[idx].placeId+":"+pub.pidwithKeywords.indexOf(this.visibleData[idx].placeId);
-        return this.visibleData[idx].label;
+	return this.visibleData[idx].label;
       } else if (column.id == "url") {
         return pub.getUrlfromId(this.visibleData[idx].placeId);
       } else if (column.id == "date") {
@@ -607,57 +643,6 @@ pub.treeView = {
     pub.getURLfromNode(pub.treeView);
   };
   
-  pub.nodefromPlaceid = function(pid) {
-    var potentialchildren = pub.getAllChildrenfromPlaceId(pid);
-    var hasChildren = (potentialchildren!=null) && (potentialchildren.length>0);
-    var id = pub.getIdfromPlaceId(pid);
-    return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), hasChildren, false, [], 0);
-  };
-  
-  //TODO: add those without parent, and highlight the keywords!
-  //TODO: merge this function with createParentNodes, where allPids is []
-  pub.createParentNodesCheckDup = function(pids, allPids) {
-    var nodes = [];
-    /* partly solve the redundant parents issue */
-    var lastdup = -1;
-    var findtrace = false;
-    if(pids) {
-    for(var i=0; i<pids.length; i++) {
-      var dupidx = allPids.indexOf(pids[i]);
-      //alert(dupidx + " " + lastdup + " " + findtrace);
-      if(dupidx!=-1) {
-	if(lastdup == false) {
-	  lastdup = dupidx;
-	} else if(dupidx==lastdup-1) {
-	  findtrace = true;
-	  lastdup = dupidx;
-	  //if it's the last one and still duplicate, add it because there's no chance to check the next one
-	  //so just assume the next one doesn't duplicate
-	  if(i==pids.length-1){
-	    nodes.push(pub.nodefromPlaceid(pids[i]));
-	  }
-	} else {
-	  nodes.push(pub.nodefromPlaceid(pids[i]));
-	  lastdup = dupidx;
-	  findtrace = false;
-	}
-      } else {
-	if(findtrace){
-	  nodes.push(pub.nodefromPlaceid(pids[i-1]));
-	  findtrace = false;
-	}
-	allPids.push(pids[i]);
-	nodes.push(pub.nodefromPlaceid(pids[i]));
-      }
-    }
-    }
-    //show "no results" if nothing is found
-    if(nodes.length==0){
-      nodes.push(pub.ReferedHistoryNode(-1, -1, "No result found", false, false, [], 1));
-    }
-    return nodes;
-  };
-  
   pub.pidwithKeywords = [];
   
   pub.search = function() {
@@ -676,7 +661,7 @@ pub.treeView = {
       pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
       return;
     }
-    // should improve by search id from keywords directly instead of getting urls first
+    // improve by search id from keywords directly instead of getting urls first
     allpids = pub.searchIdbyKeywords(words);
     pub.pidwithKeywords = [].concat(allpids);
     //alert(allpids.length + " pids:\n"+allpids);
