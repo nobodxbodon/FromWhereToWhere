@@ -11,6 +11,8 @@ if(!com.wuxuan.fromwheretowhere)
 com.wuxuan.fromwheretowhere.main = function(){
   var pub={};
 
+  var nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
+    
   //sqlite operations:
 
   pub.openPlacesDatabase = function(){
@@ -77,14 +79,14 @@ com.wuxuan.fromwheretowhere.main = function(){
   /* as ids are sorted, just get the next larger rowid */
   pub.getNextLargerId = function(id) {
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
-					    where id>:id limit 1");
+					    where id>:id");// limit 1
     statement.params.id=id;
     return pub.queryOne(statement, 32, 0);
   };
   
   pub.getChildren = function(parentId) {
     var nextId = pub.getNextLargerId(parentId);
-    //var nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
+
     var statement;
     if(nextId!=null && nextId!=parentId+1){
       statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=:id and from_visit<:nextid");
@@ -166,7 +168,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   pub.getPlaceIdfromId = function(id){
     var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
 					    where id<=:id \
-					    order by -id limit 1");
+					    order by -id"); // limit 1
     statement.params.id=id;
     return pub.queryOne(statement, 32, 0);
   };
@@ -461,8 +463,10 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     // get pid from id, and then the same as createParentNodesCheckDup, only with no initial pid set to check dup
   pub.createParentNodes = function(pIds) {
     var pids = [];
-    for(var i=0; i<pIds.length; i++) {
-      pids = pub.addInArrayNoDup(pub.getPlaceIdfromId(pIds[i]), pids);
+    if(pIds){
+      for(var i=0; i<pIds.length; i++) {
+        pids = pub.addInArrayNoDup(pub.getPlaceIdfromId(pIds[i]), pids);
+      }
     }
     return pub.createParentNodesCheckDup(pids, []);
   };
@@ -616,6 +620,7 @@ pub.treeView = {
     if(pid==pub.retrievedId){
       props.AppendElement(aserv.getAtom("makeItRed"));
     }
+    //TOFIX: if it's red or blue already, just curve, otherwise make it olive
     if(com.wuxuan.fromwheretowhere.sb.urls.indexOf(pub.getUrlfromId(this.visibleData[row].placeId))!=-1){
       props.AppendElement(aserv.getAtom("makeItCurve"));
     }
