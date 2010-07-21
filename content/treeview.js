@@ -302,7 +302,9 @@ pub.workingThread.prototype = {
       // This is where the working thread does its processing work.
       pub.alreadyExpandedPids = [this.item.placeId];
       //CAN'T alert here!!
-      this.item = pub.allChildrenfromPid(this.item);
+      if(this.item.isContainer && this.item.children!=[]){
+	this.item = pub.allChildrenfromPid(this.item);
+      }
       
       // When it's done, call back to the main thread to let it know
       // we're finished.
@@ -646,6 +648,72 @@ pub.treeView = {
   
   pub.openlink = function(){
     pub.getURLfromNode(pub.treeView);
+  };
+  
+  pub.getAllSelectedIndex = function(){
+    var start = new Object();
+    var end = new Object();
+    var numRanges = this.treeView.selection.getRangeCount();
+    var index = [];
+    for (var t = 0; t < numRanges; t++){
+      this.treeView.selection.getRangeAt(t,start,end);
+      for (var v = start.value; v <= end.value; v++){
+        index.push(v);
+      }
+    }
+    return index;
+  };
+  
+  pub.decreaseLevelandCollapse = function(node, levels){
+    var children = node.children;
+    for(var i in children){
+      children[i].level = pub.decreaseLevelandCollapse(children[i].level, levels);
+    }
+    node.level = node.level - levels;
+    node.isFolded = false;
+    return node;
+  };
+  
+  pub.putNodeToLevel0 = function(node){
+    var currentLevel = node.level;
+    return pub.decreaseLevelandCollapse(node, currentLevel);
+  };
+  
+  /* for now there's no circular reference within nodes, so JSON has no problem.
+    TOIMPROVE until there's built-in support, as it should make loop detection more elegant? */
+  //TODO: add separator in contextmenu for export part
+  pub.property = function() {
+    var selectCount = this.treeView.selection.count;
+    var selectedIndex = pub.getAllSelectedIndex();
+    //verify 
+    if(selectCount!=selectedIndex.length){
+      alert("Error when getting selected rows");
+    }
+    var selected = [];
+    for(var i in selectedIndex){
+      var node = this.treeView.visibleData[selectedIndex[i]];
+      //if it's a container, but never opened before, then it has no children.
+      //For now have to manually open it first to get all the children, and then "export the whole trace"
+      /*if (node.isContainer && node.children.length==0) {
+        alert("This node has invisible children that won't be exported. If you want to export the whole trace, please open the node first.")
+      }*/
+
+      
+      selected.push(node);
+    }
+    var json = nativeJSON.encode(selected);
+    alert(json);
+    //var str = "{\"id\":476,\"placeId\":3825,\"label\":\"Bloomington,\",\"isContainer\":false,\"isFolded\":true,\"children\":[],\"level\":1}";
+    //var backToJS = nativeJSON.decode(str);  
+    //alert(backToJS.label);
+    
+    /*var newNodes = nativeJSON.decode(json);
+    for (var i = 0; i < newNodes.length; i++) {
+      newNodes[i]=pub.putNodeToLevel0(newNodes[i]);
+      this.treeView.visibleData.splice(this.treeView.visibleData.length, 0, newNodes[i]);
+    }
+    this.treeView.treeBox.rowCountChanged(this.treeView.visibleData.length, newNodes.length);
+    */
   };
   
   pub.pidwithKeywords = [];
