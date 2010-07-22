@@ -296,6 +296,9 @@ pub.workingThread = function(threadID, item, idx) {
   this.result = 0;
 };
 
+/*Current: if the item has children list available, don't check local.
+ TOIMPROVE: merge with the children queryed from local history.
+ Sometimes you don't care about local or online, but sometimes you do. */
 pub.workingThread.prototype = {
   run: function() {
     try {
@@ -354,22 +357,6 @@ pub.mainThread.prototype = {
 
 pub.background = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(0);
 pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
-
-  /*pub.allChildren = function(parentNode) {
-    var parentId = parentNode.id;
-    var parentLevel = parentNode.level;
-    var allChildrenPId = pub.getChildren(parentId);
-    if(allChildrenPId == null) return null;
-    //else alert(allChildrenId);
-    var urls = [];
-    for(var i=0; i<allChildrenPId.length; i++) {
-      var thisid = pub.getIdfromPlaceId(allChildrenPId[i]);
-      var potentialchildren = pub.getChildren(thisid);
-      var hasChildren = (potentialchildren!=null) && (potentialchildren.length>0);
-      urls.push(pub.ReferedHistoryNode(thisid, allChildrenPId[i], pub.getTitlefromId(allChildrenPId[i]), pub.getUrlfromId(allChildrenPId[i]), hasChildren, false, [], parentLevel+1));
-    }
-    return urls;
-  };*/
   
   pub.allChildrenfromPid = function(parentNode) {
     parentNode.isFolded = true;
@@ -410,7 +397,6 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     }
   };
   
-
    
   pub.nodefromPlaceid = function(pid) {
     var potentialchildren = pub.getAllChildrenfromPlaceId(pid);
@@ -538,23 +524,19 @@ pub.treeView = {
   
   //expand using the children cached in item, hopefully save expanding time
   expandFromNodeInTree: function(item, idx) {
-    //alert("expandFromNodeInTree");
     if (!item.children || item.children.length==0) {
       //alert(item);
       return 0;
     }
-    //alert("expandFromNodeInTree1");
     // need to check here. Otherwise if check the children, the first parent won't be recorded as existInVisible.
     if(pub.existInVisible(item)){
       return 0;
     }
     item.isFolded = true;
-    //alert("expandFromNodeInTree2");
     //alert("children\n" + item.children);
     for (var i = 0; i < item.children.length; i++) {  
       this.visibleData.splice(idx + i + 1, 0, item.children[i]);
     }
-    //alert("expandFromNodeInTree3");
     // adjust the index offset of the node to expand
     var offset = 0;
     for (var i = 0; i < item.children.length; i++) {
@@ -563,7 +545,6 @@ pub.treeView = {
     }
     //only add the length of its own direct children, the children will count in the length of their own children themselves
     this.treeBox.rowCountChanged(idx + 1, item.children.length);
-    //alert("expandFromNodeInTree4");
     return offset+item.children.length;
   },
   
@@ -694,6 +675,8 @@ pub.treeView = {
   
   /* for now there's no circular reference within nodes, so JSON has no problem.
     TOIMPROVE until there's built-in support, as it should make loop detection more elegant? */
+  //if it's a container, but never opened before, then it has no children.
+  //For now have to manually open it first to get all the children, and then "export the whole trace"
   //TODO: add separator in contextmenu for export part
   pub.property = function() {
     var selectCount = this.treeView.selection.count;
@@ -705,12 +688,6 @@ pub.treeView = {
     var selected = [];
     for(var i in selectedIndex){
       var node = this.treeView.visibleData[selectedIndex[i]];
-      //if it's a container, but never opened before, then it has no children.
-      //For now have to manually open it first to get all the children, and then "export the whole trace"
-      /*if (node.isContainer && node.children.length==0) {
-        alert("This node has invisible children that won't be exported. If you want to export the whole trace, please open the node first.")
-      }*/
-
       selected.push(node);
     }
     var json = nativeJSON.encode(selected);
@@ -753,7 +730,6 @@ pub.treeView = {
     //TODO: to be more precise. If there's an indirect link, it'll still pass
     for(var i=allpids.length-1;i>=0;i--){
       var pIds = pub.getParentIds(allpids[i]);
-      //alert(pIds + " for " +allids[i]);
       if(!pIds || pIds.length==0){
 	allPpids = pub.addInArrayNoDup(allpids[i], allPpids);
       } else {
@@ -764,7 +740,6 @@ pub.treeView = {
       }
     }
     pub.treeView.delSuspensionPoints(-1);
-    //alert(allPpids.length + " parent placeids: \n" + allPpids);
     //refresh tree, remove all visibledata and add new ones
     pub.treeView.visibleData = pub.createParentNodesCheckDup(allPpids, allpids);
     pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
