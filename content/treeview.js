@@ -244,11 +244,12 @@ com.wuxuan.fromwheretowhere.main = function(){
   //sqlite operations finish
   
   // Main Datastructure for each Node
-  pub.ReferedHistoryNode = function(id, placeId, label, isContainer, isFolded, children, level) {
+  pub.ReferedHistoryNode = function(id, placeId, label, url, isContainer, isFolded, children, level) {
     var obj = new Object();
     obj.id = id;
     obj.placeId = placeId;
     obj.label = label;
+    obj.url = url;
     obj.isContainer = isContainer;
     obj.isFolded = isFolded;
     obj.children = children;
@@ -266,9 +267,8 @@ com.wuxuan.fromwheretowhere.main = function(){
   pub.getURLfromNode = function(treeView) {
     var sel = treeView.selection;
     var node = treeView.visibleData[sel.currentIndex];
-    var url = pub.getUrlfromId(node.placeId);
     //alert("id: " + node.id + "\n" + "place_id: " + node.placeId + "\n" + url);//+"\n"+getFirstDatefromPid(node.placeid));//+"\n"+formatDate(getFirstDatefromPid(node.placeid)));
-    window.open(url);
+    window.open(node.url);
   };
 
   pub.splitWithSpaces = function(myString) {
@@ -301,8 +301,8 @@ pub.workingThread.prototype = {
     try {
       // This is where the working thread does its processing work.
       pub.alreadyExpandedPids = [this.item.placeId];
-      //CAN'T alert here!!
-      if(this.item.isContainer && this.item.children!=[]){
+      //CAN'T alert here!! will crash!
+      if(this.item.isContainer && this.item.children.length==0){
 	this.item = pub.allChildrenfromPid(this.item);
       }
       
@@ -355,7 +355,7 @@ pub.mainThread.prototype = {
 pub.background = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(0);
 pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 
-  pub.allChildren = function(parentNode) {
+  /*pub.allChildren = function(parentNode) {
     var parentId = parentNode.id;
     var parentLevel = parentNode.level;
     var allChildrenPId = pub.getChildren(parentId);
@@ -366,10 +366,10 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
       var thisid = pub.getIdfromPlaceId(allChildrenPId[i]);
       var potentialchildren = pub.getChildren(thisid);
       var hasChildren = (potentialchildren!=null) && (potentialchildren.length>0);
-      urls.push(pub.ReferedHistoryNode(thisid, allChildrenPId[i], pub.getTitlefromId(allChildrenPId[i]), hasChildren, false, [], parentLevel+1));
+      urls.push(pub.ReferedHistoryNode(thisid, allChildrenPId[i], pub.getTitlefromId(allChildrenPId[i]), pub.getUrlfromId(allChildrenPId[i]), hasChildren, false, [], parentLevel+1));
     }
     return urls;
-  };
+  };*/
   
   pub.allChildrenfromPid = function(parentNode) {
     parentNode.isFolded = true;
@@ -380,7 +380,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     for(var i=0; i<allChildrenPId.length; i++) {
       var thisid = pub.getIdfromPlaceId(allChildrenPId[i]);
       
-      var newChildNode = pub.ReferedHistoryNode(thisid, allChildrenPId[i], pub.getTitlefromId(allChildrenPId[i]), false, false, null, parentLevel+1);
+      var newChildNode = pub.ReferedHistoryNode(thisid, allChildrenPId[i], pub.getTitlefromId(allChildrenPId[i]), pub.getUrlfromId(allChildrenPId[i]), false, false, null, parentLevel+1);
       
       //TODO: if opened node was container, get the same properties as that!     
       if(!pub.existInVisible(newChildNode)){
@@ -416,7 +416,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     var potentialchildren = pub.getAllChildrenfromPlaceId(pid);
     var hasChildren = (potentialchildren!=null) && (potentialchildren.length>0);
     var id = pub.getIdfromPlaceId(pid);
-    return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), hasChildren, false, [], 0);
+    return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
   
   // those without parent are also added, can't only highlight the keywords instead of the whole title?
@@ -457,7 +457,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     }
     //show "no results" if nothing is found
     if(nodes.length==0){
-      nodes.push(pub.ReferedHistoryNode(-1, -1, "No result found", false, false, [], 1));
+      nodes.push(pub.ReferedHistoryNode(-1, -1, "No result found", null, false, false, [], 1));
     }
     return nodes;
   };
@@ -493,7 +493,7 @@ pub.treeView = {
       if(column.id == "element") {
 	return this.visibleData[idx].label;
       } else if (column.id == "url") {
-        return pub.getUrlfromId(this.visibleData[idx].placeId);
+	return this.visibleData[idx].url;
       } else if (column.id == "date") {
         return pub.formatDate(pub.getFirstDatefromPid(this.visibleData[idx].placeId));
       }else {
@@ -538,19 +538,23 @@ pub.treeView = {
   
   //expand using the children cached in item, hopefully save expanding time
   expandFromNodeInTree: function(item, idx) {
+    //alert("expandFromNodeInTree");
     if (!item.children || item.children.length==0) {
       //alert(item);
       return 0;
     }
+    //alert("expandFromNodeInTree1");
     // need to check here. Otherwise if check the children, the first parent won't be recorded as existInVisible.
     if(pub.existInVisible(item)){
       return 0;
     }
     item.isFolded = true;
+    //alert("expandFromNodeInTree2");
     //alert("children\n" + item.children);
     for (var i = 0; i < item.children.length; i++) {  
       this.visibleData.splice(idx + i + 1, 0, item.children[i]);
     }
+    //alert("expandFromNodeInTree3");
     // adjust the index offset of the node to expand
     var offset = 0;
     for (var i = 0; i < item.children.length; i++) {
@@ -559,11 +563,12 @@ pub.treeView = {
     }
     //only add the length of its own direct children, the children will count in the length of their own children themselves
     this.treeBox.rowCountChanged(idx + 1, item.children.length);
+    //alert("expandFromNodeInTree4");
     return offset+item.children.length;
   },
   
   addSuspensionPoints: function(level, idx) {
-    var sp = pub.ReferedHistoryNode(-1, -1, "searching...", false, false, [], level+1);
+    var sp = pub.ReferedHistoryNode(-1, -1, "searching...", null, false, false, [], level+1);
     this.visibleData.splice(idx+ 1, 0, sp);
     this.treeBox.rowCountChanged(idx + 1, 1);
   },
@@ -616,15 +621,19 @@ pub.treeView = {
     var aserv=Components.classes["@mozilla.org/atom-service;1"].
                 getService(Components.interfaces.nsIAtomService);
     //CAN'T alert here! 
-    if(haveKeywords!=-1){
-      props.AppendElement(aserv.getAtom("makeItBlue"));
-    }
     if(pid==pub.retrievedId){
       props.AppendElement(aserv.getAtom("makeItRed"));
+    }else if(haveKeywords!=-1){
+      props.AppendElement(aserv.getAtom("makeItBlue"));
     }
     //TOFIX: if it's red or blue already, just curve, otherwise make it olive
-    if(com.wuxuan.fromwheretowhere.sb.urls.indexOf(pub.getUrlfromId(this.visibleData[row].placeId))!=-1){
-      props.AppendElement(aserv.getAtom("makeItCurve"));
+    if(com.wuxuan.fromwheretowhere.sb.urls.indexOf(this.visibleData[row].url)!=-1){
+      if(haveKeywords!=-1 || pid==pub.retrievedId){
+	props.AppendElement(aserv.getAtom("makeItCurve"));
+      } else {
+	props.AppendElement(aserv.getAtom("makeItOlive"));
+	props.AppendElement(aserv.getAtom("makeItCurve"));
+      }
     }
   },
   
@@ -698,22 +707,20 @@ pub.treeView = {
         alert("This node has invisible children that won't be exported. If you want to export the whole trace, please open the node first.")
       }*/
 
-      
       selected.push(node);
     }
     var json = nativeJSON.encode(selected);
     alert(json);
-    //var str = "{\"id\":476,\"placeId\":3825,\"label\":\"Bloomington,\",\"isContainer\":false,\"isFolded\":true,\"children\":[],\"level\":1}";
-    //var backToJS = nativeJSON.decode(str);  
-    //alert(backToJS.label);
-    
-    /*var newNodes = nativeJSON.decode(json);
+  };
+  
+  pub.importNodes = function(){
+    var json = window.prompt("Please paste the nodes' property:", "[]");
+    var newNodes = nativeJSON.decode(json);
     for (var i = 0; i < newNodes.length; i++) {
       newNodes[i]=pub.putNodeToLevel0(newNodes[i]);
       this.treeView.visibleData.splice(this.treeView.visibleData.length, 0, newNodes[i]);
     }
     this.treeView.treeBox.rowCountChanged(this.treeView.visibleData.length, newNodes.length);
-    */
   };
   
   pub.pidwithKeywords = [];
@@ -772,6 +779,8 @@ pub.treeView = {
   };
   
   pub.init = function() {
+    //add here to check the top level nodes
+    com.wuxuan.fromwheretowhere.sb.urlInit();
     document.getElementById("elementList").view = pub.treeView;
     //document.getElementById("elementList").addEventListener("click", function (){getURLfromNode(treeView);}, false);
   }

@@ -11,9 +11,13 @@ tree#elementList > treechildren::-moz-tree-cell-text(makeItRed)
   color: red;
 }
 
-tree#elementList > treechildren::-moz-tree-cell-text(makeItCurve)
+tree#elementList > treechildren::-moz-tree-cell-text(makeItOlive)
 {
   color: olive;
+}
+
+tree#elementList > treechildren::-moz-tree-cell-text(makeItCurve)
+{
   font-style: italic;
   font-family: cursive;
 }
