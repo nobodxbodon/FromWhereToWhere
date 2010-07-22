@@ -641,13 +641,17 @@ pub.treeView = {
   click: function() {}
 };  
   pub.selectNodeLocal = null;
-  pub.showHasLocalCopy = function(){
+  pub.showMenuItems = function(){
     var localItem = document.getElementById("local");
 
     var node = this.treeView.visibleData[this.treeView.selection.currentIndex];
     var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(pub.getUrlfromId(node.placeId));
     pub.selectNodeLocal = exists;
     localItem.hidden = (exists == -1);
+    
+    var selectedIndex = pub.getAllSelectedIndex();
+    var propertyItem = document.getElementById("property");
+    propertyItem.hidden = (selectedIndex.length==0);
   };
   
   pub.openlocal = function(){
