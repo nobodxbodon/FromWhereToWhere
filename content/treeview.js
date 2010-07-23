@@ -625,8 +625,9 @@ pub.treeView = {
     var haveKeywords = pub.pidwithKeywords.indexOf(pid);
     var aserv=Components.classes["@mozilla.org/atom-service;1"].
                 getService(Components.interfaces.nsIAtomService);
-    //CAN'T alert here! 
-    if(pid==pub.retrievedId){
+    //CAN'T alert here!
+    //in case pid is null, which means new imported nodes
+    if(pid && pid==pub.retrievedId){
       props.AppendElement(aserv.getAtom("makeItRed"));
     }else if(haveKeywords!=-1){
       props.AppendElement(aserv.getAtom("makeItBlue"));
@@ -685,7 +686,7 @@ pub.treeView = {
   pub.decreaseLevelandCollapse = function(node, levels){
     var children = node.children;
     for(var i in children){
-      children[i].level = pub.decreaseLevelandCollapse(children[i].level, levels);
+      children[i] = pub.decreaseLevelandCollapse(children[i], levels);
     }
     node.level = node.level - levels;
     node.isFolded = false;
@@ -723,9 +724,21 @@ pub.treeView = {
     alert(json);
   };
   
+  //TOFIX: when the first node is "no result found", needs to remove it, otherwise FF freezes when the next node is collapsed
   pub.importNodes = function(){
+    if(this.treeView.visibleData.length==1 && this.treeView.visibleData[0].id == -1){
+      this.treeView.visibleData = [];
+      this.treeView.treeBox.rowCountChanged(0, -this.treeView.visibleData.length);
+    }
     var json = window.prompt("Please paste the nodes' property:", "[]");
-    var newNodes = nativeJSON.decode(json);
+    var newNodes = [];
+    try{
+      newNodes = nativeJSON.decode(json);
+    }catch(err){
+      if(json && json!="[]"){
+	alert("Input properties incomplete or corrupted:\n" + json);
+      }
+    }
     for (var i = 0; i < newNodes.length; i++) {
       newNodes[i]=pub.putNodeToLevel0(newNodes[i]);
       this.treeView.visibleData.splice(this.treeView.visibleData.length, 0, newNodes[i]);
