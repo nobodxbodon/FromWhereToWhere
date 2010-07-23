@@ -257,7 +257,27 @@ com.wuxuan.fromwheretowhere.main = function(){
     return obj;
   };
   
+  pub.clearReferedHistoryNode = function(node){
+    for(var i in node.children){
+      node.children[i] = pub.clearReferedHistoryNode(node.children[i]);
+    }
+    node.id = null;
+    node.placeId = null;
+    return node;
+  };
+  
   // Utils functions from here
+  pub.cloneObject = function(obj){
+    var clone = (obj instanceof Array) ? [] : {};;
+    for(var i in obj) {
+      if(typeof(obj[i])=="object")
+        clone[i] = pub.cloneObject(obj[i]);
+      else
+        clone[i] = obj[i];
+    }
+    return clone;
+  };
+
   pub.formatDate = function(intDate) {
     var myDate = new Date(intDate/1000);
     var formated = myDate.toLocaleString();
@@ -386,9 +406,13 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
   pub.alreadyExpandedPids = [];
   
   /* go through all invisible node that's expanded, if there exists dup place_id,
-  add it to alreadyExpandedPids, and return true */
+  add it to alreadyExpandedPids, and return true;
+  Add for import, if pid is null, it means new nodes imported from outside. Treat as not expanded*/
   pub.existInVisible = function(item) {
     var pid = item.placeId;
+    if(!pid){
+      return false;
+    }
     if(pub.alreadyExpandedPids.indexOf(pid)!=-1){
       return true;
     }else{
@@ -688,8 +712,13 @@ pub.treeView = {
     var selected = [];
     for(var i in selectedIndex){
       var node = this.treeView.visibleData[selectedIndex[i]];
-      selected.push(node);
+      //clean away id/pid from the node, as it's useless for other instances of FF
+      selected.push(pub.clearReferedHistoryNode(pub.cloneObject(node)));
     }
+    /*var cpSelected = pub.cloneObject(selected);
+    for(var i in cpSelected){
+      cpSelected[i] = pub.clearReferedHistoryNode(cpSelected[i]);
+    }*/
     var json = nativeJSON.encode(selected);
     alert(json);
   };
