@@ -37,7 +37,6 @@ com.wuxuan.fromwheretowhere.main = function(){
 	}
       }
       statement.reset();
-      //alert(children.length);
       return children;  
     } 
     catch (e) {
@@ -71,7 +70,6 @@ com.wuxuan.fromwheretowhere.main = function(){
   /* the url visited before are all associated with the first place_id */
   pub.getAllIdfromPlaceId = function(pid){
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits where place_id=:pid");
-    //alert("titlefromid: " + id);
     statement.params.pid=pid;
     return pub.queryAll(statement, 32, 0);
   };
@@ -120,7 +118,6 @@ com.wuxuan.fromwheretowhere.main = function(){
 	potentialchildren = pub.addInArrayNoDup(newChildren[i], potentialchildren);
       }
     }
-    //alert(ids + "\n" + potentialchildren);
     return potentialchildren;
   };
       
@@ -234,7 +231,6 @@ com.wuxuan.fromwheretowhere.main = function(){
 	}
       }
       statement.reset();
-      //alert(id);
       return ids;
     } 
     catch (e) {
@@ -549,7 +545,6 @@ pub.treeView = {
   //expand using the children cached in item, hopefully save expanding time
   expandFromNodeInTree: function(item, idx) {
     if (!item.children || item.children.length==0) {
-      //alert(item);
       return 0;
     }
     // need to check here. Otherwise if check the children, the first parent won't be recorded as existInVisible.
@@ -557,7 +552,6 @@ pub.treeView = {
       return 0;
     }
     item.isFolded = true;
-    //alert("children\n" + item.children);
     for (var i = 0; i < item.children.length; i++) {  
       this.visibleData.splice(idx + i + 1, 0, item.children[i]);
     }
@@ -592,7 +586,6 @@ pub.treeView = {
       var thisLevel = this.getLevel(idx);  
       var deletecount = 0;  
       for (var t = idx + 1;; t++) {
-	//alert(t + ":" + this.getLevel(t) + " vs. " + thisLevel);
         if (this.visibleData[t] != null && (this.getLevel(t) > thisLevel)) deletecount++;  
         else break;  
       }  
@@ -716,10 +709,6 @@ pub.treeView = {
       //clean away id/pid from the node, as it's useless for other instances of FF
       selected.push(pub.clearReferedHistoryNode(pub.cloneObject(node)));
     }
-    /*var cpSelected = pub.cloneObject(selected);
-    for(var i in cpSelected){
-      cpSelected[i] = pub.clearReferedHistoryNode(cpSelected[i]);
-    }*/
     var json = nativeJSON.encode(selected);
     alert(json);
   };
