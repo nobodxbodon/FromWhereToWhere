@@ -463,7 +463,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     }
     //show "no results" if nothing is found
     if(nodes.length==0){
-      nodes.push(pub.ReferedHistoryNode(-1, -1, "No result found", null, false, false, [], 1));
+      nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
     }
     return nodes;
   };
@@ -713,7 +713,7 @@ pub.treeView = {
     alert(json);
   };
   
-  //TOFIX: when the first node is "no result found", needs to remove it, otherwise FF freezes when the next node is collapsed
+  //when the first node is "no result found", remove it first, otherwise FF freezes when the next node is collapsed
   pub.importNodes = function(){
     if(this.treeView.visibleData.length==1 && this.treeView.visibleData[0].id == -1){
       this.treeView.visibleData = [];
@@ -772,7 +772,14 @@ pub.treeView = {
     }
     pub.treeView.delSuspensionPoints(-1);
     //refresh tree, remove all visibledata and add new ones
-    pub.treeView.visibleData = pub.createParentNodesCheckDup(allPpids, allpids);
+    //when allPpids = null/[], show "no result with xxx", to distinguish with normal nothing found
+    if(!allPpids || allPpids.length==0){
+      var nodes = [];
+      nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found with \""+keywords+"\" in title", null, false, false, [], 1));
+      pub.treeView.visibleData = nodes;
+    }else{
+      pub.treeView.visibleData = pub.createParentNodesCheckDup(allPpids, allpids);
+    }
     pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
     //document.getElementById("elementList").disabled = "false";
   };
