@@ -446,12 +446,11 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
         }
         tops.push(pid);
       } else {
-        //alert("parent ids: "+pParentIds);
+	//if multiple ancestors, latest first
         for(var j=pParentIds.length-1;j>=0;j--){
 	  var placeId = pub.getPlaceIdfromId(pParentIds[j]);
 	  if(pub.allKnownParentPids.indexOf(placeId)==-1){
 	    pub.allKnownParentPids.push(placeId);
-	    //alert("go up "+ placeId);
 	    var anc=pub.getAllAncestorsfromPlaceid(placeId, knownParentPids);
 	    for(var k in anc){
 	      tops=pub.addInArrayNoDup(anc[k],tops);
@@ -460,67 +459,24 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
         }
       }
     }
-    //alert("tops: "+ tops + "\npid: " +pid)
     return tops;
   };
   
   // those without parent are also added, can't only highlight the keywords instead of the whole title?
-  pub.createParentNodesCheckDup = function(pids, allPids) {
+  pub.createParentNodesCheckDup = function(pids) {
     pub.allKnownParentPids = [];
     var nodes = [];
     var ancPids = [];
-    //TODO: it's not necessary to have allPids, feels like
+    //order by time: latest first by default
     for(var i=pids.length-1; i>=0; i--){
-      //if(allPids.indexOf(pids[i])==-1){
-	var anc = pub.getAllAncestorsfromPlaceid(pids[i],[]);
-	//alert("anc of "+pids[i]+" "+anc.length+" \n"+anc);
-	//TODO: anc can dup!!
-	//TODO: order by time reversely by default!! now is from older to later
-	for(var j in anc){
-	  ancPids = pub.addInArrayNoDup(anc[j],ancPids);
-	}
-      //}else{
-	//alert("top child "+pids[i]);
-	//nodes.push(pub.nodefromPlaceid(pids[i]));
-      //}
+      var anc = pub.getAllAncestorsfromPlaceid(pids[i],[]);
+      for(var j in anc){
+        ancPids = pub.addInArrayNoDup(anc[j],ancPids);
+      }
     }
     for(var i in ancPids){
       nodes.push(pub.nodefromPlaceid(ancPids[i]));
     }
-    //alert(nodes.length);
-    /* partly solve the redundant parents issue */
-    /*var lastdup = -1;
-    var findtrace = false;
-    if(pids) {
-    for(var i=0; i<pids.length; i++) {
-      var dupidx = allPids.indexOf(pids[i]);
-      //alert(dupidx + " " + lastdup + " " + findtrace);
-      if(dupidx!=-1) {
-	if(lastdup == false) {
-	  lastdup = dupidx;
-	} else if(dupidx==lastdup-1) {
-	  findtrace = true;
-	  lastdup = dupidx;
-	  //if it's the last one and still duplicate, add it because there's no chance to check the next one
-	  //so just assume the next one doesn't duplicate
-	  if(i==pids.length-1){
-	    nodes.push(pub.nodefromPlaceid(pids[i]));
-	  }
-	} else {
-	  nodes.push(pub.nodefromPlaceid(pids[i]));
-	  lastdup = dupidx;
-	  findtrace = false;
-	}
-      } else {
-	if(findtrace){
-	  nodes.push(pub.nodefromPlaceid(pids[i-1]));
-	  findtrace = false;
-	}
-	allPids.push(pids[i]);
-	nodes.push(pub.nodefromPlaceid(pids[i]));
-      }
-    }
-    }*/
     //show "no results" if nothing is found
     if(nodes.length==0){
       nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
@@ -536,7 +492,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
         pids = pub.addInArrayNoDup(pub.getPlaceIdfromId(pIds[i]), pids);
       }
     }
-    return pub.createParentNodesCheckDup(pids, []);
+    return pub.createParentNodesCheckDup(pids);
   };
   
 // Main Tree definition
@@ -804,7 +760,6 @@ pub.treeView = {
     var keywords = document.getElementById("keywords").value;
     var words = pub.splitWithSpaces(keywords);
     var allpids = [];
-    var allPpids = [];
     //TODO: new thread
     if(words.length==0){
       alert("no keywords input");
@@ -816,20 +771,6 @@ pub.treeView = {
     // improve by search id from keywords directly instead of getting urls first
     allpids = pub.searchIdbyKeywords(words);
     pub.pidwithKeywords = [].concat(allpids);
-    //alert(allpids.length + " pids:\n"+allpids);
-    //getParentIds -> pIds, if exists in ids or pIds, don't add to parents
-    //TODO: to be more precise. If there's an indirect link, it'll still pass
-    /*for(var i=allpids.length-1;i>=0;i--){
-      var pIds = pub.getParentIdsfromPlaceid(allpids[i]);
-      if(!pIds || pIds.length==0){
-	allPpids = pub.addInArrayNoDup(allpids[i], allPpids);
-      } else {
-	for(var j=0;j<pIds.length;j++){
-	  var placeId = pub.getPlaceIdfromId(pIds[j]);
-	  allPpids = pub.addInArrayNoDup(placeId, allPpids);
-	}
-      }
-    }*/
     pub.treeView.delSuspensionPoints(-1);
     //refresh tree, remove all visibledata and add new ones
     //when allPpids = null/[], show "no result with xxx", to distinguish with normal nothing found
@@ -838,8 +779,7 @@ pub.treeView = {
       nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found with \""+keywords+"\" in title", null, false, false, [], 1));
       pub.treeView.visibleData = nodes;
     }else{
-      //pub.treeView.visibleData = pub.createParentNodesCheckDup(allPpids, allpids);
-      pub.treeView.visibleData = pub.createParentNodesCheckDup(allpids, []);
+      pub.treeView.visibleData = pub.createParentNodesCheckDup(allpids);
     }
     pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
     //document.getElementById("elementList").disabled = "false";
