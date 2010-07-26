@@ -470,7 +470,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     var nodes = [];
     var ancPids = [];
     //TODO: it's not necessary to have allPids, feels like
-    for(var i in pids){
+    for(var i=pids.length-1; i>=0; i--){
       //if(allPids.indexOf(pids[i])==-1){
 	var anc = pub.getAllAncestorsfromPlaceid(pids[i],[]);
 	//alert("anc of "+pids[i]+" "+anc.length+" \n"+anc);
@@ -819,7 +819,7 @@ pub.treeView = {
     //alert(allpids.length + " pids:\n"+allpids);
     //getParentIds -> pIds, if exists in ids or pIds, don't add to parents
     //TODO: to be more precise. If there's an indirect link, it'll still pass
-    for(var i=allpids.length-1;i>=0;i--){
+    /*for(var i=allpids.length-1;i>=0;i--){
       var pIds = pub.getParentIdsfromPlaceid(allpids[i]);
       if(!pIds || pIds.length==0){
 	allPpids = pub.addInArrayNoDup(allpids[i], allPpids);
@@ -829,11 +829,11 @@ pub.treeView = {
 	  allPpids = pub.addInArrayNoDup(placeId, allPpids);
 	}
       }
-    }
+    }*/
     pub.treeView.delSuspensionPoints(-1);
     //refresh tree, remove all visibledata and add new ones
     //when allPpids = null/[], show "no result with xxx", to distinguish with normal nothing found
-    if(!allPpids || allPpids.length==0){
+    if(!allpids || allpids.length==0){
       var nodes = [];
       nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found with \""+keywords+"\" in title", null, false, false, [], 1));
       pub.treeView.visibleData = nodes;
