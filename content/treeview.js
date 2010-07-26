@@ -70,7 +70,11 @@ com.wuxuan.fromwheretowhere.main = function(){
   /* the url visited before are all associated with the first place_id */
   pub.getAllIdfromPlaceId = function(pid){
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits where place_id=:pid");
-    statement.params.pid=pid;
+    try{
+      statement.params.pid=pid;
+    }catch(err){
+      alert(err);
+    }
     return pub.queryAll(statement, 32, 0);
   };
     
@@ -149,12 +153,12 @@ com.wuxuan.fromwheretowhere.main = function(){
     statement.params.id=id;
     return pub.queryOne(statement, "str", 0); 
   };
-    
+  /*  
   pub.getAllIdfromUrl = function(url){
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_places where url=:url");
     statement.params.url=url;
     return pub.queryAll(statement, 32, 0);
-  };
+  };*/
   
   pub.getFirstDatefromPid = function(pid){
     var statement = pub.mDBConn.createStatement("SELECT visit_date FROM moz_historyvisits where place_id=:pid");
@@ -208,7 +212,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryAll(statement, 32, 0);
   };
   
-  pub.getParentIds = function(retrievedId){
+  pub.getParentIdsfromPlaceid = function(retrievedId){
     if(!retrievedId) {
       return null;
     }
@@ -303,7 +307,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   
   pub.retrievedId = pub.getIdfromUrl(Application.storage.get("currentURI", false));//pub.currentURI);//com.wuxuan.fromwheretowhere.currenURI);//pub.currentURI);
   
-  pub.parentIds = pub.getParentIds(pub.retrievedId);
+  pub.parentIds = pub.getParentIdsfromPlaceid(pub.retrievedId);
 
 pub.workingThread = function(threadID, item, idx) {
   this.threadID = threadID;
@@ -425,11 +429,57 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
   
+  pub.allKnownParentPids = [];
+  
+  //return all the top ancesters of a placeid, and add to allKnownParents
+  pub.getAllAncestorsfromPlaceid = function(pid){
+    var tops = [];
+    var pParentIds = pub.getParentIdsfromPlaceid(pid);
+    if(!pParentIds || pParentIds.length==0){
+      if(pub.allKnownParentPids.indexOf(pid)==-1){
+	pub.allKnownParentPids.push(pid);
+      }
+      tops.push(pid);
+    } else {
+      //alert("parent ids: "+pParentIds);
+      for(var j=pParentIds.length-1;j>=0;j--){
+	var placeId = pub.getPlaceIdfromId(pParentIds[j]);
+	if(pub.allKnownParentPids.indexOf(placeId)==-1){
+	  pub.allKnownParentPids.push(placeId);
+	  //alert("go up "+ placeId);
+	  var anc=pub.getAllAncestorsfromPlaceid(placeId);
+	  for(var k in anc){
+	    tops=pub.addInArrayNoDup(anc[k],tops);
+	  }
+	}
+      }
+    }
+    //alert("tops: "+ tops + "\npid: " +pid)
+    return tops;
+  };
+  
   // those without parent are also added, can't only highlight the keywords instead of the whole title?
   pub.createParentNodesCheckDup = function(pids, allPids) {
+    pub.allKnownParentPids = [];
     var nodes = [];
+    //TODO: it's not necessary to have allPids, feels like
+    for(var i in pids){
+      //if(allPids.indexOf(pids[i])==-1){
+	var anc = pub.getAllAncestorsfromPlaceid(pids[i]);
+	//alert("anc of "+pids[i]+" "+anc.length+" \n"+anc);
+	//TODO: anc can dup!!
+	//TODO: order by time reversely by default!! now is from older to later
+	for(var j in anc){
+	  nodes.push(pub.nodefromPlaceid(anc[j]));
+	}
+      //}else{
+	//alert("top child "+pids[i]);
+	//nodes.push(pub.nodefromPlaceid(pids[i]));
+      //}
+    }
+    //alert(nodes.length);
     /* partly solve the redundant parents issue */
-    var lastdup = -1;
+    /*var lastdup = -1;
     var findtrace = false;
     if(pids) {
     for(var i=0; i<pids.length; i++) {
@@ -460,7 +510,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
 	nodes.push(pub.nodefromPlaceid(pids[i]));
       }
     }
-    }
+    }*/
     //show "no results" if nothing is found
     if(nodes.length==0){
       nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
@@ -760,7 +810,7 @@ pub.treeView = {
     //getParentIds -> pIds, if exists in ids or pIds, don't add to parents
     //TODO: to be more precise. If there's an indirect link, it'll still pass
     for(var i=allpids.length-1;i>=0;i--){
-      var pIds = pub.getParentIds(allpids[i]);
+      var pIds = pub.getParentIdsfromPlaceid(allpids[i]);
       if(!pIds || pIds.length==0){
 	allPpids = pub.addInArrayNoDup(allpids[i], allPpids);
       } else {
@@ -778,7 +828,8 @@ pub.treeView = {
       nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found with \""+keywords+"\" in title", null, false, false, [], 1));
       pub.treeView.visibleData = nodes;
     }else{
-      pub.treeView.visibleData = pub.createParentNodesCheckDup(allPpids, allpids);
+      //pub.treeView.visibleData = pub.createParentNodesCheckDup(allPpids, allpids);
+      pub.treeView.visibleData = pub.createParentNodesCheckDup(allpids, []);
     }
     pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
     //document.getElementById("elementList").disabled = "false";
