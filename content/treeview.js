@@ -432,26 +432,32 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
   pub.allKnownParentPids = [];
   
   //return all the top ancesters of a placeid, and add to allKnownParents
-  pub.getAllAncestorsfromPlaceid = function(pid){
+  pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids){
     var tops = [];
-    var pParentIds = pub.getParentIdsfromPlaceid(pid);
-    if(!pParentIds || pParentIds.length==0){
-      if(pub.allKnownParentPids.indexOf(pid)==-1){
-	pub.allKnownParentPids.push(pid);
-      }
-      tops.push(pid);
-    } else {
-      //alert("parent ids: "+pParentIds);
-      for(var j=pParentIds.length-1;j>=0;j--){
-	var placeId = pub.getPlaceIdfromId(pParentIds[j]);
-	if(pub.allKnownParentPids.indexOf(placeId)==-1){
-	  pub.allKnownParentPids.push(placeId);
-	  //alert("go up "+ placeId);
-	  var anc=pub.getAllAncestorsfromPlaceid(placeId);
-	  for(var k in anc){
-	    tops=pub.addInArrayNoDup(anc[k],tops);
+    //if it's its own ancester, still display it
+    if(knownParentPids.indexOf(pid)!=-1){
+      tops=pub.addInArrayNoDup(pid,tops);
+    }else{
+      knownParentPids.push(pid);
+      var pParentIds = pub.getParentIdsfromPlaceid(pid);
+      if(!pParentIds || pParentIds.length==0){
+        if(pub.allKnownParentPids.indexOf(pid)==-1){
+	  pub.allKnownParentPids.push(pid);
+        }
+        tops.push(pid);
+      } else {
+        //alert("parent ids: "+pParentIds);
+        for(var j=pParentIds.length-1;j>=0;j--){
+	  var placeId = pub.getPlaceIdfromId(pParentIds[j]);
+	  if(pub.allKnownParentPids.indexOf(placeId)==-1){
+	    pub.allKnownParentPids.push(placeId);
+	    //alert("go up "+ placeId);
+	    var anc=pub.getAllAncestorsfromPlaceid(placeId, knownParentPids);
+	    for(var k in anc){
+	      tops=pub.addInArrayNoDup(anc[k],tops);
+	    }
 	  }
-	}
+        }
       }
     }
     //alert("tops: "+ tops + "\npid: " +pid)
@@ -462,20 +468,24 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
   pub.createParentNodesCheckDup = function(pids, allPids) {
     pub.allKnownParentPids = [];
     var nodes = [];
+    var ancPids = [];
     //TODO: it's not necessary to have allPids, feels like
     for(var i in pids){
       //if(allPids.indexOf(pids[i])==-1){
-	var anc = pub.getAllAncestorsfromPlaceid(pids[i]);
+	var anc = pub.getAllAncestorsfromPlaceid(pids[i],[]);
 	//alert("anc of "+pids[i]+" "+anc.length+" \n"+anc);
 	//TODO: anc can dup!!
 	//TODO: order by time reversely by default!! now is from older to later
 	for(var j in anc){
-	  nodes.push(pub.nodefromPlaceid(anc[j]));
+	  ancPids = pub.addInArrayNoDup(anc[j],ancPids);
 	}
       //}else{
 	//alert("top child "+pids[i]);
 	//nodes.push(pub.nodefromPlaceid(pids[i]));
       //}
+    }
+    for(var i in ancPids){
+      nodes.push(pub.nodefromPlaceid(ancPids[i]));
     }
     //alert(nodes.length);
     /* partly solve the redundant parents issue */
