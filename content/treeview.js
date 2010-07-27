@@ -153,12 +153,6 @@ com.wuxuan.fromwheretowhere.main = function(){
     statement.params.id=id;
     return pub.queryOne(statement, "str", 0); 
   };
-  /*  
-  pub.getAllIdfromUrl = function(url){
-    var statement = pub.mDBConn.createStatement("SELECT id FROM moz_places where url=:url");
-    statement.params.url=url;
-    return pub.queryAll(statement, 32, 0);
-  };*/
   
   pub.getFirstDatefromPid = function(pid){
     var statement = pub.mDBConn.createStatement("SELECT visit_date FROM moz_historyvisits where place_id=:pid");
@@ -175,7 +169,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     if(!lastid){
       var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
 					    where id<=:id \
-					    order by -id"); // limit 1
+					    order by -id");
       statement.params.id=id;
       lastid = pub.queryOne(statement, 32, 0);
     }
@@ -220,8 +214,6 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryAll(statement, 32, 0);
   };
   
-  //pub.getparentCounts = 0;
-  //pub.getancesterCounts = 0;
   pub.getParentIdsfromPlaceid = function(retrievedId){
     if(!retrievedId) {
       return null;
@@ -231,27 +223,6 @@ com.wuxuan.fromwheretowhere.main = function(){
 						place_id=:id and from_visit!=0");
     statement.params.id=retrievedId;
     return pub.queryAll(statement, 32, 0);
-    /*var ids = [];
-    try {
-      while (statement.executeStep()) {
-	//if it's redirected from somewhere, get the real id by searching again
-	var type = statement.getInt32(1);
-	var from = statement.getInt32(0);
-	if(type==6 || type==5) {
-	  var redirectSrc = pub.getFromVisitfromId(from);
-	  if(redirectSrc!=null){
-	    ids.push(redirectSrc);
-	  }
-	} else {
-	  ids.push(from);
-	}
-      }
-      statement.reset();
-      return ids;
-    } 
-    catch (e) {
-      statement.reset();
-    }*/
   };
   //sqlite operations finish
   
@@ -446,7 +417,6 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
   
   //return all the top ancesters of a placeid, and add to allKnownParents
   pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids){
-    //var start = (new Date()).getTime();
     var tops = [];
     //if it's its own ancester, still display it
     if(knownParentPids.indexOf(pid)!=-1){
@@ -475,8 +445,6 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
         }
       }
     }
-    
-    //pub.getancesterCounts +=(new Date()).getTime()-start;
     return tops;
   };
   
@@ -774,9 +742,6 @@ pub.treeView = {
       }
       this.treeView.treeBox.rowCountChanged(this.treeView.visibleData.length, newNodes.length);
     }
-    /*else {
-      this.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
-    }*/
   };
   
   pub.pidwithKeywords = [];
@@ -826,7 +791,6 @@ pub.treeView = {
   pub.showTopNodesThread.prototype = {
     run: function() {
       try {
-	//alert(pub.getancesterCounts);
         //refresh tree, remove all visibledata and add new ones
         pub.treeView.delSuspensionPoints(-1);
         if(this.words.length==0){
@@ -862,13 +826,9 @@ pub.treeView = {
   pub.showTopNodes = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 
   pub.search = function() {
-    
-    //pub.getparentCounts = 0;
-    //pub.getancesterCounts = 0;
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
     pub.treeView.addSuspensionPoints(-1, -1);
     var keywords = document.getElementById("keywords").value;
-
     pub.searchBackground.dispatch(new pub.searchThread(1, keywords), pub.searchBackground.DISPATCH_NORMAL);
       
   };
