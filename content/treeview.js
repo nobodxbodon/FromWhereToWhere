@@ -377,7 +377,7 @@ pub.mainThread.prototype = {
 
 pub.background = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(0);
 pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
-  
+
   pub.allChildrenfromPid = function(parentNode) {
     parentNode.isFolded = true;
     var parentLevel = parentNode.level;
@@ -477,10 +477,6 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     for(var i in ancPids){
       nodes.push(pub.nodefromPlaceid(ancPids[i]));
     }
-    //show "no results" if nothing is found
-    if(nodes.length==0){
-      nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
-    }
     return nodes;
   };
   
@@ -492,7 +488,13 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
         pids = pub.addInArrayNoDup(pub.getPlaceIdfromId(pIds[i]), pids);
       }
     }
-    return pub.createParentNodesCheckDup(pids);
+    var nodes = pub.createParentNodesCheckDup(pids);
+    
+    //show "no results" if nothing is found
+    if(nodes.length==0){
+      nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
+    }
+    return nodes;
   };
   
 // Main Tree definition
@@ -753,36 +755,96 @@ pub.treeView = {
   
   pub.pidwithKeywords = [];
   
+  pub.searchThread = function(threadID, keywords) {
+    this.threadID = threadID;
+    this.keywords = keywords;
+  };
+  
+  pub.searchThread.prototype = {
+    run: function() {
+      try {
+        // This is where the working thread does its processing work.
+        var words = pub.splitWithSpaces(this.keywords);
+        var topNodes = [];
+        if(words.length!=0){
+          var allpids = [];
+          // improve by search id from keywords directly instead of getting urls first
+          allpids = pub.searchIdbyKeywords(words);
+          pub.pidwithKeywords = [].concat(allpids);
+          topNodes = pub.createParentNodesCheckDup(allpids);
+        }
+      
+        pub.showTopNodes.dispatch(new pub.showTopNodesThread(this.threadID, topNodes, this.keywords, words),
+          pub.searchThread.DISPATCH_NORMAL);
+      } catch(err) {
+        Components.utils.reportError(err);
+      }
+    },
+  
+    QueryInterface: function(iid) {
+      if (iid.equals(Components.interfaces.nsIRunnable) ||
+          iid.equals(Components.interfaces.nsISupports)) {
+              return this;
+      }
+      throw Components.results.NS_ERROR_NO_INTERFACE;
+    }
+  };
+
+  pub.showTopNodesThread = function(threadID, topNodes, keywords, words) {
+    this.threadID = threadID;
+    this.topNodes = topNodes;
+    this.keywords = keywords;
+    this.words = words;
+  };
+
+  pub.showTopNodesThread.prototype = {
+    run: function() {
+      try {
+        // This is where we react to the completion of the working thread.
+        //refresh tree, remove all visibledata and add new ones
+        pub.treeView.delSuspensionPoints(-1);
+        if(this.words.length==0){
+          alert("no keywords input");
+          //cancel "searching..." after "OK", and redisplay the former result      
+          pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
+          return;
+        }
+        //when allPpids = null/[], show "no result with xxx", to distinguish with normal nothing found
+        if(this.topNodes.length==0){
+          var nodes = [];
+          nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found with \""+this.keywords+"\" in title", null, false, false, [], 1));
+          pub.treeView.visibleData = nodes;
+        }else{
+          pub.treeView.visibleData = this.topNodes;
+        }
+        pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
+      } catch(err) {
+        Components.utils.reportError(err);
+      }
+    },
+  
+    QueryInterface: function(iid) {
+      if (iid.equals(Components.interfaces.nsIRunnable) ||
+          iid.equals(Components.interfaces.nsISupports)) {
+              return this;
+      }
+      throw Components.results.NS_ERROR_NO_INTERFACE;
+    }
+  };
+
+  pub.searchBackground = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(1);
+  pub.showTopNodes = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
+
   pub.search = function() {
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
     pub.treeView.addSuspensionPoints(-1, -1);
     //document.getElementById("elementList").disabled = "true";
     var keywords = document.getElementById("keywords").value;
-    var words = pub.splitWithSpaces(keywords);
-    var allpids = [];
-    //TODO: new thread
-    if(words.length==0){
-      alert("no keywords input");
-      //cancel "searching..." after "OK", and redisplay the former result      
-      pub.treeView.delSuspensionPoints(-1);
-      pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
-      return;
-    }
-    // improve by search id from keywords directly instead of getting urls first
-    allpids = pub.searchIdbyKeywords(words);
-    pub.pidwithKeywords = [].concat(allpids);
-    pub.treeView.delSuspensionPoints(-1);
-    //refresh tree, remove all visibledata and add new ones
-    //when allPpids = null/[], show "no result with xxx", to distinguish with normal nothing found
-    if(!allpids || allpids.length==0){
-      var nodes = [];
-      nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found with \""+keywords+"\" in title", null, false, false, [], 1));
-      pub.treeView.visibleData = nodes;
-    }else{
-      pub.treeView.visibleData = pub.createParentNodesCheckDup(allpids);
-    }
-    pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
-    //document.getElementById("elementList").disabled = "false";
+
+
+    
+    pub.searchBackground.dispatch(new pub.searchThread(1, keywords), pub.searchBackground.DISPATCH_NORMAL);
+      
   };
   
   pub.keypress = function(event) {
