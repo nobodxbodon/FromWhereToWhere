@@ -166,12 +166,20 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryOne(statement, 64, 0);
   };
   
+  //only use "order by" if have to, 50x speed up
   pub.getPlaceIdfromId = function(id){
     var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
+					    where id==:id");
+    statement.params.id=id;
+    var lastid = pub.queryOne(statement, 32, 0);
+    if(!lastid){
+      var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
 					    where id<=:id \
 					    order by -id"); // limit 1
-    statement.params.id=id;
-    return pub.queryOne(statement, 32, 0);
+      statement.params.id=id;
+      lastid = pub.queryOne(statement, 32, 0);
+    }
+    return lastid;
   };
   
   pub.getIdfromPlaceId = function(pid){
@@ -212,14 +220,18 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryAll(statement, 32, 0);
   };
   
+  //pub.getparentCounts = 0;
+  //pub.getancesterCounts = 0;
   pub.getParentIdsfromPlaceid = function(retrievedId){
     if(!retrievedId) {
       return null;
     }
-    //when visit_type is 2 or 3: it's not from some url; if from_visit==0, not navigate from any link
-    var statement = pub.mDBConn.createStatement("SELECT from_visit,visit_type FROM moz_historyvisits where place_id=:id and visit_type!=2 and visit_type!=3 and from_visit!=0");
+    //if from_visit==0, not navigate from any link, or visit_type is 2 or 3(it's not from some url) 
+    var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
+						place_id=:id and from_visit!=0");
     statement.params.id=retrievedId;
-    var ids = [];
+    return pub.queryAll(statement, 32, 0);
+    /*var ids = [];
     try {
       while (statement.executeStep()) {
 	//if it's redirected from somewhere, get the real id by searching again
@@ -239,7 +251,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     } 
     catch (e) {
       statement.reset();
-    }
+    }*/
   };
   //sqlite operations finish
   
@@ -434,6 +446,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
   
   //return all the top ancesters of a placeid, and add to allKnownParents
   pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids){
+    //var start = (new Date()).getTime();
     var tops = [];
     //if it's its own ancester, still display it
     if(knownParentPids.indexOf(pid)!=-1){
@@ -449,7 +462,9 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
       } else {
 	//if multiple ancestors, latest first
         for(var j=pParentIds.length-1;j>=0;j--){
+	  //var start = (new Date()).getTime();
 	  var placeId = pub.getPlaceIdfromId(pParentIds[j]);
+	  //pub.getancesterCounts +=(new Date()).getTime()-start;
 	  if(pub.allKnownParentPids.indexOf(placeId)==-1){
 	    pub.allKnownParentPids.push(placeId);
 	    var anc=pub.getAllAncestorsfromPlaceid(placeId, knownParentPids);
@@ -460,6 +475,8 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
         }
       }
     }
+    
+    //pub.getancesterCounts +=(new Date()).getTime()-start;
     return tops;
   };
   
@@ -781,7 +798,8 @@ pub.treeView = {
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.createParentNodesCheckDup(allpids);
         }
-      
+
+	
         pub.showTopNodes.dispatch(new pub.showTopNodesThread(this.threadID, topNodes, this.keywords, words),
           pub.searchThread.DISPATCH_NORMAL);
       } catch(err) {
@@ -808,6 +826,7 @@ pub.treeView = {
   pub.showTopNodesThread.prototype = {
     run: function() {
       try {
+	//alert(pub.getancesterCounts);
         //refresh tree, remove all visibledata and add new ones
         pub.treeView.delSuspensionPoints(-1);
         if(this.words.length==0){
@@ -843,6 +862,9 @@ pub.treeView = {
   pub.showTopNodes = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 
   pub.search = function() {
+    
+    //pub.getparentCounts = 0;
+    //pub.getancesterCounts = 0;
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
     pub.treeView.addSuspensionPoints(-1, -1);
     var keywords = document.getElementById("keywords").value;
