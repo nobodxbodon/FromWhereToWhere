@@ -763,7 +763,6 @@ pub.treeView = {
   pub.searchThread.prototype = {
     run: function() {
       try {
-        // This is where the working thread does its processing work.
         var words = pub.splitWithSpaces(this.keywords);
         var topNodes = [];
         if(words.length!=0){
@@ -800,7 +799,6 @@ pub.treeView = {
   pub.showTopNodesThread.prototype = {
     run: function() {
       try {
-        // This is where we react to the completion of the working thread.
         //refresh tree, remove all visibledata and add new ones
         pub.treeView.delSuspensionPoints(-1);
         if(this.words.length==0){
@@ -838,11 +836,8 @@ pub.treeView = {
   pub.search = function() {
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
     pub.treeView.addSuspensionPoints(-1, -1);
-    //document.getElementById("elementList").disabled = "true";
     var keywords = document.getElementById("keywords").value;
 
-
-    
     pub.searchBackground.dispatch(new pub.searchThread(1, keywords), pub.searchBackground.DISPATCH_NORMAL);
       
   };
