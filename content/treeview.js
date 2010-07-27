@@ -183,14 +183,6 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryOne(statement, 32, 0);
   };
   
-  // ASSUMPTION: there exists such id!
-  pub.getFromVisitfromId = function(id){
-    var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits \
-					    where id=:id and from_visit!=0");
-    statement.params.id=id;
-    return pub.queryOne(statement, 32, 0);
-  };
-  
   pub.searchIdbyKeywords = function(words){
     //SELECT * FROM moz_places where title LIKE '%sqlite%';
     //NESTED in reverse order, with the assumption that the word in front is more frequently used, thus return more items in each SELECT
@@ -289,9 +281,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   // Utils functions finish
   pub.mDBConn = pub.openPlacesDatabase();
   
-  pub.retrievedId = pub.getIdfromUrl(Application.storage.get("currentURI", false));//pub.currentURI);//com.wuxuan.fromwheretowhere.currenURI);//pub.currentURI);
-  
-  pub.parentIds = pub.getParentIdsfromPlaceid(pub.retrievedId);
+  pub.retrievedId = pub.getIdfromUrl(Application.storage.get("currentURI", false));
 
 pub.workingThread = function(threadID, item, idx) {
   this.threadID = threadID;
