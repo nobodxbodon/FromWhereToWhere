@@ -287,8 +287,9 @@ com.wuxuan.fromwheretowhere.main = function(){
   pub.getURLfromNode = function(treeView) {
     var sel = treeView.selection;
     var node = treeView.visibleData[sel.currentIndex];
-    //alert("id: " + node.id + "\n" + "place_id: " + node.placeId + "\n" + url);//+"\n"+getFirstDatefromPid(node.placeid));//+"\n"+formatDate(getFirstDatefromPid(node.placeid)));
-    window.open(node.url);
+    if(node){
+      window.open(node.url);
+    }
   };
 
   pub.splitWithSpaces = function(myString) {
@@ -660,11 +661,14 @@ pub.treeView = {
   pub.selectNodeLocal = null;
   pub.showMenuItems = function(){
     var localItem = document.getElementById("local");
-
+    var openinnewtab = document.getElementById("openinnewtab");
     var node = this.treeView.visibleData[this.treeView.selection.currentIndex];
-    var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(pub.getUrlfromId(node.placeId));
-    pub.selectNodeLocal = exists;
-    localItem.hidden = (exists == -1);
+    if(node){
+      var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(pub.getUrlfromId(node.placeId));
+      pub.selectNodeLocal = exists;
+      localItem.hidden = (exists == -1);
+    }
+    openinnewtab.hidden = (node==null);
     
     var selectedIndex = pub.getAllSelectedIndex();
     var propertyItem = document.getElementById("property");
@@ -733,10 +737,6 @@ pub.treeView = {
   
   //when the first node is "no result found", remove it first, otherwise FF freezes when the next node is collapsed
   pub.importNodes = function(){
-    if(this.treeView.visibleData.length==1 && this.treeView.visibleData[0].id == -1){
-      this.treeView.visibleData = [];
-      this.treeView.treeBox.rowCountChanged(0, -this.treeView.visibleData.length);
-    }
     var json = window.prompt("Please paste the nodes' property:", "[]");
     var newNodes = [];
     try{
@@ -746,11 +746,20 @@ pub.treeView = {
 	alert("Input properties incomplete or corrupted:\n" + json);
       }
     }
-    for (var i = 0; i < newNodes.length; i++) {
-      newNodes[i]=pub.putNodeToLevel0(newNodes[i]);
-      this.treeView.visibleData.splice(this.treeView.visibleData.length, 0, newNodes[i]);
+    if(newNodes.length>0){
+      if(this.treeView.visibleData.length==1 && this.treeView.visibleData[0].id == -1){
+	this.treeView.visibleData = [];
+	this.treeView.treeBox.rowCountChanged(0, -1);
+      }
+      for (var i = 0; i < newNodes.length; i++) {
+	newNodes[i]=pub.putNodeToLevel0(newNodes[i]);
+	this.treeView.visibleData.splice(this.treeView.visibleData.length, 0, newNodes[i]);
+      }
+      this.treeView.treeBox.rowCountChanged(this.treeView.visibleData.length, newNodes.length);
     }
-    this.treeView.treeBox.rowCountChanged(this.treeView.visibleData.length, newNodes.length);
+    /*else {
+      this.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
+    }*/
   };
   
   pub.pidwithKeywords = [];
