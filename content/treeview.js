@@ -466,19 +466,20 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     return nodes;
   };
   
-    // get pid from id, and then the same as createParentNodesCheckDup, only with no initial pid set to check dup
-  pub.createParentNodes = function(pIds) {
-    var pids = [];
-    if(pIds){
-      for(var i=0; i<pIds.length; i++) {
-        pids = pub.addInArrayNoDup(pub.getPlaceIdfromId(pIds[i]), pids);
-      }
+  // get pid from id, and then the same as createParentNodesCheckDup, only with no initial pid set to check dup
+  pub.createParentNodes = function(pid) {
+    var nodes = [];
+    if(pid){
+      nodes = pub.createParentNodesCheckDup([pid]);
     }
-    var nodes = pub.createParentNodesCheckDup(pids);
     
-    //show "no results" if nothing is found
+    //show the current url is no parents found
     if(nodes.length==0){
-      nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
+      if(pid){
+	nodes.push(pub.nodefromPlaceid(pid));
+      } else {
+	nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
+      }
     }
     return nodes;
   };
@@ -487,7 +488,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
 pub.treeView = {
   // have to separate the looks of node from the content!!!!!!
   
-  visibleData : pub.createParentNodes(pub.parentIds),
+  visibleData : pub.createParentNodes(pub.retrievedId),
 
   treeBox: null,  
   selection: null,  
@@ -629,7 +630,7 @@ pub.treeView = {
     }else if(haveKeywords!=-1){
       props.AppendElement(aserv.getAtom("makeItBlue"));
     }
-    //TOFIX: if it's red or blue already, just curve, otherwise make it olive
+    //if it's red or blue already, just curve, otherwise make it olive
     if(com.wuxuan.fromwheretowhere.sb.urls.indexOf(this.visibleData[row].url)!=-1){
       if(haveKeywords!=-1 || pid==pub.retrievedId){
 	props.AppendElement(aserv.getAtom("makeItCurve"));
