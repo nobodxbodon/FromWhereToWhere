@@ -161,7 +161,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   };
   
   //only use "order by" if have to, 50x speed up
-  pub.getPlaceIdfromId = function(id){
+  /*pub.getPlaceIdfromId = function(id){
     var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
 					    where id==:id");
     statement.params.id=id;
@@ -174,7 +174,7 @@ com.wuxuan.fromwheretowhere.main = function(){
       lastid = pub.queryOne(statement, 32, 0);
     }
     return lastid;
-  };
+  };*/
   
   pub.getIdfromPlaceId = function(pid){
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
@@ -206,7 +206,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryAll(statement, 32, 0);
   };
   
-  pub.getParentIdsfromPlaceid = function(retrievedId){
+  /*pub.getParentIdsfromPlaceid = function(retrievedId){
     if(!retrievedId) {
       return null;
     }
@@ -215,8 +215,37 @@ com.wuxuan.fromwheretowhere.main = function(){
 						place_id=:id and from_visit!=0");
     statement.params.id=retrievedId;
     return pub.queryAll(statement, 32, 0);
-  };
+  };*/
   //sqlite operations finish
+  
+  pub.getParentPlaceidsfromPlaceid = function(pid){
+    var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
+					    where id IN (SELECT from_visit FROM moz_historyvisits where \
+						place_id==:id and from_visit!=0)");
+    statement.params.id=pid;
+    var pids = pub.queryAll(statement, 32, 0);
+    if(!pids){
+      var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
+						place_id=:id and from_visit!=0");
+      statement.params.id=pid;
+      var placeids = pub.queryAll(statement, 32, 0);
+      if(!placeids){
+	return null;
+      } else {
+	for(var i in placeids){
+	  var statement1 = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
+					    where id<=:id \
+					    order by -id");
+	  statement1.params.id=placeids[i];
+	  var thispid = pub.queryOne(statement1, 32, 0);
+	  if(thispid){
+	    pids.push(thispid);
+	  }
+	}
+      }
+    }
+    return pids;
+  };
   
   // Main Datastructure for each Node
   pub.ReferedHistoryNode = function(id, placeId, label, url, isContainer, isFolded, children, level) {
@@ -406,7 +435,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
   pub.allKnownParentPids = [];
   
   //return all the top ancesters of a placeid, and add to allKnownParents
-  pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids){
+  /*pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids){
     var tops = [];
     //if it's its own ancester, still display it
     if(knownParentPids.indexOf(pid)!=-1){
@@ -428,6 +457,35 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
 	  if(pub.allKnownParentPids.indexOf(placeId)==-1){
 	    pub.allKnownParentPids.push(placeId);
 	    var anc=pub.getAllAncestorsfromPlaceid(placeId, knownParentPids);
+	    for(var k in anc){
+	      tops=pub.addInArrayNoDup(anc[k],tops);
+	    }
+	  }
+        }
+      }
+    }
+    return tops;
+  };*/
+  
+  pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids){
+    var tops = [];
+    //if it's its own ancester, still display it
+    if(knownParentPids.indexOf(pid)!=-1){
+      tops=pub.addInArrayNoDup(pid,tops);
+    }else{
+      knownParentPids.push(pid);
+      var pParentPids = pub.getParentPlaceidsfromPlaceid(pid);
+      if(!pParentPids || pParentPids.length==0){
+        if(pub.allKnownParentPids.indexOf(pid)==-1){
+	  pub.allKnownParentPids.push(pid);
+        }
+        tops.push(pid);
+      } else {
+	//if multiple ancestors, latest first
+        for(var j=pParentPids.length-1;j>=0;j--){
+	  if(pub.allKnownParentPids.indexOf(pParentPids[j])==-1){
+	    pub.allKnownParentPids.push(pParentPids[j]);
+	    var anc=pub.getAllAncestorsfromPlaceid(pParentPids[j], knownParentPids);
 	    for(var k in anc){
 	      tops=pub.addInArrayNoDup(anc[k],tops);
 	    }
