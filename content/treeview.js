@@ -160,22 +160,6 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryOne(statement, 64, 0);
   };
   
-  //only use "order by" if have to, 50x speed up
-  /*pub.getPlaceIdfromId = function(id){
-    var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
-					    where id==:id");
-    statement.params.id=id;
-    var lastid = pub.queryOne(statement, 32, 0);
-    if(!lastid){
-      var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
-					    where id<=:id \
-					    order by -id");
-      statement.params.id=id;
-      lastid = pub.queryOne(statement, 32, 0);
-    }
-    return lastid;
-  };*/
-  
   pub.getIdfromPlaceId = function(pid){
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
 					    where place_id=:id");
@@ -205,17 +189,6 @@ com.wuxuan.fromwheretowhere.main = function(){
     var statement = pub.mDBConn.createStatement(term);
     return pub.queryAll(statement, 32, 0);
   };
-  
-  /*pub.getParentIdsfromPlaceid = function(retrievedId){
-    if(!retrievedId) {
-      return null;
-    }
-    //if from_visit==0, not navigate from any link, or visit_type is 2 or 3(it's not from some url) 
-    var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
-						place_id=:id and from_visit!=0");
-    statement.params.id=retrievedId;
-    return pub.queryAll(statement, 32, 0);
-  };*/
   //sqlite operations finish
   
   pub.getParentPlaceidsfromPlaceid = function(pid){
@@ -435,38 +408,6 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
   pub.allKnownParentPids = [];
   
   //return all the top ancesters of a placeid, and add to allKnownParents
-  /*pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids){
-    var tops = [];
-    //if it's its own ancester, still display it
-    if(knownParentPids.indexOf(pid)!=-1){
-      tops=pub.addInArrayNoDup(pid,tops);
-    }else{
-      knownParentPids.push(pid);
-      var pParentIds = pub.getParentIdsfromPlaceid(pid);
-      if(!pParentIds || pParentIds.length==0){
-        if(pub.allKnownParentPids.indexOf(pid)==-1){
-	  pub.allKnownParentPids.push(pid);
-        }
-        tops.push(pid);
-      } else {
-	//if multiple ancestors, latest first
-        for(var j=pParentIds.length-1;j>=0;j--){
-	  //var start = (new Date()).getTime();
-	  var placeId = pub.getPlaceIdfromId(pParentIds[j]);
-	  //pub.getancesterCounts +=(new Date()).getTime()-start;
-	  if(pub.allKnownParentPids.indexOf(placeId)==-1){
-	    pub.allKnownParentPids.push(placeId);
-	    var anc=pub.getAllAncestorsfromPlaceid(placeId, knownParentPids);
-	    for(var k in anc){
-	      tops=pub.addInArrayNoDup(anc[k],tops);
-	    }
-	  }
-        }
-      }
-    }
-    return tops;
-  };*/
-  
   pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids){
     var tops = [];
     //if it's its own ancester, still display it
