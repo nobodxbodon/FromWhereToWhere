@@ -46,7 +46,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   
   /*type = 32, getInt32; type = 64, getInt64; type = "str", getString */
   pub.queryOne = function(statement, type, idx) {
-    var id = [];
+    var id = null;
     try {
       if (statement.executeStep()) {
 	if(type == "str") {
@@ -197,13 +197,13 @@ com.wuxuan.fromwheretowhere.main = function(){
 						place_id==:id and from_visit!=0)");
     statement.params.id=pid;
     var pids = pub.queryAll(statement, 32, 0);
-    if(!pids){
+    if(pids.length==0){
       var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
 						place_id=:id and from_visit!=0");
       statement.params.id=pid;
       var placeids = pub.queryAll(statement, 32, 0);
-      if(!placeids){
-	return null;
+      if(placeids.length==0){
+	return [];
       } else {
 	for(var i in placeids){
 	  var statement1 = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
@@ -416,7 +416,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     }else{
       knownParentPids.push(pid);
       var pParentPids = pub.getParentPlaceidsfromPlaceid(pid);
-      if(!pParentPids || pParentPids.length==0){
+      if(pParentPids.length==0){
         if(pub.allKnownParentPids.indexOf(pid)==-1){
 	  pub.allKnownParentPids.push(pid);
         }
