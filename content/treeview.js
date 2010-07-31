@@ -191,12 +191,17 @@ com.wuxuan.fromwheretowhere.main = function(){
   };
   //sqlite operations finish
   
+  //pub.timestats1 = 0;
+  //pub.timestats2 = 0;
   pub.getParentPlaceidsfromPlaceid = function(pid){
+    //var start = (new Date()).getTime();
+    //as id!=0, from_visit=0 doesn't matter
     var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
 					    where id IN (SELECT from_visit FROM moz_historyvisits where \
-						place_id==:id and from_visit!=0)");
+						place_id==:id)");
     statement.params.id=pid;
     var pids = pub.queryAll(statement, 32, 0);
+    //pub.timestats1+=(new Date()).getTime()-start;
     if(pids.length==0){
       var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
 						place_id=:id and from_visit!=0");
@@ -206,14 +211,28 @@ com.wuxuan.fromwheretowhere.main = function(){
 	return [];
       } else {
 	for(var i in placeids){
-	  var statement1 = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
-					    where id<=:id \
-					    order by -id");
-	  statement1.params.id=placeids[i];
-	  var thispid = pub.queryOne(statement1, 32, 0);
-	  if(thispid){
-	    pids.push(thispid);
+	  //start = (new Date()).getTime();
+	  var rangeStart = 0;
+	  var rangeEnd = 10;
+	  var initInterval = 10;
+	  //limit the range of "order by". Should break far before 10, just in case
+	  for(var j=0;j<10;j++){
+	    var statement1 = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
+					    where id<=:id-:start and id>:id-:end \
+					    order by -id limit 1");
+	    statement1.params.id=placeids[i];
+	    statement1.params.start=rangeStart;
+	    statement1.params.end=rangeEnd;
+	    var thispid = pub.queryOne(statement1, 32, 0);
+	    if(thispid){
+	      pids.push(thispid);
+	      break;
+	    }
+	    initInterval = initInterval * 3;
+	    rangeStart = rangeEnd;
+	    rangeEnd += initInterval;
 	  }
+	  //pub.timestats2+=(new Date()).getTime()-start;
 	}
       }
     }
@@ -785,6 +804,7 @@ pub.treeView = {
   pub.showTopNodesThread.prototype = {
     run: function() {
       try {
+	//alert(pub.timestats1 + "  " + pub.timestats2);
         //refresh tree, remove all visibledata and add new ones
         pub.treeView.delSuspensionPoints(-1);
         if(this.words.length==0){
