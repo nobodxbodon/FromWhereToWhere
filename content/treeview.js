@@ -191,8 +191,6 @@ com.wuxuan.fromwheretowhere.main = function(){
   };
   //sqlite operations finish
   
-  //pub.timestats1 = 0;
-  //pub.timestats2 = 0;
   pub.getParentPlaceidsfromPlaceid = function(pid){
     //var start = (new Date()).getTime();
     //as id!=0, from_visit=0 doesn't matter
@@ -211,7 +209,6 @@ com.wuxuan.fromwheretowhere.main = function(){
 	return [];
       } else {
 	for(var i in placeids){
-	  //start = (new Date()).getTime();
 	  var rangeStart = 0;
 	  var rangeEnd = 10;
 	  var initInterval = 10;
@@ -232,7 +229,6 @@ com.wuxuan.fromwheretowhere.main = function(){
 	    rangeStart = rangeEnd;
 	    rangeEnd += initInterval;
 	  }
-	  //pub.timestats2+=(new Date()).getTime()-start;
 	}
       }
     }
@@ -804,7 +800,6 @@ pub.treeView = {
   pub.showTopNodesThread.prototype = {
     run: function() {
       try {
-	//alert(pub.timestats1 + "  " + pub.timestats2);
         //refresh tree, remove all visibledata and add new ones
         pub.treeView.delSuspensionPoints(-1);
         if(this.words.length==0){
