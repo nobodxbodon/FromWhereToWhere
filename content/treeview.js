@@ -79,25 +79,27 @@ com.wuxuan.fromwheretowhere.main = function(){
   };
     
   /* as ids are sorted, just get the next larger rowid */
-  pub.getNextLargerId = function(id) {
+  /*pub.getNextLargerId = function(id) {
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
 					    where id>:id");// limit 1
     statement.params.id=id;
     return pub.queryOne(statement, 32, 0);
-  };
+  };*/
   
   pub.getChildren = function(parentId) {
-    var nextId = pub.getNextLargerId(parentId);
+    //var nextId = pub.getNextLargerId(parentId);
 
-    var statement;
-    if(nextId!=null && nextId!=parentId+1){
+    var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=:id and from_visit< \
+						(SELECT id FROM moz_historyvisits where id>:id limit 1)");
+      statement.params.id=parentId;
+    /*if(nextId!=null && nextId!=parentId+1){
       statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=:id and from_visit<:nextid");
       statement.params.id=parentId;
       statement.params.nextid=nextId;
     } else {
       statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit=:id");
       statement.params.id=parentId;
-    }
+    }*/
     return pub.queryAll(statement, 32, 0);
   };
   
@@ -109,11 +111,17 @@ com.wuxuan.fromwheretowhere.main = function(){
     return ls;
   };
   
+  pub.timestats1=0;
   /* placeId: the placeId of the parent, which is unique even when this url is visited multiple times
     retrievedId: the id of the child, which correspond to the current url only
     TOOPT: use pure SQL instead of concat and dupcheck*/
   pub.getAllChildrenfromPlaceId = function(placeId) {
+    var start = (new Date()).getTime();
     var potentialchildren = [];
+    /*var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=thisid and from_visit<\
+						(SELECT id FROM moz_historyvisits where id>thisid limit 1) where thisid IN \
+						(SELECT id FROM moz_historyvisits where place_id=:pid)");
+      statement.params.pid=placeId;*/
     var ids = pub.getAllIdfromPlaceId(placeId);
     
     for(var j = 0; j<ids.length; j++) {
@@ -122,6 +130,8 @@ com.wuxuan.fromwheretowhere.main = function(){
 	potentialchildren = pub.addInArrayNoDup(newChildren[i], potentialchildren);
       }
     }
+    //potentialchildren = pub.queryAll(statement, 32, 0);
+    pub.timestats1+=(new Date()).getTime()-start;
     return potentialchildren;
   };
       
@@ -190,16 +200,14 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryAll(statement, 32, 0);
   };
   //sqlite operations finish
-  
+
   pub.getParentPlaceidsfromPlaceid = function(pid){
-    //var start = (new Date()).getTime();
     //as id!=0, from_visit=0 doesn't matter
     var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
 					    where id IN (SELECT from_visit FROM moz_historyvisits where \
 						place_id==:id)");
     statement.params.id=pid;
     var pids = pub.queryAll(statement, 32, 0);
-    //pub.timestats1+=(new Date()).getTime()-start;
     if(pids.length==0){
       var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
 						place_id=:id and from_visit!=0");
@@ -348,6 +356,7 @@ pub.mainThread = function(threadID, item, idx) {
 pub.mainThread.prototype = {
   run: function() {
     try {
+      alert(pub.timestats1);
       // This is where we react to the completion of the working thread.
       pub.alreadyExpandedPids = [];
       pub.treeView.delSuspensionPoints(this.idx);
