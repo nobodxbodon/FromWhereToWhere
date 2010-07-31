@@ -78,28 +78,11 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryAll(statement, 32, 0);
   };
     
-  /* as ids are sorted, just get the next larger rowid */
-  /*pub.getNextLargerId = function(id) {
-    var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
-					    where id>:id");// limit 1
-    statement.params.id=id;
-    return pub.queryOne(statement, 32, 0);
-  };*/
-  
   pub.getChildren = function(parentId) {
-    //var nextId = pub.getNextLargerId(parentId);
-
+    //all from_visit between id and next larger id are the same
     var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=:id and from_visit< \
 						(SELECT id FROM moz_historyvisits where id>:id limit 1)");
-      statement.params.id=parentId;
-    /*if(nextId!=null && nextId!=parentId+1){
-      statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=:id and from_visit<:nextid");
-      statement.params.id=parentId;
-      statement.params.nextid=nextId;
-    } else {
-      statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit=:id");
-      statement.params.id=parentId;
-    }*/
+    statement.params.id=parentId;
     return pub.queryAll(statement, 32, 0);
   };
   
@@ -111,12 +94,12 @@ com.wuxuan.fromwheretowhere.main = function(){
     return ls;
   };
   
-  pub.timestats1=0;
+  //pub.timestats1=0;
   /* placeId: the placeId of the parent, which is unique even when this url is visited multiple times
     retrievedId: the id of the child, which correspond to the current url only
     TOOPT: use pure SQL instead of concat and dupcheck*/
   pub.getAllChildrenfromPlaceId = function(placeId) {
-    var start = (new Date()).getTime();
+    //var start = (new Date()).getTime();
     var potentialchildren = [];
     /*var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=thisid and from_visit<\
 						(SELECT id FROM moz_historyvisits where id>thisid limit 1) where thisid IN \
@@ -131,7 +114,7 @@ com.wuxuan.fromwheretowhere.main = function(){
       }
     }
     //potentialchildren = pub.queryAll(statement, 32, 0);
-    pub.timestats1+=(new Date()).getTime()-start;
+    //pub.timestats1+=(new Date()).getTime()-start;
     return potentialchildren;
   };
       
@@ -356,7 +339,7 @@ pub.mainThread = function(threadID, item, idx) {
 pub.mainThread.prototype = {
   run: function() {
     try {
-      alert(pub.timestats1);
+      //alert(pub.timestats1);
       // This is where we react to the completion of the working thread.
       pub.alreadyExpandedPids = [];
       pub.treeView.delSuspensionPoints(this.idx);
