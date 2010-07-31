@@ -408,11 +408,14 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
   pub.allKnownParentPids = [];
   
   //return all the top ancesters of a placeid, and add to allKnownParents
-  pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids){
+  pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids, parentNumber){
     var tops = [];
     //if it's its own ancester, still display it
     if(knownParentPids.indexOf(pid)!=-1){
-      tops=pub.addInArrayNoDup(pid,tops);
+      //if there's only one parent, the link circle is closed from pid
+      if(parentNumber==1){
+	tops=pub.addInArrayNoDup(pid,tops);
+      }
     }else{
       knownParentPids.push(pid);
       var pParentPids = pub.getParentPlaceidsfromPlaceid(pid);
@@ -423,10 +426,11 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
         tops.push(pid);
       } else {
 	//if multiple ancestors, latest first
-        for(var j=pParentPids.length-1;j>=0;j--){
+	var parentNum = pParentPids.length;
+        for(var j=parentNum-1;j>=0;j--){
 	  if(pub.allKnownParentPids.indexOf(pParentPids[j])==-1){
 	    pub.allKnownParentPids.push(pParentPids[j]);
-	    var anc=pub.getAllAncestorsfromPlaceid(pParentPids[j], knownParentPids);
+	    var anc=pub.getAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum);
 	    for(var k in anc){
 	      tops=pub.addInArrayNoDup(anc[k],tops);
 	    }
@@ -444,7 +448,7 @@ pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().main
     var ancPids = [];
     //order by time: latest first by default
     for(var i=pids.length-1; i>=0; i--){
-      var anc = pub.getAllAncestorsfromPlaceid(pids[i],[]);
+      var anc = pub.getAllAncestorsfromPlaceid(pids[i],[],0);
       for(var j in anc){
         ancPids = pub.addInArrayNoDup(anc[j],ancPids);
       }
