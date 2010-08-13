@@ -11,6 +11,8 @@ if(!com.wuxuan.fromwheretowhere)
 com.wuxuan.fromwheretowhere.main = function(){
   var pub={};
 
+  var devOptions=false;
+  
   var nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
     
   //sqlite operations:
@@ -275,6 +277,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     }
   };
 
+  //TODO: reg expr instead
   pub.splitWithSpaces = function(myString) {
     var words = myString.split(" ");
     for(var i=0; i<words.length; i++){
@@ -285,7 +288,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     }
     return words;
   };
-
+  
   // Utils functions finish
   pub.mDBConn = pub.openPlacesDatabase();
   
@@ -527,10 +530,11 @@ pub.treeView = {
   isEditable: function(idx, column)  { return false; },  
   
   getParentIndex: function(idx) {  
-    if (this.isContainer(idx)) return -1;  
+    //if (this.isContainer(idx)) return -1;  
     for (var t = idx - 1; t >= 0 ; t--) {  
-      if (this.isContainer(t)) return t;  
+      if (this.visibleData[t].level<this.visibleData[idx].level) return t;  
     }
+    return -1;
   },  
   getLevel: function(idx) {
     if(this.visibleData[idx]){
@@ -637,6 +641,12 @@ pub.treeView = {
       } else {
 	props.AppendElement(aserv.getAtom("makeItOlive"));
 	props.AppendElement(aserv.getAtom("makeItCurve"));
+      }
+    }
+    if(devOptions){
+      var pIdx = this.getParentIndex(row);
+      if(pIdx!=-1 && this.visibleData[row].label==this.visibleData[pIdx].label){
+	props.AppendElement(aserv.getAtom("makeItSmall"));
       }
     }
   },
@@ -755,7 +765,21 @@ pub.treeView = {
   pub.searchThread.prototype = {
     run: function() {
       try {
-        var words = pub.splitWithSpaces(this.keywords);
+	/* get quoted words first, treat them as a whole word */
+    	var reg = /\"([\s|\w|\W]+)\"/g;
+	var quotes = this.keywords.match(reg);
+	var quotedWords = [];
+	for(var i in quotes){
+	  quotedWords.push(quotes[i].substring(1,quotes[i].length-1));
+	}
+	var words = [];
+	if(!quotes){
+	  words = pub.splitWithSpaces(this.keywords);
+	} else {
+	  words = pub.splitWithSpaces(this.keywords.replace(reg, ""));
+	}
+	//put quoted words at the end, which will be the first to search from, more likely to reduce results
+	words = words.concat(quotedWords);
         var topNodes = [];
         if(words.length!=0){
           var allpids = [];
