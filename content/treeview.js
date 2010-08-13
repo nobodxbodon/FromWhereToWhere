@@ -14,7 +14,12 @@ com.wuxuan.fromwheretowhere.main = function(){
   var devOptions=false;
   
   var nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
-    
+  var ios = Components.classes["@mozilla.org/network/io-service;1"].
+	        getService(Components.interfaces.nsIIOService);
+  var fis = Components.classes["@mozilla.org/browser/favicon-service;1"].
+		getService(Components.interfaces.nsIFaviconService);
+  var aserv=Components.classes["@mozilla.org/atom-service;1"].
+                getService(Components.interfaces.nsIAtomService);
   //sqlite operations:
 
   pub.openPlacesDatabase = function(){
@@ -160,6 +165,11 @@ com.wuxuan.fromwheretowhere.main = function(){
 					    where place_id=:id");
     statement.params.id=pid;
     return pub.queryOne(statement, 32, 0);
+  };
+  
+  pub.getImagefromUrl = function(url){
+    var uri = ios.newURI(url, null, null);
+    return fis.getFaviconImageForPage(uri).spec;
   };
   
   pub.searchIdbyKeywords = function(words){
@@ -612,7 +622,12 @@ pub.treeView = {
     this.treeBox.invalidateRow(idx);  
   },  
   
-  getImageSrc: function(idx, column) {},  
+  getImageSrc: function(idx, column) {
+    if(column.id == "element") {
+      return pub.getImagefromUrl(this.visibleData[idx].url);
+    }
+  },
+  
   getProgressMode : function(idx,column) {},  
   getCellValue: function(idx, column) {},  
   cycleHeader: function(col, elem) {},  
@@ -625,8 +640,6 @@ pub.treeView = {
   getCellProperties: function(row,col,props){
     var pid = this.visibleData[row].placeId;
     var haveKeywords = pub.pidwithKeywords.indexOf(pid);
-    var aserv=Components.classes["@mozilla.org/atom-service;1"].
-                getService(Components.interfaces.nsIAtomService);
     //CAN'T alert here!
     //in case pid is null, which means new imported nodes
     if(pid && pid==pub.retrievedId){
