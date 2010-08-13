@@ -168,8 +168,10 @@ com.wuxuan.fromwheretowhere.main = function(){
   };
   
   pub.getImagefromUrl = function(url){
-    var uri = ios.newURI(url, null, null);
-    return fis.getFaviconImageForPage(uri).spec;
+    try{
+      var uri = ios.newURI(url, null, null);
+      return fis.getFaviconImageForPage(uri).spec;
+    }catch(e){}
   };
   
   pub.searchIdbyKeywords = function(words){
