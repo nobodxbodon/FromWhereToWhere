@@ -174,22 +174,31 @@ com.wuxuan.fromwheretowhere.main = function(){
     }catch(e){}
   };
   
-  pub.searchIdbyKeywords = function(words){
+  pub.searchIdbyKeywords = function(words, excluded){
     //SELECT * FROM moz_places where title LIKE '%sqlite%';
     //NESTED in reverse order, with the assumption that the word in front is more frequently used, thus return more items in each SELECT
     var term = "";
-    var subterm = "";
-  
+    var excludeTerm = "moz_places";
+    if(excluded.length!=0){
+      for(var i = excluded.length-1; i>=0; i--){
+        if(i==excluded.length-1){
+          excludeTerm = "(SELECT * FROM " + excludeTerm + " WHERE TITLE NOT LIKE '%" + excluded[i] + "%')";
+        } else {
+          excludeTerm = "(SELECT * FROM " + excludeTerm + " WHERE TITLE NOT LIKE '%" + excluded[i] + "%')";
+        }
+      }
+    }
+    
     if(words.length==1){
-      term = "SELECT id FROM moz_places WHERE TITLE LIKE '%" + words[0] + "%'";
+      term = "SELECT id FROM " + excludeTerm + " WHERE TITLE LIKE '%" + words[0] + "%'";
     } else {
       for(var i = words.length-1; i>=0; i--){
         if(i==words.length-1){
-          subterm = "SELECT * FROM moz_places WHERE TITLE LIKE '%" + words[i] + "%'";
+          term = "SELECT * FROM " + excludeTerm + " WHERE TITLE LIKE '%" + words[i] + "%'";
         } else if(i!=0){
-          subterm = "SELECT * FROM (" + subterm + ") WHERE TITLE LIKE '%" + words[i] + "%'";
+          term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE '%" + words[i] + "%'";
         } else {
-          term = "SELECT id FROM (" + subterm + ") WHERE TITLE LIKE '%" + words[i] + "%'";
+          term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE '%" + words[i] + "%'";
         }
       }
     }
@@ -772,40 +781,28 @@ pub.treeView = {
   
   pub.pidwithKeywords = [];
   
-  pub.searchThread = function(threadID, keywords) {
+  pub.searchThread = function(threadID, keywords, words, excluded) {
     this.threadID = threadID;
     this.keywords = keywords;
+    this.words = words;
+    this.excluded = excluded;
   };
   
   pub.searchThread.prototype = {
     run: function() {
       try {
-	/* get quoted words first, treat them as a whole word */
-    	var reg = /\"([\s|\w|\W]+)\"/g;
-	var quotes = this.keywords.match(reg);
-	var quotedWords = [];
-	for(var i in quotes){
-	  quotedWords.push(quotes[i].substring(1,quotes[i].length-1));
-	}
-	var words = [];
-	if(!quotes){
-	  words = pub.splitWithSpaces(this.keywords);
-	} else {
-	  words = pub.splitWithSpaces(this.keywords.replace(reg, ""));
-	}
-	//put quoted words at the end, which will be the first to search from, more likely to reduce results
-	words = words.concat(quotedWords);
+	
         var topNodes = [];
-        if(words.length!=0){
+        if(this.words.length!=0){
           var allpids = [];
           // improve by search id from keywords directly instead of getting urls first
-          allpids = pub.searchIdbyKeywords(words);
+          allpids = pub.searchIdbyKeywords(this.words, this.excluded);
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.createParentNodesCheckDup(allpids);
         }
 
 	
-        pub.showTopNodes.dispatch(new pub.showTopNodesThread(this.threadID, topNodes, this.keywords, words),
+        pub.showTopNodes.dispatch(new pub.showTopNodesThread(this.threadID, topNodes, this.keywords, this.words),
           pub.searchThread.DISPATCH_NORMAL);
       } catch(err) {
         Components.utils.reportError(err);
@@ -869,7 +866,40 @@ pub.treeView = {
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
     pub.treeView.addSuspensionPoints(-1, -1);
     var keywords = document.getElementById("keywords").value;
-    pub.searchBackground.dispatch(new pub.searchThread(1, keywords), pub.searchBackground.DISPATCH_NORMAL);
+    var origkeywords = keywords;
+    var excludePreciseReg = /-\"([\s|\w|\W]+)\"/g;
+    var excludeQuotes = keywords.match(excludePreciseReg);
+    var quotedWords = [];
+    var excluded = [];
+    //get all the excluded and quoted keywords, remove them
+    for(var i in excludeQuotes){
+      excluded.push(excludeQuotes[i].substring(2,excludeQuotes[i].length-1));
+    }
+    if(excludeQuotes){
+      keywords = keywords.replace(excludePreciseReg, "");
+    }
+    var quoteReg = /\"([\s|\w|\W]+)\"/g;
+    var quotes = keywords.match(quoteReg);
+    for(var i in quotes){
+      quotedWords.push(quotes[i].substring(1,quotes[i].length-1));
+    }
+    var words = [];
+    if(!quotes){
+      words = pub.splitWithSpaces(keywords);
+    } else {
+      words = pub.splitWithSpaces(keywords.replace(quoteReg, ""));
+    }
+    //put quoted words at the end, which will be the first to search from, more likely to reduce results
+	
+    for(var i in words){
+      if(words[i][0]=='-'){
+        excluded.push(words[i].substring(1));
+        words.splice(i,1);
+      }
+    }
+    words = words.concat(quotedWords);
+    //alert(words+" ||||| "+excluded);
+    pub.searchBackground.dispatch(new pub.searchThread(1, origkeywords, words, excluded), pub.searchBackground.DISPATCH_NORMAL);
       
   };
   
