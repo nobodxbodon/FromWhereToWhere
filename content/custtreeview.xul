@@ -7,7 +7,7 @@
   
 <popupset>
   <menupopup id="clipmenu" onpopupshowing="com.wuxuan.fromwheretowhere.main.showMenuItems()">
-    <menuitem label="&contextMenu.openinnewtab;" oncommand="com.wuxuan.fromwheretowhere.main.openlink()"/>
+    <menuitem id="openinnewtab" label="&contextMenu.openinnewtab;" oncommand="com.wuxuan.fromwheretowhere.main.openlink()"/>
     <menuitem id="local" label="&contextMenu.openlocalcopy;" oncommand="com.wuxuan.fromwheretowhere.main.openlocal()"/>
     <menuitem id="property" label="&contextMenu.property;" oncommand="com.wuxuan.fromwheretowhere.main.property()"/>
     <menuitem id="importNodes" label="&contextMenu.importNodes;" oncommand="com.wuxuan.fromwheretowhere.main.importNodes()"/>
@@ -29,6 +29,7 @@
 </tree>  
 
 <script src="sbconnect.js" />
+<script src="utils.js" />
 <script src="treeview.js" />
 
 </window>  
