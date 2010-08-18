@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <script type="text/javascript" src="Builder.js"></script>
+    <script type="text/javascript" src="More.js"></script>
+    <script type="text/javascript" src="Simple.js"></script>
+    <script type="text/javascript" src="../content/utils.js"></script>
+  </head>
+  <body>
+    <pre id="test">
+      <script type="text/javascript">
+      	plan({ tests: 6 });
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").words, ["sqlite"], "getIncludeExcluded");
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").excluded, [], "getIncludeExcluded");
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -firefox").excluded, ["firefox"], "getIncludeExcluded");
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"google\"").excluded, ["google"], "getIncludeExcluded");
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -g1 -g2").excluded, ["g1","g2"], "getIncludeExcluded");
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"g1 g2\"").excluded, ["g1 g2"], "getIncludeExcluded");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"g1 g2\" -g3").excluded, ["g1 g2","g3"], "getIncludeExcluded");
+        //isDeeply([1,2].concat([3,4]), [1,2,3,4], "concat");
+      </script>
+    </pre>
+  </body>
+</html>
