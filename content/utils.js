@@ -43,7 +43,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
   
   pub.getIncludeExcluded = function(keywords){
     var origkeywords = keywords;
-    var excludePreciseReg = /-\"([\s|\w|\W]+)\"/g;
+    var excludePreciseReg = /-\"([\s|\w|\W]*)\"/g;
     var excludeQuotes = keywords.match(excludePreciseReg);
     var quotedWords = [];
     var excluded = [];
@@ -54,7 +54,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
     if(excludeQuotes){
       keywords = keywords.replace(excludePreciseReg, "");
     }
-    var quoteReg = /\"([\s|\w|\W]+)\"/g;
+    var quoteReg = /\"([\s|\w|\W]*)\"/g;
     var quotes = keywords.match(quoteReg);
     for(var i in quotes){
       quotedWords.push(quotes[i].substring(1,quotes[i].length-1));

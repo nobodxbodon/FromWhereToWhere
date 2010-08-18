@@ -825,7 +825,6 @@ pub.treeView = {
     pub.treeView.addSuspensionPoints(-1, -1);
     var keywords = document.getElementById("keywords").value;
     var w = com.wuxuan.fromwheretowhere.utils.getIncludeExcluded(keywords);
-    //alert(words+" ||||| "+excluded);
     pub.searchBackground.dispatch(new pub.searchThread(1, w.origkeywords, w.words, w.excluded), pub.searchBackground.DISPATCH_NORMAL);
       
   };
