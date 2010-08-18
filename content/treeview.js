@@ -12,18 +12,11 @@ com.wuxuan.fromwheretowhere.main = function(){
   var pub={};
 
   var devOptions=false;
-  
-  var nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
-  var ios = Components.classes["@mozilla.org/network/io-service;1"].
-	        getService(Components.interfaces.nsIIOService);
-  var fis = Components.classes["@mozilla.org/browser/favicon-service;1"].
-		getService(Components.interfaces.nsIFaviconService);
-  var aserv=Components.classes["@mozilla.org/atom-service;1"].
-                getService(Components.interfaces.nsIAtomService);
+
   //sqlite operations:
 
   pub.openPlacesDatabase = function(){
-       var db = Components.classes["@mozilla.org/browser/nav-history-service;1"].  
+    var db = Components.classes["@mozilla.org/browser/nav-history-service;1"].  
                       getService(Components.interfaces.nsPIPlacesDatabase).DBConnection;  
     return db;
   };
@@ -169,8 +162,8 @@ com.wuxuan.fromwheretowhere.main = function(){
   
   pub.getImagefromUrl = function(url){
     try{
-      var uri = ios.newURI(url, null, null);
-      return fis.getFaviconImageForPage(uri).spec;
+      var uri = pub.ios.newURI(url, null, null);
+      return pub.fis.getFaviconImageForPage(uri).spec;
     }catch(e){}
   };
   
@@ -272,42 +265,12 @@ com.wuxuan.fromwheretowhere.main = function(){
     return node;
   };
   
-  // Utils functions from here
-  pub.cloneObject = function(obj){
-    var clone = (obj instanceof Array) ? [] : {};;
-    for(var i in obj) {
-      if(typeof(obj[i])=="object")
-        clone[i] = pub.cloneObject(obj[i]);
-      else
-        clone[i] = obj[i];
-    }
-    return clone;
-  };
-
-  pub.formatDate = function(intDate) {
-    var myDate = new Date(intDate/1000);
-    var formated = myDate.toLocaleString();
-    return formated;
-  };
-
   pub.getURLfromNode = function(treeView) {
     var sel = treeView.selection;
     var node = treeView.visibleData[sel.currentIndex];
     if(node){
       window.open(node.url);
     }
-  };
-
-  //TODO: reg expr instead
-  pub.splitWithSpaces = function(myString) {
-    var words = myString.split(" ");
-    for(var i=0; i<words.length; i++){
-      if(words[i]==''){
-        words.splice(i, 1);
-        i--;
-      }
-    }
-    return words;
   };
   
   // Utils functions finish
@@ -382,8 +345,6 @@ pub.mainThread.prototype = {
   }
 };
 
-pub.background = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(0);
-pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 
   pub.allChildrenfromPid = function(parentNode) {
     parentNode.isFolded = true;
@@ -530,7 +491,7 @@ pub.treeView = {
       } else if (column.id == "url") {
 	return this.visibleData[idx].url;
       } else if (column.id == "date") {
-        return pub.formatDate(pub.getFirstDatefromPid(this.visibleData[idx].placeId));
+        return com.wuxuan.fromwheretowhere.utils.formatDate(pub.getFirstDatefromPid(this.visibleData[idx].placeId));
       }else {
         return "NotDefined";
       }
@@ -654,23 +615,23 @@ pub.treeView = {
     //CAN'T alert here!
     //in case pid is null, which means new imported nodes
     if(pid && pid==pub.retrievedId){
-      props.AppendElement(aserv.getAtom("makeItRed"));
+      props.AppendElement(pub.aserv.getAtom("makeItRed"));
     }else if(haveKeywords!=-1){
-      props.AppendElement(aserv.getAtom("makeItBlue"));
+      props.AppendElement(pub.aserv.getAtom("makeItBlue"));
     }
     //if it's red or blue already, just curve, otherwise make it olive
     if(com.wuxuan.fromwheretowhere.sb.urls.indexOf(this.visibleData[row].url)!=-1){
       if(haveKeywords!=-1 || pid==pub.retrievedId){
-	props.AppendElement(aserv.getAtom("makeItCurve"));
+	props.AppendElement(pub.aserv.getAtom("makeItCurve"));
       } else {
-	props.AppendElement(aserv.getAtom("makeItOlive"));
-	props.AppendElement(aserv.getAtom("makeItCurve"));
+	props.AppendElement(pub.aserv.getAtom("makeItOlive"));
+	props.AppendElement(pub.aserv.getAtom("makeItCurve"));
       }
     }
     if(devOptions){
       var pIdx = this.getParentIndex(row);
       if(pIdx!=-1 && this.visibleData[row].label==this.visibleData[pIdx].label){
-	props.AppendElement(aserv.getAtom("makeItSmall"));
+	props.AppendElement(pub.aserv.getAtom("makeItSmall"));
       }
     }
   },
@@ -749,9 +710,9 @@ pub.treeView = {
     for(var i in selectedIndex){
       var node = this.treeView.visibleData[selectedIndex[i]];
       //clean away id/pid from the node, as it's useless for other instances of FF
-      selected.push(pub.clearReferedHistoryNode(pub.cloneObject(node)));
+      selected.push(pub.clearReferedHistoryNode(com.wuxuan.fromwheretowhere.utils.cloneObject(node)));
     }
-    var json = nativeJSON.encode(selected);
+    var json = pub.nativeJSON.encode(selected);
     alert(json);
   };
   
@@ -760,7 +721,7 @@ pub.treeView = {
     var json = window.prompt("Please paste the nodes' property:", "[]");
     var newNodes = [];
     try{
-      newNodes = nativeJSON.decode(json);
+      newNodes = pub.nativeJSON.decode(json);
     }catch(err){
       if(json && json!="[]"){
 	alert("Input properties incomplete or corrupted:\n" + json);
@@ -859,47 +820,13 @@ pub.treeView = {
     }
   };
 
-  pub.searchBackground = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(1);
-  pub.showTopNodes = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
-
   pub.search = function() {
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
     pub.treeView.addSuspensionPoints(-1, -1);
     var keywords = document.getElementById("keywords").value;
-    var origkeywords = keywords;
-    var excludePreciseReg = /-\"([\s|\w|\W]+)\"/g;
-    var excludeQuotes = keywords.match(excludePreciseReg);
-    var quotedWords = [];
-    var excluded = [];
-    //get all the excluded and quoted keywords, remove them
-    for(var i in excludeQuotes){
-      excluded.push(excludeQuotes[i].substring(2,excludeQuotes[i].length-1));
-    }
-    if(excludeQuotes){
-      keywords = keywords.replace(excludePreciseReg, "");
-    }
-    var quoteReg = /\"([\s|\w|\W]+)\"/g;
-    var quotes = keywords.match(quoteReg);
-    for(var i in quotes){
-      quotedWords.push(quotes[i].substring(1,quotes[i].length-1));
-    }
-    var words = [];
-    if(!quotes){
-      words = pub.splitWithSpaces(keywords);
-    } else {
-      words = pub.splitWithSpaces(keywords.replace(quoteReg, ""));
-    }
-    //put quoted words at the end, which will be the first to search from, more likely to reduce results
-	
-    for(var i in words){
-      if(words[i][0]=='-'){
-        excluded.push(words[i].substring(1));
-        words.splice(i,1);
-      }
-    }
-    words = words.concat(quotedWords);
+    var w = com.wuxuan.fromwheretowhere.utils.getIncludeExcluded(keywords);
     //alert(words+" ||||| "+excluded);
-    pub.searchBackground.dispatch(new pub.searchThread(1, origkeywords, words, excluded), pub.searchBackground.DISPATCH_NORMAL);
+    pub.searchBackground.dispatch(new pub.searchThread(1, w.origkeywords, w.words, w.excluded), pub.searchBackground.DISPATCH_NORMAL);
       
   };
   
@@ -915,6 +842,19 @@ pub.treeView = {
   };
   
   pub.init = function() {
+      
+    pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
+    pub.ios = Components.classes["@mozilla.org/network/io-service;1"].
+	        getService(Components.interfaces.nsIIOService);
+    pub.fis = Components.classes["@mozilla.org/browser/favicon-service;1"].
+		getService(Components.interfaces.nsIFaviconService);
+    pub.aserv=Components.classes["@mozilla.org/atom-service;1"].
+                getService(Components.interfaces.nsIAtomService);
+		
+    pub.background = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(0);
+    pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
+    pub.searchBackground = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(1);
+    pub.showTopNodes = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     //add here to check the top level nodes
     com.wuxuan.fromwheretowhere.sb.urlInit();
     document.getElementById("elementList").view = pub.treeView;
