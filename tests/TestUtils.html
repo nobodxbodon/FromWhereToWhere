@@ -8,14 +8,17 @@
   <body>
     <pre id="test">
       <script type="text/javascript">
-      	plan({ tests: 6 });
-        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").words, ["sqlite"], "getIncludeExcluded");
-        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").excluded, [], "getIncludeExcluded");
-        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -firefox").excluded, ["firefox"], "getIncludeExcluded");
-        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"google\"").excluded, ["google"], "getIncludeExcluded");
-        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -g1 -g2").excluded, ["g1","g2"], "getIncludeExcluded");
-        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"g1 g2\"").excluded, ["g1 g2"], "getIncludeExcluded");
-	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"g1 g2\" -g3").excluded, ["g1 g2","g3"], "getIncludeExcluded");
+      	plan({ tests: 9 });
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("  ").words, [], "getIncludeExcluded words 0");
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").words, ["sqlite"], "getIncludeExcluded words 1");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox").words, ["sqlite","firefox"], "getIncludeExcluded words 2");
+	
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").excluded, [], "getIncludeExcluded excluded 0");
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -firefox").excluded, ["firefox"], "getIncludeExcluded excluded 1");
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"google\"").excluded, ["google"], "getIncludeExcluded excluded 2");
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -g1 -g2").excluded, ["g1","g2"], "getIncludeExcluded excluded 3");
+        isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"g1 g2\"").excluded, ["g1 g2"], "getIncludeExcluded excluded 4");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"g1 g2\" -g3").excluded, ["g1 g2","g3"], "getIncludeExcluded excluded 5");
         //isDeeply([1,2].concat([3,4]), [1,2,3,4], "concat");
       </script>
     </pre>
