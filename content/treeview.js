@@ -50,7 +50,11 @@ com.wuxuan.fromwheretowhere.main = function(){
     try {
       if (statement.executeStep()) {
 	if(type == "str") {
-	  id = statement.getString(idx);
+	  if(statement.getIsNull(idx)){
+	    id = "";
+	  }else{
+	    id = statement.getString(idx);
+	  }
 	} else if(type == 32){
 	  id = statement.getInt32(idx);
 	} else if(type == 64){
@@ -355,7 +359,7 @@ pub.mainThread.prototype = {
     for(var i=0; i<allChildrenPId.length; i++) {
       var thisid = pub.getIdfromPlaceId(allChildrenPId[i]);
       
-      var newChildNode = pub.ReferedHistoryNode(thisid, allChildrenPId[i], pub.getTitlefromId(allChildrenPId[i]), pub.getUrlfromId(allChildrenPId[i]), false, false, null, parentLevel+1);
+      var newChildNode = pub.ReferedHistoryNode(thisid, allChildrenPId[i], pub.getTitlefromId(allChildrenPId[i]), pub.getUrlfromId(allChildrenPId[i]), false, false, [], parentLevel+1);
       
       //TODO: if opened node was container, get the same properties as that!     
       if(!pub.existInVisible(newChildNode)){
