@@ -625,7 +625,7 @@ pub.treeView = {
     }
     //if it's red or blue already, just curve, otherwise make it olive
     if(com.wuxuan.fromwheretowhere.sb.urls.indexOf(this.visibleData[row].url)!=-1){
-      if(haveKeywords!=-1 || pid==pub.retrievedId){
+      if(haveKeywords!=-1 || (pid && pid==pub.retrievedId) ){
 	props.AppendElement(pub.aserv.getAtom("makeItCurve"));
       } else {
 	props.AppendElement(pub.aserv.getAtom("makeItOlive"));
@@ -649,7 +649,7 @@ pub.treeView = {
     var openinnewtab = document.getElementById("openinnewtab");
     var node = this.treeView.visibleData[this.treeView.selection.currentIndex];
     if(node){
-      var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(pub.getUrlfromId(node.placeId));
+      var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(node.url);
       pub.selectNodeLocal = exists;
       localItem.hidden = (exists == -1);
     }
@@ -698,12 +698,7 @@ pub.treeView = {
     return pub.decreaseLevelandCollapse(node, currentLevel);
   };
   
-  /* for now there's no circular reference within nodes, so JSON has no problem.
-    TOIMPROVE until there's built-in support, as it should make loop detection more elegant? */
-  //if it's a container, but never opened before, then it has no children.
-  //For now have to manually open it first to get all the children, and then "export the whole trace"
-  //TODO: add separator in contextmenu for export part
-  pub.property = function() {
+  pub.getCurrentSelected = function(){
     var selectCount = this.treeView.selection.count;
     var selectedIndex = pub.getAllSelectedIndex();
     //verify 
@@ -716,9 +711,45 @@ pub.treeView = {
       //clean away id/pid from the node, as it's useless for other instances of FF
       selected.push(pub.clearReferedHistoryNode(com.wuxuan.fromwheretowhere.utils.cloneObject(node)));
     }
-    var json = pub.nativeJSON.encode(selected);
-    alert(json);
+    return selected;
   };
+  
+  /* for now there's no circular reference within nodes, so JSON has no problem.
+    TOIMPROVE until there's built-in support, as it should make loop detection more elegant? */
+  //if it's a container, but never opened before, then it has no children.
+  //For now have to manually open it first to get all the children, and then "export the whole trace"
+  //TODO: add separator in contextmenu for export part
+  pub.property = function() {
+    var json = pub.nativeJSON.encode(pub.getCurrentSelected());
+    var params = {inn:{property:json}, out:null};       
+    setTimeout(function(){
+      window.openDialog("chrome://FromWhereToWhere/content/propdialog.xul", "",
+      "chrome, centerscreen, dialog, resizable=yes", params).focus();
+      },1);
+  };
+  
+  /* returns all titles of this and all its children */
+  pub.getAllTitles = function(item){
+    var titles = [];
+    titles.push(item.label);
+    if(item.children.length==0){
+      return titles;
+    }else{
+      for(var i in item.children){
+	titles = titles.concat(pub.getAllTitles(item.children[i]));
+      }
+      return titles;
+    }
+  };
+  
+  /*pub.wordNet = function() {
+    var allSelected = pub.getCurrentSelected();
+    var alltitle = "";
+    for(var i in allSelected){
+      alltitle += pub.getAllTitles(allSelected[i]);
+    }
+    alert(alltitle);
+  };*/
   
   //when the first node is "no result found", remove it first, otherwise FF freezes when the next node is collapsed
   pub.importNodes = function(){
@@ -853,7 +884,6 @@ pub.treeView = {
 		getService(Components.interfaces.nsIFaviconService);
     pub.aserv=Components.classes["@mozilla.org/atom-service;1"].
                 getService(Components.interfaces.nsIAtomService);
-		
     pub.background = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(0);
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     pub.searchBackground = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(1);
