@@ -722,10 +722,8 @@ pub.treeView = {
   pub.property = function() {
     var json = pub.nativeJSON.encode(pub.getCurrentSelected());
     var params = {inn:{property:json}, out:null};       
-    setTimeout(function(){
-      window.openDialog("chrome://FromWhereToWhere/content/propdialog.xul", "",
+    window.openDialog("chrome://FromWhereToWhere/content/propdialog.xul", "",
       "chrome, centerscreen, dialog, resizable=yes", params).focus();
-      },1);
   };
   
   //when the first node is "no result found", remove it first, otherwise FF freezes when the next node is collapsed
@@ -773,7 +771,6 @@ pub.treeView = {
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.createParentNodesCheckDup(allpids);
         }
-
 	
         pub.showTopNodes.dispatch(new pub.showTopNodesThread(this.threadID, topNodes, this.keywords, this.words),
           pub.searchThread.DISPATCH_NORMAL);
