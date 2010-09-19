@@ -23,8 +23,12 @@
 <tree id="elementList" flex="1">  
   <treecols>  
     <treecol id="element" label="&table.title;" primary="true" flex="4"/>
+       <splitter resizeafter="closest">
+      </splitter>
     <treecol id="url" label="&table.url;" primary="true" flex="3"/>
-    <treecol id="date" label="&table.date;" flex="1"/>
+      <splitter resizeafter="closest">
+      </splitter>
+     <treecol id="date" label="&table.date;" flex="1"/>
   </treecols>
   <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.main.openlink()"/>  
 </tree>  
