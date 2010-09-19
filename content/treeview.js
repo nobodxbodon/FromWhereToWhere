@@ -728,29 +728,6 @@ pub.treeView = {
       },1);
   };
   
-  /* returns all titles of this and all its children */
-  pub.getAllTitles = function(item){
-    var titles = [];
-    titles.push(item.label);
-    if(item.children.length==0){
-      return titles;
-    }else{
-      for(var i in item.children){
-	titles = titles.concat(pub.getAllTitles(item.children[i]));
-      }
-      return titles;
-    }
-  };
-  
-  /*pub.wordNet = function() {
-    var allSelected = pub.getCurrentSelected();
-    var alltitle = "";
-    for(var i in allSelected){
-      alltitle += pub.getAllTitles(allSelected[i]);
-    }
-    alert(alltitle);
-  };*/
-  
   //when the first node is "no result found", remove it first, otherwise FF freezes when the next node is collapsed
   pub.importNodes = function(){
     var json = window.prompt("Please paste the nodes' property:", "[]");
