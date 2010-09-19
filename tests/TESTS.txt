@@ -13,3 +13,4 @@
 13) during searching or opening a node, it won't freeze Firefox
 14) icon will show for the url that has been visited
 15) accurate searching a) exact phrase: "keyword1 key2"; b) exclusion: -key3 -"key4 key5"
+16) columns in the view can be resized using splitters
