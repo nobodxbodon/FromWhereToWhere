@@ -12,6 +12,7 @@
     <menuseparator/>
     <menuitem id="property" label="&contextMenu.property;" oncommand="com.wuxuan.fromwheretowhere.main.property()"/>
     <menuitem id="importNodes" label="&contextMenu.importNodes;" oncommand="com.wuxuan.fromwheretowhere.main.importNodes()"/>
+    <menuitem id="saveNodetoLocal" label="&contextMenu.saveNodetoLocal;" oncommand="com.wuxuan.fromwheretowhere.main.saveNodetoLocal()"/>
   </menupopup>
 </popupset>
 
@@ -36,5 +37,6 @@
 <script src="sbconnect.js" />
 <script src="utils.js" />
 <script src="treeview.js" />
+<script src="localmanager.js" />
 
 </window>  

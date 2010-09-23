@@ -279,8 +279,9 @@ com.wuxuan.fromwheretowhere.main = function(){
   
   // Utils functions finish
   pub.mDBConn = pub.openPlacesDatabase();
-  
-  pub.retrievedId = pub.getIdfromUrl(Application.storage.get("currentURI", false));
+  pub.keywords = "";
+  pub.currentURI = Application.storage.get("currentURI", false);
+  pub.retrievedId = pub.getIdfromUrl(pub.currentURI);
 
 pub.workingThread = function(threadID, item, idx) {
   this.threadID = threadID;
@@ -718,12 +719,38 @@ pub.treeView = {
     TOIMPROVE until there's built-in support, as it should make loop detection more elegant? */
   //if it's a container, but never opened before, then it has no children.
   //For now have to manually open it first to get all the children, and then "export the whole trace"
-  //TODO: add separator in contextmenu for export part
   pub.property = function() {
     var json = pub.nativeJSON.encode(pub.getCurrentSelected());
     var params = {inn:{property:json}, out:null};       
     window.openDialog("chrome://FromWhereToWhere/content/propdialog.xul", "",
       "chrome, centerscreen, dialog, resizable=yes", params).focus();
+  };
+  
+  // recordType: 0 - from URI; 1 - from searching keywords; 2 - imported; -1 - invalid.
+  pub.saveNodetoLocal = function() {
+    var json = pub.nativeJSON.encode(pub.getCurrentSelected());
+    var recordName = "";
+    var recordType = -1;
+    if(pub.getCurrentSelected().length==0){
+	alert("No record is saved");
+    } else {
+      /* recordName can duplicate in the records */
+      if(pub.currentURI){
+        recordName = pub.currentURI;
+	recordType = 0;
+      } else if(pub.keywords!=""){
+        recordName = pub.keywords;
+	recordType = 1;
+      } else if(pub.getCurrentSelected()[0].id==null) {
+        // imported: use the label of first top node as name for now
+        // TODO: pick tags
+        recordName = pub.getCurrentSelected()[0].label;
+	recordType = 2;
+      }
+      com.wuxuan.fromwheretowhere.localmanager.addRecord(recordType, recordName, json);
+    }
+    //for test
+    alert(com.wuxuan.fromwheretowhere.localmanager.queryAll());
   };
   
   //when the first node is "no result found", remove it first, otherwise FF freezes when the next node is collapsed
@@ -832,8 +859,8 @@ pub.treeView = {
   pub.search = function() {
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
     pub.treeView.addSuspensionPoints(-1, -1);
-    var keywords = document.getElementById("keywords").value;
-    var w = com.wuxuan.fromwheretowhere.utils.getIncludeExcluded(keywords);
+    pub.keywords = document.getElementById("keywords").value;
+    var w = com.wuxuan.fromwheretowhere.utils.getIncludeExcluded(pub.keywords);
     pub.searchBackground.dispatch(new pub.searchThread(1, w.origkeywords, w.words, w.excluded), pub.searchBackground.DISPATCH_NORMAL);
       
   };
@@ -864,6 +891,7 @@ pub.treeView = {
     pub.showTopNodes = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     //add here to check the top level nodes
     com.wuxuan.fromwheretowhere.sb.urlInit();
+    com.wuxuan.fromwheretowhere.localmanager.init();
     document.getElementById("elementList").view = pub.treeView;
     //document.getElementById("elementList").addEventListener("click", function (){getURLfromNode(treeView);}, false);
   }
