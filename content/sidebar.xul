@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
+<?xml-stylesheet href="chrome://FromWhereToWhere/skin/treedec.css" type="text/css"?>  
+
+<page id="emptySidebar" title="records"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
+  <vbox flex="1">
+    <label id="atest" value="records" />
+  </vbox>
+</page>
