@@ -727,27 +727,36 @@ pub.treeView = {
   };
   
   // recordType: 0 - from URI; 1 - from searching keywords; 2 - imported; -1 - invalid.
+  // TODO: make constants!
   pub.saveNodetoLocal = function() {
     var json = pub.nativeJSON.encode(pub.getCurrentSelected());
     var recordName = "";
     var recordType = -1;
-    if(pub.getCurrentSelected().length==0){
-	alert("No record is saved");
+    var recordUrl = "";
+    var searchTerm = "";
+    var currentURI = "";
+    var saveDate = (new Date()).getTime();
+    var select = pub.getCurrentSelected();
+    if(select.length==0){
+      alert("No record is saved");
     } else {
+      recordName = select[0].label;
+      recordUrl = select[0].url;
       /* recordName can duplicate in the records */
-      if(pub.currentURI){
-        recordName = pub.currentURI;
-	recordType = 0;
-      } else if(pub.keywords!=""){
-        recordName = pub.keywords;
+      /* the order matters now, as keyword searching is allowed when pub.currentURI is valid*/
+      // if there's keywords, recordUrl isn't set
+      if(pub.keywords!=""){  
+        searchTerm = pub.keywords;
 	recordType = 1;
-      } else if(pub.getCurrentSelected()[0].id==null) {
+      } else if(pub.currentURI){
+        currentURI = pub.currentURI;
+	recordType = 0;
+      } else if(select[0].id==null) {
         // imported: use the label of first top node as name for now
         // TODO: pick tags
-        recordName = pub.getCurrentSelected()[0].label;
 	recordType = 2;
       }
-      com.wuxuan.fromwheretowhere.localmanager.addRecord(recordType, recordName, json);
+      com.wuxuan.fromwheretowhere.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
     }
     //for test
     alert(com.wuxuan.fromwheretowhere.localmanager.queryAll());
