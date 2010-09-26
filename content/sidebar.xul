@@ -2,9 +2,18 @@
 <!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
 <?xml-stylesheet href="chrome://FromWhereToWhere/skin/treedec.css" type="text/css"?>  
 
-<page id="emptySidebar" title="records"
+<page id="emptySidebar" title="records" onload="com.wuxuan.fromwheretowhere.localmanager.init();"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
-  <vbox flex="1">
-    <label id="atest" value="records" />
-  </vbox>
+  
+  <tree id="recordList" flex="1">  
+  <treecols>  
+    <treecol id="title" label="&table.title;" primary="true" flex="5"/>
+       <splitter resizeafter="closest">
+      </splitter>
+     <treecol id="date" label="&table.date;" flex="1"/>
+  </treecols>
+  <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.localmanager.openNode()"/>  
+</tree>
+  
+<script src="localmanager.js" />
 </page>

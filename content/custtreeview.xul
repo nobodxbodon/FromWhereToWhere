@@ -37,6 +37,5 @@
 <script src="sbconnect.js" />
 <script src="utils.js" />
 <script src="treeview.js" />
-<script src="localmanager.js" />
 
 </window>  

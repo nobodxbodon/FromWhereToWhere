@@ -527,7 +527,8 @@ pub.treeView = {
     if(this.visibleData[idx]){
       return this.visibleData[idx].level;
     }
-  },  
+  },
+  // UNrefed now
   hasNextSibling: function(idx, after) {  
     var thisLevel = this.getLevel(idx);  
     for (var t = after + 1; t < this.visibleData.length; t++) {  
@@ -758,8 +759,6 @@ pub.treeView = {
       }
       com.wuxuan.fromwheretowhere.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
     }
-    //for test
-    alert(com.wuxuan.fromwheretowhere.localmanager.queryAll());
   };
   
   //when the first node is "no result found", remove it first, otherwise FF freezes when the next node is collapsed
@@ -900,7 +899,6 @@ pub.treeView = {
     pub.showTopNodes = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     //add here to check the top level nodes
     com.wuxuan.fromwheretowhere.sb.urlInit();
-    com.wuxuan.fromwheretowhere.localmanager.init();
     document.getElementById("elementList").view = pub.treeView;
     //document.getElementById("elementList").addEventListener("click", function (){getURLfromNode(treeView);}, false);
   }
