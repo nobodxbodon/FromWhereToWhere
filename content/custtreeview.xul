@@ -13,7 +13,7 @@
     <menuitem id="property" label="&contextMenu.property;" oncommand="com.wuxuan.fromwheretowhere.main.property()"/>
     <menuitem id="importNodes" label="&contextMenu.importNodes;" oncommand="com.wuxuan.fromwheretowhere.main.importNodes()"/>
     <menuitem id="saveNodetoLocal" label="&contextMenu.saveNodetoLocal;" oncommand="com.wuxuan.fromwheretowhere.main.saveNodetoLocal()"/>
-    <menuitem id="opensidebar" label="opensidebar" oncommand="com.wuxuan.fromwheretowhere.main.mainWindow.toggleSidebar('viewEmptySidebar');"/>
+    <menuitem id="opensidebar" label="&contextMenu.showLocalNotes;" oncommand="com.wuxuan.fromwheretowhere.main.mainWindow.toggleSidebar('viewEmptySidebar');"/>
   </menupopup>
 </popupset>
 

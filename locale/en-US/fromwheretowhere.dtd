@@ -2,6 +2,8 @@
 <!ENTITY contextMenu.openlocalcopy "Open Local Copy">
 <!ENTITY contextMenu.property "Property">
 <!ENTITY contextMenu.importNodes "Import">
+<!ENTITY contextMenu.saveNodetoLocal "Save to Local Notes">
+<!ENTITY contextMenu.showLocalNotes "Show Notes in Sidebar">
 <!ENTITY button.searchallwords "Search titles with all the words">
 
 <!ENTITY table.title "Title">
