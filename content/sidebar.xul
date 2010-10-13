@@ -14,6 +14,7 @@
   </treecols>
   <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.localmanager.openNode()"/>  
 </tree>
-  
+
+<script src="browser.js" />
 <script src="localmanager.js" />
 </page>

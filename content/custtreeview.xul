@@ -4,7 +4,7 @@
 
 <window onload="com.wuxuan.fromwheretowhere.main.init();"  
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">  
-  
+
 <popupset>
   <menupopup id="clipmenu" onpopupshowing="com.wuxuan.fromwheretowhere.main.showMenuItems()">
     <menuitem id="openinnewtab" label="&contextMenu.openinnewtab;" oncommand="com.wuxuan.fromwheretowhere.main.openlink()"/>
@@ -13,6 +13,7 @@
     <menuitem id="property" label="&contextMenu.property;" oncommand="com.wuxuan.fromwheretowhere.main.property()"/>
     <menuitem id="importNodes" label="&contextMenu.importNodes;" oncommand="com.wuxuan.fromwheretowhere.main.importNodes()"/>
     <menuitem id="saveNodetoLocal" label="&contextMenu.saveNodetoLocal;" oncommand="com.wuxuan.fromwheretowhere.main.saveNodetoLocal()"/>
+    <menuitem id="opensidebar" label="opensidebar" oncommand="com.wuxuan.fromwheretowhere.main.mainWindow.toggleSidebar('viewEmptySidebar');"/>
   </menupopup>
 </popupset>
 
@@ -37,5 +38,6 @@
 <script src="sbconnect.js" />
 <script src="utils.js" />
 <script src="treeview.js" />
+<script src="localmanager.js" />
 
 </window>  

@@ -759,6 +759,7 @@ pub.treeView = {
       }
       com.wuxuan.fromwheretowhere.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
     }
+    //pub.mainWindow.toggleSidebar('viewEmptySidebar');
   };
   
   //when the first node is "no result found", remove it first, otherwise FF freezes when the next node is collapsed
@@ -884,6 +885,13 @@ pub.treeView = {
     }
   };
   
+  pub.mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+        .getInterface(Components.interfaces.nsIWebNavigation)
+        .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+        .rootTreeItem
+        .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+        .getInterface(Components.interfaces.nsIDOMWindow);
+ 
   pub.init = function() {
       
     pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
@@ -899,6 +907,7 @@ pub.treeView = {
     pub.showTopNodes = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     //add here to check the top level nodes
     com.wuxuan.fromwheretowhere.sb.urlInit();
+    //alert(document.getElementById("elementList"));
     document.getElementById("elementList").view = pub.treeView;
     //document.getElementById("elementList").addEventListener("click", function (){getURLfromNode(treeView);}, false);
   }

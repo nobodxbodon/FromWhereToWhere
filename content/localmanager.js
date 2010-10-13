@@ -14,6 +14,28 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
   pub.LOCALRECORDFILE = "fwtw_local_record.sqlite";
   pub.RECORDTABLENAME = "localRecord_0_20_0";
   
+  pub.getBrowserWindow = function(){
+    var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]  
+                   .getService(Components.interfaces.nsIWindowMediator);  
+    var enumerator = wm.getEnumerator("navigator:browser");
+    var i = 0;
+    while(enumerator.hasMoreElements()) {  
+      var win = enumerator.getNext();  
+      if(win==pub.mainWindow){
+        alert("the top windows is a browser for sure!");
+      }else{
+        alert(i++);
+      }
+    }
+  };
+  
+  pub.mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+ .getInterface(Components.interfaces.nsIWebNavigation)
+ .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+ .rootTreeItem
+ .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+ .getInterface(Components.interfaces.nsIDOMWindow);
+
   pub.localRecord = function(){
     var file = Components.classes["@mozilla.org/file/directory_service;1"]  
                       .getService(Components.interfaces.nsIProperties)  
@@ -87,10 +109,35 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     //TODO: add pre-processing to check table from former version if format changes
     pub.localRecord.executeSimpleSQL("CREATE TABLE IF NOT EXISTS " + pub.RECORDTABLENAME + "(type INTEGER, name STRING, url STRING, searchterm STRING, currentURI STRING, content STRING, savedate INTEGER)");
     document.getElementById("recordList").view = pub.treeView;
-    };
+    pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
+  };
     
+  //TODO: merge the code with ImportNode in main
   pub.openNode = function(){
-    alert(pub.getNodeContent(pub.treeView.visibleData[pub.treeView.selection.currentIndex].id));    
+    //pub.getBrowserWindow();
+    //alert("main content location is " + content.document.getElementById("elementList"));
+    var treeView = pub.mainWindow.content.document.getElementById("elementList").view;//pub.mainWindow.top.treeView;//.document.getElementById("elementList").view;
+    var json = pub.getNodeContent(pub.treeView.visibleData[pub.treeView.selection.currentIndex].id);
+    alert(pub.nativeJSON.encode(treeView.visibleDate));
+    var newNodes = [];
+    try{
+      newNodes = pub.nativeJSON.decode(json);
+    }catch(err){
+      if(json && json!="[]"){
+        alert("record corrupted:\n" + json + " " + err);
+      }
+    }
+    if(newNodes.length>0){
+      if(treeView.visibleData.length==1 && treeView.visibleData[0].id == -1){
+        treeView.visibleData = [];
+        treeView.treeBox.rowCountChanged(0, -1);
+      }
+      for (var i = 0; i < newNodes.length; i++) {
+        newNodes[i]=com.wuxuan.fromwheretowhere.main.putNodeToLevel0(newNodes[i]);
+        treeView.visibleData.splice(treeView.visibleData.length, 0, newNodes[i]);
+      }
+      treeView.treeBox.rowCountChanged(treeView.visibleData.length, newNodes.length);
+    }
   };
   
   pub.treeView = {
