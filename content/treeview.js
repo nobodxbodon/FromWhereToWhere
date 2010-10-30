@@ -1,13 +1,4 @@
 
-if(!com)
-  var com={};
-  
-if(!com.wuxuan)
-  com.wuxuan={};
-
-if(!com.wuxuan.fromwheretowhere)
-  com.wuxuan.fromwheretowhere = {};
-
 com.wuxuan.fromwheretowhere.main = function(){
   var pub={};
 
@@ -786,6 +777,15 @@ pub.treeView = {
     }
   };
   
+  pub.showLocalNotes = function(){
+    alert("show local notes");
+    pub.mainWindow.toggleSidebar('viewEmptySidebar');  
+  };
+  
+  pub.getAllNotes = function() {
+    return com.wuxuan.fromwheretowhere.localmanager.queryAll();
+  };
+  
   pub.pidwithKeywords = [];
   
   pub.searchThread = function(threadID, keywords, words, excluded) {
@@ -909,6 +909,7 @@ pub.treeView = {
     com.wuxuan.fromwheretowhere.sb.urlInit();
     //alert(document.getElementById("elementList"));
     document.getElementById("elementList").view = pub.treeView;
+    com.wuxuan.fromwheretowhere.localmanager.init();
     //document.getElementById("elementList").addEventListener("click", function (){getURLfromNode(treeView);}, false);
   }
   

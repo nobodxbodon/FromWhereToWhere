@@ -1,6 +1,5 @@
 <?xml version="1.0"?>  
 <overlay id="FromWhereToWhereOverlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script src="openwindow.js" />
   
   <broadcasterset id="mainBroadcasterSet"> 
     <broadcaster id="viewEmptySidebar" 
@@ -15,7 +14,7 @@
     <menuitem id="helloworldMenuitem" label="FromWhereToWhere" insertbefore="sanitizeSeparator"  
      oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
   </menupopup>
-
-
-
+  
+<script src="namespace.js" />
+<script src="openwindow.js" />
 </overlay>  

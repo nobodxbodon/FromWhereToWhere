@@ -2,7 +2,7 @@
 <!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
 <?xml-stylesheet href="chrome://FromWhereToWhere/skin/treedec.css" type="text/css"?>  
 
-<page id="emptySidebar" title="records" onload="com.wuxuan.fromwheretowhere.localmanager.init();"
+<page id="emptySidebar" title="records" onload="com.wuxuan.fromwheretowhere.noteSidebar.initView();"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
   
   <tree id="recordList" flex="1">  
@@ -12,9 +12,10 @@
       </splitter>
      <treecol id="date" label="&table.date;" flex="1"/>
   </treecols>
-  <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.localmanager.openNode()"/>  
+  <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.noteSidebar.openNode()"/>  
 </tree>
 
-<script src="browser.js" />
+<script src="namespace.js" />
 <script src="localmanager.js" />
+<script src="noteSidebar.js" />
 </page>

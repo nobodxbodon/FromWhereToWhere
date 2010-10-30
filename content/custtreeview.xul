@@ -13,7 +13,7 @@
     <menuitem id="property" label="&contextMenu.property;" oncommand="com.wuxuan.fromwheretowhere.main.property()"/>
     <menuitem id="importNodes" label="&contextMenu.importNodes;" oncommand="com.wuxuan.fromwheretowhere.main.importNodes()"/>
     <menuitem id="saveNodetoLocal" label="&contextMenu.saveNodetoLocal;" oncommand="com.wuxuan.fromwheretowhere.main.saveNodetoLocal()"/>
-    <menuitem id="opensidebar" label="&contextMenu.showLocalNotes;" oncommand="com.wuxuan.fromwheretowhere.main.mainWindow.toggleSidebar('viewEmptySidebar');"/>
+    <menuitem id="opensidebar" label="&contextMenu.showLocalNotes;" oncommand="com.wuxuan.fromwheretowhere.main.showLocalNotes()"/>
   </menupopup>
 </popupset>
 
@@ -35,6 +35,7 @@
   <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.main.openlink()"/>  
 </tree>  
 
+<script src="namespace.js" />
 <script src="sbconnect.js" />
 <script src="utils.js" />
 <script src="treeview.js" />

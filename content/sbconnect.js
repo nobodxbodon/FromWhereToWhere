@@ -1,14 +1,5 @@
 const NS_SCRAPBOOK = "http://amb.vis.ne.jp/mozilla/scrapbook-rdf#";
 
-if(!com)
-  var com={};
-  
-if(!com.wuxuan)
-  com.wuxuan={};
-
-if(!com.wuxuan.fromwheretowhere)
-  com.wuxuan.fromwheretowhere = {};
-
 com.wuxuan.fromwheretowhere.sb = function(){
   var pub={};
     
