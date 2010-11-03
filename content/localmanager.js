@@ -93,7 +93,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
   
   //built-in rowid, can't guarantee same order as savedate, if renaming is allowed
   pub.init = function(){
-    alert("in local init");
+    //alert("in local init");
     //TODO: add pre-processing to check table from former version if format changes
     var statement = pub.localRecord.createStatement("CREATE TABLE IF NOT EXISTS " + pub.RECORDTABLENAME + "(type INTEGER, name STRING, url STRING, searchterm STRING, currentURI STRING, content STRING, savedate INTEGER)");
     try {
@@ -106,7 +106,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     catch (e) {
       alert(e);
       statement.reset();
-    }//document.getElementById("recordList").view = pub.treeView;
+    }
   };
   
   return pub;

@@ -19,7 +19,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   // have to separate the looks of node from the content!!!!!!
   
     visibleData : function(){
-      alert("gen vis data");
+      //alert("gen vis data");
       return com.wuxuan.fromwheretowhere.localmanager.queryAll();
     }(),
   
@@ -100,10 +100,16 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   pub.openNode = function(){
     //pub.getBrowserWindow();
     //alert("main content location is " + content.document.getElementById("elementList"));
-    var treeView = pub.mainWindow.content.document.getElementById("elementList").view;//pub.mainWindow.top.treeView;//.document.getElementById("elementList").view;
+    //var treeView = com.wuxuan.fromwheretowhere.mainView.treeView;
+    var treeView = pub.mainWindow.content.document.getElementById("elementList");//.wrappedJSObject.view;//pub.mainWindow.top.treeView;//.document.getElementById("elementList").view;
     var json = com.wuxuan.fromwheretowhere.localmanager.getNodeContent(pub.treeView.visibleData[pub.treeView.selection.currentIndex].id);
-    alert(treeView);//pub.nativeJSON.encode(treeView.visibleData));
-    alert(json);
+    //var loadView = Application.storage.get("fromwheretowhere.mainTreeView", {test:-1});
+    //alert(treeView.selection.count);
+    //alert(treeView.isContainer(treeView.selection.currentIndex));
+    //treeView.setTree(null);
+    //alert(treeView.rowCount);
+
+    //alert(json);
     var newNodes = [];
     try{
       newNodes = pub.nativeJSON.decode(json);
@@ -112,7 +118,10 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
         alert("record corrupted:\n" + json + " " + err);
       }
     }
-    if(newNodes.length>0){
+    var newView = com.wuxuan.fromwheretowhere.mainView.createView(newNodes, true);
+    //com.wuxuan.fromwheretowhere.main.treeView = newView;
+    treeView.wrappedJSObject.view = newView;
+    /*if(newNodes.length>0){
       if(treeView.visibleData.length==1 && treeView.visibleData[0].id == -1){
         treeView.visibleData = [];
         treeView.treeBox.rowCountChanged(0, -1);
@@ -122,7 +131,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
         treeView.visibleData.splice(treeView.visibleData.length, 0, newNodes[i]);
       }
       treeView.treeBox.rowCountChanged(treeView.visibleData.length, newNodes.length);
-    }
+    }*/
   };
   
   return pub;

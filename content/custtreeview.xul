@@ -2,7 +2,7 @@
 <!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
 <?xml-stylesheet href="chrome://FromWhereToWhere/skin/treedec.css" type="text/css"?>  
 
-<window onload="com.wuxuan.fromwheretowhere.main.init();"  
+<window onload="com.wuxuan.fromwheretowhere.mainView.init(com.wuxuan.fromwheretowhere.main);"  
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">  
 
 <popupset>
@@ -39,6 +39,7 @@
 <script src="sbconnect.js" />
 <script src="utils.js" />
 <script src="treeview.js" />
+<script src="main.js" />
 <script src="localmanager.js" />
 
 </window>  
