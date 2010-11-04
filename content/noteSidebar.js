@@ -120,7 +120,10 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     }
     var main = com.wuxuan.fromwheretowhere.main;
     main.init();
-    var newView = com.wuxuan.fromwheretowhere.mainView.createView(newNodes, main, true);
+    
+    var sb = com.wuxuan.fromwheretowhere.sb;
+    sb.urlInit();
+    var newView = com.wuxuan.fromwheretowhere.mainView.createView(newNodes, main, sb, true);
     //TODO: remove, pass newView as parameter
     main.treeView = newView;
     //com.wuxuan.fromwheretowhere.main.treeView = newView;
