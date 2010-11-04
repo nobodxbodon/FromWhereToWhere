@@ -3,10 +3,10 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   var pub={};
 
   var devOptions=false;
-  var testConstruct=(function(){alert("mainView cons here");})();
+  //var testConstruct=(function(){alert("mainView cons here");})();
   
   // if isRecord, there's no need to check for infinite expansion
-  pub.createView = function(visible, main, isRecord){
+  pub.createView = function(visible, main, sb, isRecord){
     return {
   // have to separate the looks of node from the content!!!!!!
   test: 1,
@@ -166,7 +166,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       props.AppendElement(main.aserv.getAtom("makeItBlue"));
     }
     //if it's red or blue already, just curve, otherwise make it olive
-    if(com.wuxuan.fromwheretowhere.sb.urls.indexOf(this.visibleData[row].url)!=-1){
+    if(sb.urls.indexOf(this.visibleData[row].url)!=-1){
       if(haveKeywords!=-1 || (pid && pid==main.retrievedId) ){
 	props.AppendElement(main.aserv.getAtom("makeItCurve"));
       } else {
@@ -188,10 +188,10 @@ com.wuxuan.fromwheretowhere.mainView = function(){
 
   pub.init = function(main){
     main.init();
-    //pub.main = main;
-    
+    var sb = com.wuxuan.fromwheretowhere.sb;
+    sb.urlInit();
     // Main Tree definition
-    pub.treeView = pub.createView(main.createParentNodes(main.retrievedId), main, false);
+    pub.treeView = pub.createView(main.createParentNodes(main.retrievedId), main, sb, false);
     //TODO: remove this, pass as parameter
     main.treeView = pub.treeView;
     document.getElementById("elementList").view = pub.treeView;
