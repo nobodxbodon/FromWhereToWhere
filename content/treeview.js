@@ -6,7 +6,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   var testConstruct=(function(){alert("mainView cons here");})();
   
   // if isRecord, there's no need to check for infinite expansion
-  pub.createView = function(visible, isRecord){
+  pub.createView = function(visible, main, isRecord){
     return {
   // have to separate the looks of node from the content!!!!!!
   test: 1,
@@ -33,7 +33,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
 	return this.visibleData[idx].url;
       } else if (column.id == "date") {
         if (this.visibleData[idx].placeId){
-            return com.wuxuan.fromwheretowhere.utils.formatDate(pub.main.getFirstDatefromPid(this.visibleData[idx].placeId));
+            return com.wuxuan.fromwheretowhere.utils.formatDate(main.getFirstDatefromPid(this.visibleData[idx].placeId));
         } else {
             return null;
         }
@@ -85,7 +85,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       return 0;
     }
     // need to check here. Otherwise if check the children, the first parent won't be recorded as existInVisible.
-    if(isRecord && pub.main.existInVisible(item)){
+    if(isRecord && main.existInVisible(item)){
       return 0;
     }
     item.isFolded = true;
@@ -104,7 +104,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   },
   
   addSuspensionPoints: function(level, idx) {
-    var sp = pub.main.ReferedHistoryNode(-1, -1, "searching...", null, false, false, [], level+1);
+    var sp = main.ReferedHistoryNode(-1, -1, "searching...", null, false, false, [], level+1);
     this.visibleData.splice(idx+ 1, 0, sp);
     this.treeBox.rowCountChanged(idx + 1, 1);
   },
@@ -133,7 +133,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     }  
     else {
       com.wuxuan.fromwheretowhere.sb.urlInit();
-      pub.main.background.dispatch(new pub.main.workingThread(1, item, idx), pub.main.background.DISPATCH_NORMAL);
+      main.background.dispatch(new main.workingThread(1, item, idx), main.background.DISPATCH_NORMAL);
       this.addSuspensionPoints(item.level, idx);
       
     }  
@@ -142,7 +142,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   
   getImageSrc: function(idx, column) {
     if(column.id == "element") {
-      return pub.main.getImagefromUrl(this.visibleData[idx].url);
+      return main.getImagefromUrl(this.visibleData[idx].url);
     }
   },
   
@@ -157,27 +157,27 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   
   getCellProperties: function(row,col,props){
     var pid = this.visibleData[row].placeId;
-    var haveKeywords = pub.main.pidwithKeywords.indexOf(pid);
+    var haveKeywords = main.pidwithKeywords.indexOf(pid);
     //CAN'T alert here!
     //in case pid is null, which means new imported nodes
-    if(pid && pid==pub.main.retrievedId){
-      props.AppendElement(pub.main.aserv.getAtom("makeItRed"));
+    if(pid && pid==main.retrievedId){
+      props.AppendElement(main.aserv.getAtom("makeItRed"));
     }else if(haveKeywords!=-1){
-      props.AppendElement(pub.main.aserv.getAtom("makeItBlue"));
+      props.AppendElement(main.aserv.getAtom("makeItBlue"));
     }
     //if it's red or blue already, just curve, otherwise make it olive
     if(com.wuxuan.fromwheretowhere.sb.urls.indexOf(this.visibleData[row].url)!=-1){
-      if(haveKeywords!=-1 || (pid && pid==pub.main.retrievedId) ){
-	props.AppendElement(pub.main.aserv.getAtom("makeItCurve"));
+      if(haveKeywords!=-1 || (pid && pid==main.retrievedId) ){
+	props.AppendElement(main.aserv.getAtom("makeItCurve"));
       } else {
-	props.AppendElement(pub.main.aserv.getAtom("makeItOlive"));
-	props.AppendElement(pub.main.aserv.getAtom("makeItCurve"));
+	props.AppendElement(main.aserv.getAtom("makeItOlive"));
+	props.AppendElement(main.aserv.getAtom("makeItCurve"));
       }
     }
     if(devOptions){
       var pIdx = this.getParentIndex(row);
       if(pIdx!=-1 && this.visibleData[row].label==this.visibleData[pIdx].label){
-	props.AppendElement(pub.main.aserv.getAtom("makeItSmall"));
+	props.AppendElement(main.aserv.getAtom("makeItSmall"));
       }
     }
   },
@@ -188,11 +188,11 @@ com.wuxuan.fromwheretowhere.mainView = function(){
 
   pub.init = function(main){
     main.init();
-    pub.main = main;
+    //pub.main = main;
     
     // Main Tree definition
-    pub.treeView = pub.createView(pub.main.createParentNodes(pub.main.retrievedId), false);
-
+    pub.treeView = pub.createView(main.createParentNodes(main.retrievedId), main, false);
+    //TODO: remove this, pass as parameter
     main.treeView = pub.treeView;
     document.getElementById("elementList").view = pub.treeView;
   };

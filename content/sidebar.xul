@@ -18,6 +18,8 @@
 <script src="namespace.js" />
 <script src="treeview.js" />
 <script src="utils.js" />
+<script src="main.js" />
+<script src="sbconnect.js" />
 <script src="localmanager.js" />
 <script src="noteSidebar.js" />
 </page>

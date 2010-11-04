@@ -118,7 +118,11 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
         alert("record corrupted:\n" + json + " " + err);
       }
     }
-    var newView = com.wuxuan.fromwheretowhere.mainView.createView(newNodes, true);
+    var main = com.wuxuan.fromwheretowhere.main;
+    main.init();
+    var newView = com.wuxuan.fromwheretowhere.mainView.createView(newNodes, main, true);
+    //TODO: remove, pass newView as parameter
+    main.treeView = newView;
     //com.wuxuan.fromwheretowhere.main.treeView = newView;
     treeView.wrappedJSObject.view = newView;
     /*if(newNodes.length>0){
