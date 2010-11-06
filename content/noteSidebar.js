@@ -118,16 +118,20 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
         alert("record corrupted:\n" + json + " " + err);
       }
     }
-    var main = com.wuxuan.fromwheretowhere.main;
+    /*var main = com.wuxuan.fromwheretowhere.main;
     main.init();
     
     var sb = com.wuxuan.fromwheretowhere.sb;
     sb.urlInit();
     var newView = com.wuxuan.fromwheretowhere.mainView.createView(newNodes, main, sb, true);
+    */
+    //alert("set new data");
+    Application.storage.set("fromwheretowhere.currentData", newNodes);
+    //Application.storage.set("fromwheretowhere.currentView", newView);
     //TODO: remove, pass newView as parameter
-    main.treeView = newView;
+    //main.treeView = newView;
     //com.wuxuan.fromwheretowhere.main.treeView = newView;
-    treeView.wrappedJSObject.view = newView;
+    //treeView.wrappedJSObject.view = newView;
     /*if(newNodes.length>0){
       if(treeView.visibleData.length==1 && treeView.visibleData[0].id == -1){
         treeView.visibleData = [];

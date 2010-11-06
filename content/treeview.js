@@ -14,26 +14,29 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     alert(input);
   },
   
-  visibleData : visible,
+  visibleData : function(){
+    //alert("get visible data");
+    return Application.storage.get("fromwheretowhere.currentData", false);
+  },
 
   treeBox: null,  
   selection: null,  
   
-  get rowCount()                     { return this.visibleData.length; },
+  get rowCount()                     { return this.visibleData().length; },
   
   setTree: function(treeBox){
     this.treeBox = treeBox;
   },
   
   getCellText: function(idx, column) {
-    if(this.visibleData[idx]) {
+    if(this.visibleData()[idx]) {
       if(column.id == "element") {
-	return this.visibleData[idx].label;
+	return this.visibleData()[idx].label;
       } else if (column.id == "url") {
-	return this.visibleData[idx].url;
+	return this.visibleData()[idx].url;
       } else if (column.id == "date") {
-        if (this.visibleData[idx].placeId){
-            return com.wuxuan.fromwheretowhere.utils.formatDate(main.getFirstDatefromPid(this.visibleData[idx].placeId));
+        if (this.visibleData()[idx].placeId){
+            return com.wuxuan.fromwheretowhere.utils.formatDate(main.getFirstDatefromPid(this.visibleData()[idx].placeId));
         } else {
             return null;
         }
@@ -44,13 +47,13 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   },
     
   isContainer: function(idx){
-    if(this.visibleData[idx]){
-      return this.visibleData[idx].isContainer;
+    if(this.visibleData()[idx]){
+      return this.visibleData()[idx].isContainer;
     } else {
       return false;
     }
   },  
-  isContainerOpen: function(idx)     { return this.visibleData[idx].isFolded; },  
+  isContainerOpen: function(idx)     { return this.visibleData()[idx].isFolded; },  
   isContainerEmpty: function(idx)    { return false; },  
   isSeparator: function(idx)         { return false; },  
   isSorted: function()               { return false; },  
@@ -59,19 +62,19 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   getParentIndex: function(idx) {  
     //if (this.isContainer(idx)) return -1;  
     for (var t = idx - 1; t >= 0 ; t--) {  
-      if (this.visibleData[t].level<this.visibleData[idx].level) return t;  
+      if (this.visibleData()[t].level<this.visibleData()[idx].level) return t;  
     }
     return -1;
   },  
   getLevel: function(idx) {
-    if(this.visibleData[idx]){
-      return this.visibleData[idx].level;
+    if(this.visibleData()[idx]){
+      return this.visibleData()[idx].level;
     }
   },
   // UNrefed now
   hasNextSibling: function(idx, after) {  
     var thisLevel = this.getLevel(idx);  
-    for (var t = after + 1; t < this.visibleData.length; t++) {  
+    for (var t = after + 1; t < this.visibleData().length; t++) {  
       var nextLevel = this.getLevel(t);  
       if (nextLevel == thisLevel) return true;  
       if (nextLevel < thisLevel) break;  
@@ -90,7 +93,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     }
     item.isFolded = true;
     for (var i = 0; i < item.children.length; i++) {  
-      this.visibleData.splice(idx + i + 1, 0, item.children[i]);
+      this.visibleData().splice(idx + i + 1, 0, item.children[i]);
     }
     // adjust the index offset of the node to expand
     var offset = 0;
@@ -105,16 +108,16 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   
   addSuspensionPoints: function(level, idx) {
     var sp = main.ReferedHistoryNode(-1, -1, "searching...", null, false, false, [], level+1);
-    this.visibleData.splice(idx+ 1, 0, sp);
+    this.visibleData().splice(idx+ 1, 0, sp);
     this.treeBox.rowCountChanged(idx + 1, 1);
   },
   delSuspensionPoints: function(idx) {
-    this.visibleData.splice(idx+ 1, 1);
+    this.visibleData().splice(idx+ 1, 1);
     this.treeBox.rowCountChanged(idx + 1, -1);
   },
   
   toggleOpenState: function(idx) {  
-    var item = this.visibleData[idx];  
+    var item = this.visibleData()[idx];  
     if (!item.isContainer) return;  
   
     if (item.isFolded) {  
@@ -123,11 +126,11 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       var thisLevel = this.getLevel(idx);  
       var deletecount = 0;  
       for (var t = idx + 1;; t++) {
-        if (this.visibleData[t] != null && (this.getLevel(t) > thisLevel)) deletecount++;  
+        if (this.visibleData()[t] != null && (this.getLevel(t) > thisLevel)) deletecount++;  
         else break;  
       }  
       if (deletecount) {  
-        this.visibleData.splice(idx + 1, deletecount);  
+        this.visibleData().splice(idx + 1, deletecount);  
         this.treeBox.rowCountChanged(idx + 1, -deletecount);  
       }
     }  
@@ -137,12 +140,13 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       this.addSuspensionPoints(item.level, idx);
       
     }  
-    this.treeBox.invalidateRow(idx);  
+    this.treeBox.invalidateRow(idx);
   },  
   
   getImageSrc: function(idx, column) {
+    var vis = this.visibleData();
     if(column.id == "element") {
-      return main.getImagefromUrl(this.visibleData[idx].url);
+      return main.getImagefromUrl(vis[idx].url);
     }
   },
   
@@ -156,7 +160,8 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   getRowProperties: function(idx, column, prop) {},  
   
   getCellProperties: function(row,col,props){
-    var pid = this.visibleData[row].placeId;
+    var vis = this.visibleData();
+    var pid = vis[row].placeId;
     var haveKeywords = main.pidwithKeywords.indexOf(pid);
     //CAN'T alert here!
     //in case pid is null, which means new imported nodes
@@ -166,7 +171,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       props.AppendElement(main.aserv.getAtom("makeItBlue"));
     }
     //if it's red or blue already, just curve, otherwise make it olive
-    if(sb.urls.indexOf(this.visibleData[row].url)!=-1){
+    if(sb.urls.indexOf(this.visibleData()[row].url)!=-1){
       if(haveKeywords!=-1 || (pid && pid==main.retrievedId) ){
 	props.AppendElement(main.aserv.getAtom("makeItCurve"));
       } else {
@@ -176,7 +181,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     }
     if(devOptions){
       var pIdx = this.getParentIndex(row);
-      if(pIdx!=-1 && this.visibleData[row].label==this.visibleData[pIdx].label){
+      if(pIdx!=-1 && this.visibleData()[row].label==this.visibleData()[pIdx].label){
 	props.AppendElement(main.aserv.getAtom("makeItSmall"));
       }
     }
@@ -191,7 +196,10 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     var sb = com.wuxuan.fromwheretowhere.sb;
     sb.urlInit();
     // Main Tree definition
-    pub.treeView = pub.createView(main.createParentNodes(main.retrievedId), main, sb, false);
+    var newNodes = main.createParentNodes(main.retrievedId);
+    Application.storage.set("fromwheretowhere.currentData", newNodes);
+    pub.treeView = pub.createView(newNodes, main, sb, false);
+    //Application.storage.set("fromwheretowhere.currentView", pub.treeView);
     //TODO: remove this, pass as parameter
     main.treeView = pub.treeView;
     document.getElementById("elementList").view = pub.treeView;
