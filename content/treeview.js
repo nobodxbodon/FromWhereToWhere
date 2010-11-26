@@ -25,6 +25,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   get rowCount()                     { return this.visibleData().length; },
   
   setTree: function(treeBox){
+    //alert("set tree again");
     this.treeBox = treeBox;
   },
   
@@ -84,6 +85,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   
   //expand using the children cached in item, hopefully save expanding time
   expandFromNodeInTree: function(item, idx) {
+    var vis = this.visibleData();
     if (!item.children || item.children.length==0) {
       return 0;
     }
@@ -93,7 +95,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     }
     item.isFolded = true;
     for (var i = 0; i < item.children.length; i++) {  
-      this.visibleData().splice(idx + i + 1, 0, item.children[i]);
+      vis.splice(idx + i + 1, 0, item.children[i]);
     }
     // adjust the index offset of the node to expand
     var offset = 0;
@@ -136,7 +138,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     }  
     else {
       com.wuxuan.fromwheretowhere.sb.urlInit();
-      main.background.dispatch(new main.workingThread(1, item, idx), main.background.DISPATCH_NORMAL);
+      main.main.dispatch(new main.mainThread(1, item, idx), main.DISPATCH_NORMAL);
       this.addSuspensionPoints(item.level, idx);
       
     }  
