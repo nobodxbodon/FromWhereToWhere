@@ -282,17 +282,14 @@ com.wuxuan.fromwheretowhere.main = function(){
   
   pub.retrievedId = pub.getIdfromUrl(Application.storage.get("currentURI", false));
 
-pub.workingThread = function(threadID, item, idx) {
+/*pub.workingThread = function(threadID, item, idx) {
   this.threadID = threadID;
   this.item = item;
   this.idx = idx;
   this.result = 0;
-};
+};*/
 
-/*Current: if the item has children list available, don't check local.
- TOIMPROVE: merge with the children queryed from local history.
- Sometimes you don't care about local or online, but sometimes you do. */
-pub.workingThread.prototype = {
+/*pub.workingThread.prototype = {
   run: function() {
     try {
       // This is where the working thread does its processing work.
@@ -319,7 +316,7 @@ pub.workingThread.prototype = {
     }
     throw Components.results.NS_ERROR_NO_INTERFACE;
   }
-};
+};*/
 
 pub.mainThread = function(threadID, item, idx) {
   this.threadID = threadID;
@@ -330,8 +327,15 @@ pub.mainThread = function(threadID, item, idx) {
 pub.mainThread.prototype = {
   run: function() {
     try {
-      //alert(pub.timestats1);
-      // This is where we react to the completion of the working thread.
+      /*Current: if the item has children list available, don't check local.
+      TOIMPROVE: merge with the children queryed from local history.
+      Sometimes you don't care about local or online, but sometimes you do. */
+      pub.alreadyExpandedPids = [this.item.placeId];
+      //CAN'T alert here!! will crash!
+      if(this.item.isContainer && this.item.children.length==0){
+	this.item = pub.allChildrenfromPid(this.item);
+      }
+      // expand in UI
       pub.alreadyExpandedPids = [];
       pub.treeView.delSuspensionPoints(this.idx);
       pub.treeView.expandFromNodeInTree(this.item, this.idx);
@@ -591,7 +595,12 @@ pub.treeView = {
     }  
     else {
       com.wuxuan.fromwheretowhere.sb.urlInit();
-      pub.background.dispatch(new pub.workingThread(1, item, idx), pub.background.DISPATCH_NORMAL);
+      //pub.background.dispatch(new pub.workingThread(1, item, idx), pub.background.DISPATCH_NORMAL);
+
+      pub.main.dispatch(new pub.mainThread(this.threadID, item, idx),
+        pub.main.DISPATCH_NORMAL);
+
+    
       this.addSuspensionPoints(item.level, idx);
       
     }  
@@ -772,8 +781,26 @@ pub.treeView = {
           topNodes = pub.createParentNodesCheckDup(allpids);
         }
 	
-        pub.showTopNodes.dispatch(new pub.showTopNodesThread(this.threadID, topNodes, this.keywords, this.words),
-          pub.searchThread.DISPATCH_NORMAL);
+        //pub.showTopNodes.dispatch(new pub.showTopNodesThread(this.threadID, topNodes, this.keywords, this.words),
+        //  pub.searchThread.DISPATCH_NORMAL);
+	//refresh tree, remove all visibledata and add new ones
+        pub.treeView.delSuspensionPoints(-1);
+        if(this.words.length==0){
+          alert("no keywords input");
+          //cancel "searching..." after "OK", and redisplay the former result      
+          pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
+          return;
+        }
+        //when allPpids = null/[], show "no result with xxx", to distinguish with normal nothing found
+        if(topNodes.length==0){
+          var nodes = [];
+          nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found with \""+this.keywords+"\" in title", null, false, false, [], 1));
+          pub.treeView.visibleData = nodes;
+        }else{
+          pub.treeView.visibleData = topNodes;
+        }
+        pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
+	
       } catch(err) {
         Components.utils.reportError(err);
       }
@@ -788,7 +815,7 @@ pub.treeView = {
     }
   };
 
-  pub.showTopNodesThread = function(threadID, topNodes, keywords, words) {
+  /*pub.showTopNodesThread = function(threadID, topNodes, keywords, words) {
     this.threadID = threadID;
     this.topNodes = topNodes;
     this.keywords = keywords;
@@ -827,14 +854,14 @@ pub.treeView = {
       }
       throw Components.results.NS_ERROR_NO_INTERFACE;
     }
-  };
+  };*/
 
   pub.search = function() {
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
     pub.treeView.addSuspensionPoints(-1, -1);
     var keywords = document.getElementById("keywords").value;
     var w = com.wuxuan.fromwheretowhere.utils.getIncludeExcluded(keywords);
-    pub.searchBackground.dispatch(new pub.searchThread(1, w.origkeywords, w.words, w.excluded), pub.searchBackground.DISPATCH_NORMAL);
+    pub.main.dispatch(new pub.searchThread(1, w.origkeywords, w.words, w.excluded), pub.main.DISPATCH_NORMAL);
       
   };
   
@@ -858,10 +885,10 @@ pub.treeView = {
 		getService(Components.interfaces.nsIFaviconService);
     pub.aserv=Components.classes["@mozilla.org/atom-service;1"].
                 getService(Components.interfaces.nsIAtomService);
-    pub.background = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(0);
+    //pub.background = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(0);
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
-    pub.searchBackground = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(1);
-    pub.showTopNodes = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
+    //pub.searchBackground = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(1);
+    //pub.showTopNodes = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     //add here to check the top level nodes
     com.wuxuan.fromwheretowhere.sb.urlInit();
     document.getElementById("elementList").view = pub.treeView;
