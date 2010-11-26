@@ -101,12 +101,11 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     //pub.getBrowserWindow();
     //alert("main content location is " + content.document.getElementById("elementList"));
     //var treeView = com.wuxuan.fromwheretowhere.mainView.treeView;
-    var treeView = pub.mainWindow.content.document.getElementById("elementList");//.wrappedJSObject.view;//pub.mainWindow.top.treeView;//.document.getElementById("elementList").view;
+    var treeView = pub.mainWindow.content.document.getElementById("elementList").wrappedJSObject.view;//pub.mainWindow.top.treeView;//.document.getElementById("elementList").view;
     var json = com.wuxuan.fromwheretowhere.localmanager.getNodeContent(pub.treeView.visibleData[pub.treeView.selection.currentIndex].id);
     //var loadView = Application.storage.get("fromwheretowhere.mainTreeView", {test:-1});
     //alert(treeView.selection.count);
     //alert(treeView.isContainer(treeView.selection.currentIndex));
-    //treeView.setTree(null);
     //alert(treeView.rowCount);
 
     //alert(json);
@@ -126,7 +125,11 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     var newView = com.wuxuan.fromwheretowhere.mainView.createView(newNodes, main, sb, true);
     */
     //alert("set new data");
+    alert(newNodes);
     Application.storage.set("fromwheretowhere.currentData", newNodes);
+    //alert(treeView.treeBox);
+    //just to reset visibleData, hope this hack works
+    treeView.setTree(null);
     //Application.storage.set("fromwheretowhere.currentView", newView);
     //TODO: remove, pass newView as parameter
     //main.treeView = newView;

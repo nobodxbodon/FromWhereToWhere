@@ -260,7 +260,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   
   pub.getURLfromNode = function(treeView) {
     var sel = treeView.selection;
-    var node = treeView.visibleData()[sel.currentIndex];
+    var node = treeView.visibleData[sel.currentIndex];
     if(node){
       window.open(node.url);
     }
@@ -434,8 +434,8 @@ pub.mainThread.prototype = {
   pub.showMenuItems = function(){
     var localItem = document.getElementById("local");
     var openinnewtab = document.getElementById("openinnewtab");
-    //alert(pub.treeView.visibleData().length);
-    var node = pub.treeView.visibleData()[pub.treeView.selection.currentIndex];
+    //alert(pub.treeView.visibleData.length);
+    var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
     //alert(pub.treeView.selection.currentIndex);
     if(node){
       var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(node.url);
@@ -496,7 +496,7 @@ pub.mainThread.prototype = {
     }
     var selected = [];
     for(var i in selectedIndex){
-      var node = pub.treeView.visibleData()[selectedIndex[i]];
+      var node = pub.treeView.visibleData[selectedIndex[i]];
       //clean away id/pid from the node, as it's useless for other instances of FF
       selected.push(pub.clearReferedHistoryNode(com.wuxuan.fromwheretowhere.utils.cloneObject(node)));
     }
@@ -517,14 +517,14 @@ pub.mainThread.prototype = {
   // recordType: 0 - from URI; 1 - from searching keywords; 2 - imported; -1 - invalid.
   // TODO: make constants!
   pub.saveNodetoLocal = function() {
-    var json = pub.nativeJSON.encode(pub.getCurrentSelected());
+    var select = pub.getCurrentSelected();
+    var json = pub.nativeJSON.encode(select);
     var recordName = "";
     var recordType = -1;
     var recordUrl = "";
     var searchTerm = "";
     var currentURI = "";
     var saveDate = (new Date()).getTime();
-    var select = pub.getCurrentSelected();
     if(select.length==0){
       alert("No record is saved");
     } else {
@@ -560,15 +560,15 @@ pub.mainThread.prototype = {
       }
     }
     if(newNodes.length>0){
-      if(pub.treeView.visibleData().length==1 && pub.treeView.visibleData()[0].id == -1){
-	pub.treeView.visibleData() = [];
+      if(pub.treeView.visibleData.length==1 && pub.treeView.visibleData[0].id == -1){
+	pub.treeView.visibleData = [];
 	pub.treeView.treeBox.rowCountChanged(0, -1);
       }
       for (var i = 0; i < newNodes.length; i++) {
 	newNodes[i]=pub.putNodeToLevel0(newNodes[i]);
-	pub.treeView.visibleData().splice(pub.treeView.visibleData().length, 0, newNodes[i]);
+	pub.treeView.visibleData.splice(pub.treeView.visibleData.length, 0, newNodes[i]);
       }
-      pub.treeView.treeBox.rowCountChanged(pub.treeView.visibleData().length, newNodes.length);
+      pub.treeView.treeBox.rowCountChanged(pub.treeView.visibleData.length, newNodes.length);
     }
   };
   
@@ -607,18 +607,18 @@ pub.mainThread.prototype = {
         if(this.words.length==0){
           alert("no keywords input");
           //cancel "searching..." after "OK", and redisplay the former result      
-          pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData().length);
+          pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
           return;
         }
         //when allPpids = null/[], show "no result with xxx", to distinguish with normal nothing found
         if(topNodes.length==0){
           var nodes = [];
           nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found with \""+this.keywords+"\" in title", null, false, false, [], 1));
-          pub.treeView.visibleData() = nodes;
+          pub.treeView.visibleData = nodes;
         }else{
-          pub.treeView.visibleData() = topNodes;
+          pub.treeView.visibleData = topNodes;
         }
-        pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData().length);
+        pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
       } catch(err) {
         Components.utils.reportError(err);
       }
@@ -634,7 +634,7 @@ pub.mainThread.prototype = {
   };
 
   pub.search = function() {
-    pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData().length);
+    pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
     pub.treeView.addSuspensionPoints(-1, -1);
     pub.keywords = document.getElementById("keywords").value;
     var w = com.wuxuan.fromwheretowhere.utils.getIncludeExcluded(pub.keywords);
