@@ -1,0 +1,1 @@
+7z a -tzip FromWhereToWhere.xpi chrome.manifest install.rdf content/*.xul content/*.js locale/en-US/*.dtd skin/*.css 

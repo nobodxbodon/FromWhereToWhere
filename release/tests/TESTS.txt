@@ -1,0 +1,16 @@
+1) top nodes have no duplicates, except for when importing existing node
+2) expanded nodes have the same number as last version if the profile hasn't been changed
+3) expansion won't go infinite if there's cyclic link
+4) searching returns the same top nodes as last version if the profile hasn't been changed
+5) context menu -> "open in new tab" works for all the nodes, resulting in opening a new tab with url of the node as url
+6) the link that has been captured by Scrapbook are highlighted in Italic font
+7) the link that has been captured by Scrapbook can open the captured page by context menu -> "open local copy"
+8) context menu -> "property" works for all the nodes. If the node has been opened, the property will include the title and url information of itself and all its children; otherwise it'll only include the title and url information of this node
+9) the property can be copied from the opened "property" dialog
+10) context menu -> "import" works in all circumstances
+11) the copied property in step 9 can be pasted into the textbox in "import" dialog
+12) click "OK" in import dialog will reconstruct the same tree structure as the nodes that the property was copied from
+13) during searching or opening a node, it won't freeze Firefox
+14) icon will show for the url that has been visited
+15) accurate searching a) exact phrase: "keyword1 key2"; b) exclusion: -key3 -"key4 key5"
+16) columns in the view can be resized using splitters

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE dialog PUBLIC "-//MOZILLA//DTD XUL V1.0//EN" "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+
+<dialog
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  id="propertyDialog"
+  title="Property"
+  onload="com.wuxuan.fromwheretowhere.propdialog.onLoad();"
+  persist="screenX screenY width height">
+
+  <script type="application/javascript" src="chrome://FromWhereToWhere/content/propdialog.js"/>
+  <hbox>
+    <textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
+  </hbox>
+
+</dialog>
+

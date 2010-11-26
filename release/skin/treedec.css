@@ -1,0 +1,23 @@
+@import url(chrome://global/skin/);
+
+
+tree#elementList > treechildren::-moz-tree-cell-text(makeItBlue)
+{
+  color: blue;
+}
+
+tree#elementList > treechildren::-moz-tree-cell-text(makeItRed)
+{
+  color: red;
+}
+
+tree#elementList > treechildren::-moz-tree-cell-text(makeItOlive)
+{
+  color: olive;
+}
+
+tree#elementList > treechildren::-moz-tree-cell-text(makeItCurve)
+{
+  font-style: italic;
+  font-family: cursive;
+}

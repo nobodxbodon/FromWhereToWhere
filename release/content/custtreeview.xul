@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
+<?xml-stylesheet href="chrome://FromWhereToWhere/skin/treedec.css" type="text/css"?>  
+
+<window onload="com.wuxuan.fromwheretowhere.main.init();"  
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">  
+  
+<popupset>
+  <menupopup id="clipmenu" onpopupshowing="com.wuxuan.fromwheretowhere.main.showMenuItems()">
+    <menuitem id="openinnewtab" label="&contextMenu.openinnewtab;" oncommand="com.wuxuan.fromwheretowhere.main.openlink()"/>
+    <menuitem id="local" label="&contextMenu.openlocalcopy;" oncommand="com.wuxuan.fromwheretowhere.main.openlocal()"/>
+    <menuseparator/>
+    <menuitem id="property" label="&contextMenu.property;" oncommand="com.wuxuan.fromwheretowhere.main.property()"/>
+    <menuitem id="importNodes" label="&contextMenu.importNodes;" oncommand="com.wuxuan.fromwheretowhere.main.importNodes()"/>
+  </menupopup>
+</popupset>
+
+<hbox>
+  <textbox id="keywords" multiline="false" flex="1" onkeypress="com.wuxuan.fromwheretowhere.main.keypress(event)"/>
+  <button id="bsearch" label="&button.searchallwords;" oncommand="com.wuxuan.fromwheretowhere.main.search()"/>
+</hbox>
+
+<tree id="elementList" flex="1">  
+  <treecols>  
+    <treecol id="element" label="&table.title;" primary="true" flex="4"/>
+       <splitter resizeafter="closest">
+      </splitter>
+    <treecol id="url" label="&table.url;" primary="true" flex="3"/>
+      <splitter resizeafter="closest">
+      </splitter>
+     <treecol id="date" label="&table.date;" flex="1"/>
+  </treecols>
+  <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.main.openlink()"/>  
+</tree>  
+
+<script src="sbconnect.js" />
+<script src="utils.js" />
+<script src="treeview.js" />
+
+</window>  
