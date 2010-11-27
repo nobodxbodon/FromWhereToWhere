@@ -291,6 +291,7 @@ pub.mainThread.prototype = {
       // This is where we react to the completion of the working thread.
       pub.alreadyExpandedPids = [];
       pub.treeView.delSuspensionPoints(this.idx);
+			//alert(this.item.children.length);
       pub.treeView.expandFromNodeInTree(this.item, this.idx);
     } catch(err) {
       Components.utils.reportError(err);
@@ -419,7 +420,7 @@ pub.mainThread.prototype = {
       nodes = pub.createParentNodesCheckDup([pid]);
     }
     
-    //show the current url is no parents found
+    //show the current url if no parents found
     if(nodes.length==0){
       if(pid){
 	nodes.push(pub.nodefromPlaceid(pid));
@@ -434,9 +435,7 @@ pub.mainThread.prototype = {
   pub.showMenuItems = function(){
     var localItem = document.getElementById("local");
     var openinnewtab = document.getElementById("openinnewtab");
-    //alert(pub.treeView.visibleData.length);
     var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
-    //alert(pub.treeView.selection.currentIndex);
     if(node){
       var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(node.url);
       pub.selectNodeLocal = exists;
@@ -482,6 +481,7 @@ pub.mainThread.prototype = {
     return node;
   };
   
+	//TODO: if the node.level=0, no need to move at all
   pub.putNodeToLevel0 = function(node){
     var currentLevel = node.level;
     return pub.decreaseLevelandCollapse(node, currentLevel);
@@ -508,7 +508,11 @@ pub.mainThread.prototype = {
   //if it's a container, but never opened before, then it has no children.
   //For now have to manually open it first to get all the children, and then "export the whole trace"
   pub.property = function() {
-    var json = pub.nativeJSON.encode(pub.getCurrentSelected());
+		var tosave = pub.getCurrentSelected();
+		/*alert(tosave.length);
+		alert(tosave[0].children.length);
+    alert(tosave[0].children instanceof Array);*/
+    var json = pub.nativeJSON.encode(tosave);
     var params = {inn:{property:json}, out:null};       
     window.openDialog("chrome://FromWhereToWhere/content/propdialog.xul", "",
       "chrome, centerscreen, dialog, resizable=yes", params).focus();
@@ -516,7 +520,15 @@ pub.mainThread.prototype = {
   
   // recordType: 0 - from URI; 1 - from searching keywords; 2 - imported; -1 - invalid.
   // TODO: make constants!
+	// TODO: if sidebar is open, close it first to save the sync trouble
   pub.saveNodetoLocal = function() {
+		var sidebarWindow = pub.mainWindow.document.getElementById("sidebar").contentWindow;
+		//alert(sidebarWindow.location.href);
+		var sidebarRef = "chrome://FromWhereToWhere/content/sidebar.xul".toLowerCase();
+		if (sidebarWindow.location.href == sidebarRef) {
+			pub.mainWindow.toggleSidebar('viewEmptySidebar');  
+		} 
+
     var select = pub.getCurrentSelected();
     var json = pub.nativeJSON.encode(select);
     var recordName = "";
@@ -545,6 +557,7 @@ pub.mainThread.prototype = {
 	recordType = 2;
       }
       com.wuxuan.fromwheretowhere.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
+			document.getElementById("saved_notification").openPopup(null, "", 60, 50, false, false);
     }
   };
   
@@ -670,7 +683,7 @@ pub.mainThread.prototype = {
     pub.aserv=Components.classes["@mozilla.org/atom-service;1"].
                 getService(Components.interfaces.nsIAtomService);
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
-    //add here to check the top level nodes
+    //add here to check the top level nodes - ?
     com.wuxuan.fromwheretowhere.sb.urlInit();
     
     com.wuxuan.fromwheretowhere.localmanager.init();

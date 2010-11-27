@@ -19,7 +19,6 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   // have to separate the looks of node from the content!!!!!!
   
     visibleData : function(){
-      //alert("gen vis data");
       return com.wuxuan.fromwheretowhere.localmanager.queryAll();
     }(),
   
@@ -75,9 +74,6 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     
     getImageSrc: function(idx, column) {
       //can't access .main like it's global
-      /*if(column.id == "title") {
-        return com.wuxuan.fromwheretowhere.main.getImagefromUrl(this.visibleData[idx].url);
-      }*/
     },
     
     getProgressMode : function(idx,column) {},  
@@ -98,17 +94,14 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   
   //TODO: merge the code with ImportNode in main
   pub.openNode = function(){
-    //pub.getBrowserWindow();
-    //alert("main content location is " + content.document.getElementById("elementList"));
-    //var treeView = com.wuxuan.fromwheretowhere.mainView.treeView;
-    var treeView = pub.mainWindow.content.document.getElementById("elementList").wrappedJSObject.view;//pub.mainWindow.top.treeView;//.document.getElementById("elementList").view;
+    //compliant issue: for 4.0
+    var treeView = pub.mainWindow.content.document.getElementById("elementList").view;
+    if(treeView==null){
+      //for 3.6.x
+      treeView = pub.mainWindow.content.document.getElementById("elementList").wrappedJSObject.view;
+    }
     var json = com.wuxuan.fromwheretowhere.localmanager.getNodeContent(pub.treeView.visibleData[pub.treeView.selection.currentIndex].id);
-    //var loadView = Application.storage.get("fromwheretowhere.mainTreeView", {test:-1});
-    //alert(treeView.selection.count);
-    //alert(treeView.isContainer(treeView.selection.currentIndex));
-    //alert(treeView.rowCount);
 
-    //alert(json);
     var newNodes = [];
     try{
       newNodes = pub.nativeJSON.decode(json);
@@ -117,35 +110,9 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
         alert("record corrupted:\n" + json + " " + err);
       }
     }
-    /*var main = com.wuxuan.fromwheretowhere.main;
-    main.init();
-    
-    var sb = com.wuxuan.fromwheretowhere.sb;
-    sb.urlInit();
-    var newView = com.wuxuan.fromwheretowhere.mainView.createView(newNodes, main, sb, true);
-    */
-    //alert("set new data");
-    //alert(newNodes);
     Application.storage.set("fromwheretowhere.currentData", newNodes);
-    //alert(treeView.treeBox);
-    //just to reset visibleData, hope this hack works
+    //just to reset visibleData, seems this hack works
     treeView.setTree(null);
-    //Application.storage.set("fromwheretowhere.currentView", newView);
-    //TODO: remove, pass newView as parameter
-    //main.treeView = newView;
-    //com.wuxuan.fromwheretowhere.main.treeView = newView;
-    //treeView.wrappedJSObject.view = newView;
-    /*if(newNodes.length>0){
-      if(treeView.visibleData.length==1 && treeView.visibleData[0].id == -1){
-        treeView.visibleData = [];
-        treeView.treeBox.rowCountChanged(0, -1);
-      }
-      for (var i = 0; i < newNodes.length; i++) {
-        newNodes[i]=com.wuxuan.fromwheretowhere.main.putNodeToLevel0(newNodes[i]);
-        treeView.visibleData.splice(treeView.visibleData.length, 0, newNodes[i]);
-      }
-      treeView.treeBox.rowCountChanged(treeView.visibleData.length, newNodes.length);
-    }*/
   };
   
   return pub;

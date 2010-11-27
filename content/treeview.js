@@ -5,21 +5,12 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   var devOptions=false;
   //var testConstruct=(function(){alert("mainView cons here");})();
   
-  // if isRecord, there's no need to check for infinite expansion
-  pub.createView = function(visible, main, sb, isRecord){
+  //TODO: if isRecord, there's no need to check for infinite expansion
+  pub.createView = function(main, sb, isRecord){
     return {
   // have to separate the looks of node from the content!!!!!!
-  /*test: 1,
-  update: function(input){
-    alert(input);
-  },*/
   
   visibleData : null,
-  /*function(){
-    //alert("get visible data");
-    return Application.storage.get("fromwheretowhere.currentData", false);
-  },*/
-
   treeBox: null,  
   selection: null,  
   
@@ -35,14 +26,13 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   },
   
   setTree: function(treeBox){
+    //get the length of last visibleData, for rowCountChanged
     var lastVisibleLen = 0;
     if(this.visibleData!=null){
         lastVisibleLen = this.visibleData.length;
     }
     var newNodes = Application.storage.get("fromwheretowhere.currentData", false);
-
-    //var len = this.getVisibleLength(this.visibleData);
-    //alert("set tree again: "+this.visibleData.length);
+    
     if(treeBox!=null){
         this.treeBox = treeBox;
     }
@@ -55,9 +45,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       newNodes[i]=main.putNodeToLevel0(newNodes[i]);
       this.visibleData.splice(this.visibleData.length, 0, newNodes[i]);
     }
-    //alert(this.visibleData.length+ " " + lastVisibleLen);
     this.treeBox.rowCountChanged(lastVisibleLen,this.visibleData.length-lastVisibleLen+1);
-    //this.treeBox.invalidate();
   },
   
   getCellText: function(idx, column) {
@@ -230,9 +218,9 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     sb.urlInit();
     // Main Tree definition
     var newNodes = main.createParentNodes(main.retrievedId);
+    
     Application.storage.set("fromwheretowhere.currentData", newNodes);
-    pub.treeView = pub.createView(newNodes, main, sb, false);
-    //Application.storage.set("fromwheretowhere.currentView", pub.treeView);
+    pub.treeView = pub.createView(main, sb, false);
     //TODO: remove this, pass as parameter
     main.treeView = pub.treeView;
     document.getElementById("elementList").view = pub.treeView;

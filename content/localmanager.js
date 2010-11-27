@@ -40,7 +40,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     statement.params.content = content;
     statement.params.url = url;
     statement.params.date = date;
-    alert("statement done");
+    //alert("statement done");
     if(term!=""){
       statement.params.term = term;
     } else if(currenturi!=""){
@@ -49,7 +49,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     
     try {
       statement.executeStep();
-      alert("saved");
+      //alert("saved");
     } 
     catch (e) {
       alert("add record exception!");

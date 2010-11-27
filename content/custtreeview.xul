@@ -35,6 +35,18 @@
   <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.main.openlink()"/>  
 </tree>  
 
+<panel id="saved_notification" fade="fast">
+  <hbox align="start">
+    <vbox>
+      <description value="saved"/>
+      <hbox>
+        <button label="what's saved"/>
+        <button label="none removed"/>
+      </hbox>
+    </vbox>
+  </hbox>
+</panel>
+
 <script src="namespace.js" />
 <script src="sbconnect.js" />
 <script src="utils.js" />
