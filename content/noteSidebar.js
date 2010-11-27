@@ -125,7 +125,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     var newView = com.wuxuan.fromwheretowhere.mainView.createView(newNodes, main, sb, true);
     */
     //alert("set new data");
-    alert(newNodes);
+    //alert(newNodes);
     Application.storage.set("fromwheretowhere.currentData", newNodes);
     //alert(treeView.treeBox);
     //just to reset visibleData, hope this hack works

@@ -9,10 +9,10 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   pub.createView = function(visible, main, sb, isRecord){
     return {
   // have to separate the looks of node from the content!!!!!!
-  test: 1,
+  /*test: 1,
   update: function(input){
     alert(input);
-  },
+  },*/
   
   visibleData : null,
   /*function(){
@@ -35,6 +35,10 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   },
   
   setTree: function(treeBox){
+    var lastVisibleLen = 0;
+    if(this.visibleData!=null){
+        lastVisibleLen = this.visibleData.length;
+    }
     var newNodes = Application.storage.get("fromwheretowhere.currentData", false);
 
     //var len = this.getVisibleLength(this.visibleData);
@@ -51,8 +55,9 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       newNodes[i]=main.putNodeToLevel0(newNodes[i]);
       this.visibleData.splice(this.visibleData.length, 0, newNodes[i]);
     }
-    this.treeBox.rowCountChanged(0,this.visibleData.length);
-    //this.treeBox.invalidateRow(0);
+    //alert(this.visibleData.length+ " " + lastVisibleLen);
+    this.treeBox.rowCountChanged(lastVisibleLen,this.visibleData.length-lastVisibleLen+1);
+    //this.treeBox.invalidate();
   },
   
   getCellText: function(idx, column) {
