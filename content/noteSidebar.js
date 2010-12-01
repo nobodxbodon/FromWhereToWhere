@@ -92,6 +92,21 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     click: function() {}
   };
   
+  pub.showMenuItems = function(){
+    var deleteItem = document.getElementById("delete");
+    var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
+    deleteItem.hidden = (node==null);
+  };
+  
+  pub.deleteNotes = function(){
+    var recordIds = pub.treeView.selection.currentIndex;
+    //alert("delete: "+recordIds)
+    com.wuxuan.fromwheretowhere.localmanager.deleteRecords(recordIds);
+    //rowCountChange for all ids
+    //alert("remove row: "+recordIds)
+    pub.treeView.visibleData.splice(recordIds, 1);
+    pub.treeView.treeBox.rowCountChanged(recordIds, -1);
+  }
   //TODO: merge the code with ImportNode in main
   pub.openNode = function(){
     //compliant issue: for 4.0

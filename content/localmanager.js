@@ -57,6 +57,21 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     }
   };
   
+  //one for now
+  pub.deleteRecords = function(recordIds){
+    var statement = pub.localRecord.createStatement("DELETE FROM " + pub.RECORDTABLENAME + " WHERE rowid=:recordIds")
+    statement.params.recordIds = recordIds;
+    
+    try {
+      statement.executeStep();
+      //alert("saved");
+    } 
+    catch (e) {
+      alert("delete record exception!");
+      statement.reset();
+    }
+  };
+  
   pub.queryAll = function(){
     var statement = pub.localRecord.createStatement("SELECT rowid,* from " + pub.RECORDTABLENAME);
     var items = [];

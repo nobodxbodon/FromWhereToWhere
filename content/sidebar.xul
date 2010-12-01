@@ -4,15 +4,21 @@
 
 <page id="emptySidebar" title="records" onload="com.wuxuan.fromwheretowhere.noteSidebar.initView();"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
-  
-  <tree id="recordList" flex="1">  
+
+<popupset>
+  <menupopup id="sidebarmenu" onpopupshowing="com.wuxuan.fromwheretowhere.noteSidebar.showMenuItems()">
+    <menuitem id="delete" label="&contextMenu.delete;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.deleteNotes()"/>
+  </menupopup>
+</popupset>
+
+<tree id="recordList" flex="1">  
   <treecols>  
     <treecol id="title" label="&table.title;" primary="true" flex="5"/>
        <splitter resizeafter="closest">
       </splitter>
      <treecol id="date" label="&table.date;" flex="1"/>
   </treecols>
-  <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.noteSidebar.openNode()"/>  
+  <treechildren context="sidebarmenu" ondblclick="com.wuxuan.fromwheretowhere.noteSidebar.openNode()"/>  
 </tree>
 
 <script src="namespace.js" />

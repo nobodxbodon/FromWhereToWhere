@@ -291,7 +291,6 @@ pub.mainThread.prototype = {
       // This is where we react to the completion of the working thread.
       pub.alreadyExpandedPids = [];
       pub.treeView.delSuspensionPoints(this.idx);
-			//alert(this.item.children.length);
       pub.treeView.expandFromNodeInTree(this.item, this.idx);
     } catch(err) {
       Components.utils.reportError(err);
@@ -509,9 +508,6 @@ pub.mainThread.prototype = {
   //For now have to manually open it first to get all the children, and then "export the whole trace"
   pub.property = function() {
 		var tosave = pub.getCurrentSelected();
-		/*alert(tosave.length);
-		alert(tosave[0].children.length);
-    alert(tosave[0].children instanceof Array);*/
     var json = pub.nativeJSON.encode(tosave);
     var params = {inn:{property:json}, out:null};       
     window.openDialog("chrome://FromWhereToWhere/content/propdialog.xul", "",

@@ -38,11 +38,7 @@
 <panel id="saved_notification" fade="fast">
   <hbox align="start">
     <vbox>
-      <description value="saved"/>
-      <hbox>
-        <button label="what's saved"/>
-        <button label="none removed"/>
-      </hbox>
+      <description id="saved_note" value="saved"/>
     </vbox>
   </hbox>
 </panel>
