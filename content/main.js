@@ -553,6 +553,8 @@ pub.mainThread.prototype = {
 	recordType = 2;
       }
       com.wuxuan.fromwheretowhere.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
+			var savenote = document.getElementById("saved_note");
+			savenote.value = "saved:"+recordName;
 			document.getElementById("saved_notification").openPopup(null, "", 60, 50, false, false);
     }
   };
