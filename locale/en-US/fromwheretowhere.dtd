@@ -4,6 +4,7 @@
 <!ENTITY contextMenu.importNodes "Import">
 <!ENTITY contextMenu.saveNodetoLocal "Save to Local Notes">
 <!ENTITY contextMenu.showLocalNotes "Show Notes in Sidebar">
+<!ENTITY contextMenu.delete "Delete">
 <!ENTITY button.searchallwords "Search titles with all the words">
 
 <!ENTITY table.title "Title">
