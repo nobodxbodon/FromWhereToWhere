@@ -57,16 +57,23 @@ com.wuxuan.fromwheretowhere.utils = function(){
       words = pub.splitWithSpaces(keywords.replace(quoteReg, ""));
     }
     //put quoted words at the end, which will be the first to search from, more likely to reduce results
-	
+    
+    var site = [];
     for(var i=0; i<words.length; i++){
+      //get excluded words
       if(words[i][0]=='-'){
         excluded.push(words[i].substring(1));
+        words.splice(i,1);
+        i--;
+      //get site
+      } else if(words[i].indexOf("site:")==0){
+        site.push(words[i].substring(5));
         words.splice(i,1);
         i--;
       }
     }
     words = words.concat(quotedWords);
-    return {origkeywords : origkeywords, words : words, excluded : excluded};
+    return {origkeywords : origkeywords, words : words, excluded : excluded, site : site};
   };
   
   return pub;

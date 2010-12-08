@@ -160,11 +160,21 @@ com.wuxuan.fromwheretowhere.main = function(){
     }catch(e){}
   };
   
-  pub.searchIdbyKeywords = function(words, excluded){
+  pub.searchIdbyKeywords = function(words, excluded, site){
     //SELECT * FROM moz_places where title LIKE '%sqlite%';
     //NESTED in reverse order, with the assumption that the word in front is more frequently used, thus return more items in each SELECT
     var term = "";
-    var excludeTerm = "moz_places";
+		
+		//add site filter
+		var siteTerm = "moz_places";
+		if(site.length!=0){
+      for(var i = site.length-1; i>=0; i--){
+        siteTerm = "(SELECT * FROM " + siteTerm + " WHERE URL LIKE '%" + site[i] + "%')";
+      }
+    }
+		
+		//TODO: seems dup condition, to simplify
+    var excludeTerm = siteTerm;
     if(excluded.length!=0){
       for(var i = excluded.length-1; i>=0; i--){
         if(i==excluded.length-1){
@@ -593,11 +603,13 @@ pub.mainThread.prototype = {
   
   pub.pidwithKeywords = [];
   
-  pub.searchThread = function(threadID, keywords, words, excluded) {
+	//TODO: call getIncludeExclude here, save passing arguments?
+  pub.searchThread = function(threadID, keywords, words, excluded, site) {
     this.threadID = threadID;
     this.keywords = keywords;
     this.words = words;
     this.excluded = excluded;
+		this.site = site;
   };
   
   pub.searchThread.prototype = {
@@ -608,7 +620,7 @@ pub.mainThread.prototype = {
         if(this.words.length!=0){
           var allpids = [];
           // improve by search id from keywords directly instead of getting urls first
-          allpids = pub.searchIdbyKeywords(this.words, this.excluded);
+          allpids = pub.searchIdbyKeywords(this.words, this.excluded, this.site);
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.createParentNodesCheckDup(allpids);
         }
@@ -649,7 +661,7 @@ pub.mainThread.prototype = {
     pub.treeView.addSuspensionPoints(-1, -1);
     pub.keywords = document.getElementById("keywords").value;
     var w = com.wuxuan.fromwheretowhere.utils.getIncludeExcluded(pub.keywords);
-    pub.main.dispatch(new pub.searchThread(1, w.origkeywords, w.words, w.excluded), pub.main.DISPATCH_NORMAL);
+    pub.main.dispatch(new pub.searchThread(1, w.origkeywords, w.words, w.excluded, w.site), pub.main.DISPATCH_NORMAL);
       
   };
   
