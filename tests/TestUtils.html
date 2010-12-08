@@ -3,12 +3,13 @@
     <script type="text/javascript" src="Builder.js"></script>
     <script type="text/javascript" src="More.js"></script>
     <script type="text/javascript" src="Simple.js"></script>
+    <script type="text/javascript" src="../content/namespace.js"></script>
     <script type="text/javascript" src="../content/utils.js"></script>
   </head>
   <body>
     <pre id="test">
       <script type="text/javascript">
-      	plan({ tests: 13 });
+      	plan({ tests: 14 });
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("  ").words, [], "getIncludeExcluded words 0");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").words, ["sqlite"], "getIncludeExcluded words 1");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox").words, ["sqlite","firefox"], "getIncludeExcluded words 2");
@@ -22,6 +23,8 @@
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"g1 g2\" -g3").excluded, ["g1 g2","g3"], "getIncludeExcluded excluded 5");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("-\"\"").excluded, [""], "getIncludeExcluded excluded 6");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("-\" \"").excluded, [" "], "getIncludeExcluded excluded 7");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox site:test.com").site, ["test.com"], "getIncludeExcluded site 0");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("site:onlysite").site, ["onlysite"], "getIncludeExcluded site 1");
         //isDeeply([1,2].concat([3,4]), [1,2,3,4], "concat");
       </script>
     </pre>
