@@ -45,6 +45,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
     if(excludeQuotes){
       keywords = keywords.replace(excludePreciseReg, "");
     }
+    //get all quoted phrases, put them in words and remove them from 'keywords'
     var quoteReg = /\"([\s|\w|\W]*)\"/g;
     var quotes = keywords.match(quoteReg);
     for(var i in quotes){
@@ -60,8 +61,8 @@ com.wuxuan.fromwheretowhere.utils = function(){
     
     var site = [];
     for(var i=0; i<words.length; i++){
-      //get excluded words
-      if(words[i][0]=='-'){
+      //get excluded words, single '-' is rec as keyword
+      if(words[i][0]=='-' && words.length>1){
         excluded.push(words[i].substring(1));
         words.splice(i,1);
         i--;
