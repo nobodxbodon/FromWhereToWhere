@@ -32,7 +32,9 @@ com.wuxuan.fromwheretowhere.mainView = function(){
         lastVisibleLen = this.visibleData.length;
     }
     var newNodes = Application.storage.get("fromwheretowhere.currentData", false);
-    
+    //ugly solution for passing the nodes from sidebar to main TV:
+    //always make sure this "global" currentData is reset every time after the treeview.js loads visibleData from it
+    Application.storage.set("fromwheretowhere.currentData", false);
     if(treeBox!=null){
         this.treeBox = treeBox;
     }
@@ -217,9 +219,12 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     var sb = com.wuxuan.fromwheretowhere.sb;
     sb.urlInit();
     // Main Tree definition
-    var newNodes = main.createParentNodes(main.retrievedId);
-    
-    Application.storage.set("fromwheretowhere.currentData", newNodes);
+    // one case the nodes are set: open a note from sidebar, and current page isn't main TV
+    var nodes = Application.storage.get("fromwheretowhere.currentData", false);
+    if(!nodes){
+      var newNodes = main.createParentNodes(main.retrievedId);
+      Application.storage.set("fromwheretowhere.currentData", newNodes);
+    }
     pub.treeView = pub.createView(main, sb, false);
     //TODO: remove this, pass as parameter
     main.treeView = pub.treeView;

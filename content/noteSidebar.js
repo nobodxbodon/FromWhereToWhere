@@ -2,6 +2,8 @@
 com.wuxuan.fromwheretowhere.noteSidebar = function(){
   var pub={};
   
+  var TVURI = "chrome://FromWhereToWhere/content/custtreeview.xul".toLowerCase();
+  
   pub.mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
  .getInterface(Components.interfaces.nsIWebNavigation)
  .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
@@ -109,12 +111,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   }
   //TODO: merge the code with ImportNode in main
   pub.openNode = function(){
-    //compliant issue: for 4.0
-    var treeView = pub.mainWindow.content.document.getElementById("elementList").view;
-    if(treeView==null){
-      //for 3.6.x
-      treeView = pub.mainWindow.content.document.getElementById("elementList").wrappedJSObject.view;
-    }
+    //get nodes content first
     var json = com.wuxuan.fromwheretowhere.localmanager.getNodeContent(pub.treeView.visibleData[pub.treeView.selection.currentIndex].id);
 
     var newNodes = [];
@@ -126,8 +123,21 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
       }
     }
     Application.storage.set("fromwheretowhere.currentData", newNodes);
-    //just to reset visibleData, seems this hack works
-    treeView.setTree(null);
+    //if current tab is the main treeview, open 
+    if(pub.mainWindow.gBrowser.currentURI.spec!=TVURI){
+      //alert(pub.mainWindow.gBrowser.currentURI.spec);
+      pub.mainWindow.gBrowser.selectedTab = pub.mainWindow.gBrowser.addTab(TVURI);
+    } else {
+      //compliant issue: for 4.0
+      var ele = pub.mainWindow.content.document.getElementById("elementList");
+      var treeView = ele.view;
+      if(treeView==null){
+        //for 3.6.x
+        treeView = ele.wrappedJSObject.view;
+      }
+      //just to reset visibleData, seems this hack works
+      treeView.setTree(null);
+    }
   };
   
   return pub;
