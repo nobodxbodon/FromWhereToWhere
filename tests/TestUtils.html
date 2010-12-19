@@ -15,6 +15,8 @@
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox").words, ["sqlite","firefox"], "getIncludeExcluded words 2");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("\"\"").words, [""], "getIncludeExcluded words 3");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("\" \"").words, [" "], "getIncludeExcluded words 4");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("-").words, ["-"], "getIncludeExcluded words 5");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("\"-notexclude \"").words, ["-notexclude "], "getIncludeExcluded words 6");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").excluded, [], "getIncludeExcluded excluded 0");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -firefox").excluded, ["firefox"], "getIncludeExcluded excluded 1");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"google\"").excluded, ["google"], "getIncludeExcluded excluded 2");
