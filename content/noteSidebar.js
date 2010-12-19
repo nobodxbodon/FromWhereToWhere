@@ -101,7 +101,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   pub.deleteNotes = function(){
     var recordIds = pub.treeView.selection.currentIndex;
     //alert("delete: "+recordIds)
-    com.wuxuan.fromwheretowhere.localmanager.deleteRecords(recordIds);
+    com.wuxuan.fromwheretowhere.localmanager.deleteRecords(pub.treeView.visibleData[recordIds].id);
     //rowCountChange for all ids
     //alert("remove row: "+recordIds)
     pub.treeView.visibleData.splice(recordIds, 1);
