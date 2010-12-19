@@ -4,7 +4,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
   
   // Utils functions from here
   pub.cloneObject = function(obj){
-    var clone = (obj instanceof Array) ? [] : {};;
+    var clone = (obj.constructor.name=="Array") ? [] : {};;
     for(var i in obj) {
       if(typeof(obj[i])=="object")
         clone[i] = pub.cloneObject(obj[i]);
