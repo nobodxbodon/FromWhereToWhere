@@ -65,7 +65,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
     var site = [];
     for(var i=0; i<words.length; i++){
       //get excluded words, single '-' is rec as keyword
-      if(words[i][0]=='-' && words.length>1){
+      if(words[i][0]=='-' && words[i].length>1){
         excluded.push(words[i].substring(1));
         words.splice(i,1);
         i--;
