@@ -92,6 +92,21 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     }
   };
   
+  pub.getNodesRawfromURI = function(uri){
+    var statement = pub.localRecord.createStatement("SELECT content from " + pub.RECORDTABLENAME + " where content LIKE '%" + uri + "%'");
+    var nodes = [];
+    try {
+      while (statement.executeStep()) {
+        nodes.push(statement.getString(0));
+      }
+      statement.reset();
+      return nodes;  
+    } 
+    catch (e) {
+      statement.reset();
+    }
+  };
+  
   pub.getNodeContent = function(rowid){
     var statement = pub.localRecord.createStatement("SELECT content from " + pub.RECORDTABLENAME + " where rowid=" + rowid);
     try {

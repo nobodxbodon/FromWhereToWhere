@@ -437,6 +437,23 @@ pub.mainThread.prototype = {
 	nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
       }
     }
+		
+    //add from-to from local notes, using the same URI
+    var rawLocalNotes = pub.localmanager.getNodesRawfromURI(pub.currentURI);
+		//alert(rawLocalNotes);
+		for(var i in rawLocalNotes){
+			var localNodes = []
+			try{
+				localNodes = pub.nativeJSON.decode(rawLocalNotes[i]);
+			}catch(err){
+				//if(json && json!="[]"){
+					alert("record corrupted:\n" + json + " " + err);
+				//}
+			}
+			//alert(localNodes[0].label);
+			nodes = localNodes.concat(nodes);//splice(0,0,localNodes[0]);	
+		}
+		
     return nodes;
   };
   
@@ -562,9 +579,9 @@ pub.mainThread.prototype = {
         // TODO: pick tags
 	recordType = 2;
       }
-      com.wuxuan.fromwheretowhere.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
+      pub.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
 			var savenote = document.getElementById("saved_note");
-			savenote.value = "saved:"+recordName;
+			savenote.value = "Note saved:\n"+recordName;
 			document.getElementById("saved_notification").openPopup(null, "", 60, 50, false, false);
     }
   };
@@ -598,7 +615,7 @@ pub.mainThread.prototype = {
   };
   
   pub.getAllNotes = function() {
-    return com.wuxuan.fromwheretowhere.localmanager.queryAll();
+    return pub.localmanager.queryAll();
   };
   
   pub.pidwithKeywords = [];
@@ -695,8 +712,8 @@ pub.mainThread.prototype = {
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     //add here to check the top level nodes - ?
     com.wuxuan.fromwheretowhere.sb.urlInit();
-    
-    com.wuxuan.fromwheretowhere.localmanager.init();
+    pub.localmanager = com.wuxuan.fromwheretowhere.localmanager;
+    pub.localmanager.init();
     //document.getElementById("elementList").addEventListener("click", function (){getURLfromNode(treeView);}, false);
   }
   
