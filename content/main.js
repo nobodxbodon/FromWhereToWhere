@@ -642,6 +642,12 @@ pub.mainThread.prototype = {
           topNodes = pub.createParentNodesCheckDup(allpids);
         }
 	
+				//search in local notes, latest first
+				var localNodes = pub.localmanager.searchNotesbyKeywords(this.words, this.excluded, this.site);
+				for(var i in localNodes){
+					topNodes.splice(0,0,pub.putNodeToLevel0(localNodes[i]));
+				}
+				
 				//refresh tree, remove all visibledata and add new ones
         pub.treeView.delSuspensionPoints(-1);
         if(this.words.length==0){

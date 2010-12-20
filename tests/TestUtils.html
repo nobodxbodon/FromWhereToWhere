@@ -29,6 +29,7 @@
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("-\" \"").excluded, [" "], "getIncludeExcluded excluded 7");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox site:test.com").site, ["test.com"], "getIncludeExcluded site 0");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("site:onlysite").site, ["onlysite"], "getIncludeExcluded site 1");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("site:ab site:.com").site, ["ab",".com"], "getIncludeExcluded site 2");
         //isDeeply([1,2].concat([3,4]), [1,2,3,4], "concat");
       </script>
     </pre>
