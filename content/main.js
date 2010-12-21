@@ -428,6 +428,22 @@ pub.mainThread.prototype = {
     var nodes = [];
     if(pid){
       nodes = pub.createParentNodesCheckDup([pid]);
+			
+			//add from-to from local notes, using the same URI
+			var rawLocalNotes = pub.localmanager.getNodesRawfromURI(pub.currentURI);
+			//alert(rawLocalNotes);
+			for(var i in rawLocalNotes){
+				var localNodes = []
+				try{
+					localNodes = pub.nativeJSON.decode(rawLocalNotes[i]);
+				}catch(err){
+					//if(json && json!="[]"){
+						alert("record corrupted:\n" + json + " " + err);
+					//}
+				}
+				//alert(localNodes[0].label);
+				nodes = localNodes.concat(nodes);//splice(0,0,localNodes[0]);	
+			}
     }
     
     //show the current url if no parents found
@@ -438,22 +454,6 @@ pub.mainThread.prototype = {
 	nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
       }
     }
-		
-    //add from-to from local notes, using the same URI
-    var rawLocalNotes = pub.localmanager.getNodesRawfromURI(pub.currentURI);
-		//alert(rawLocalNotes);
-		for(var i in rawLocalNotes){
-			var localNodes = []
-			try{
-				localNodes = pub.nativeJSON.decode(rawLocalNotes[i]);
-			}catch(err){
-				//if(json && json!="[]"){
-					alert("record corrupted:\n" + json + " " + err);
-				//}
-			}
-			//alert(localNodes[0].label);
-			nodes = localNodes.concat(nodes);//splice(0,0,localNodes[0]);	
-		}
 		
     return nodes;
   };
@@ -684,27 +684,27 @@ pub.mainThread.prototype = {
           allpids = pub.searchIdbyKeywords(this.words, this.excluded, this.site);
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.createParentNodesCheckDup(allpids);
-        }
 	
-				//search in local notes, latest first
-				//7 short records 1 long: 7ms; 7 short 11 long: 37ms
-				//var start = (new Date()).getTime();
-				var maybeNodes = pub.localmanager.searchNotesbyKeywords(this.words, this.excluded, this.site);
-				//lowercase for all keywords
-				for(var w in this.words){
-					this.words[w] = this.words[w].toLowerCase();
+					//search in local notes, latest first
+					//7 short records 1 long: 7ms; 7 short 11 long: 37ms
+					//var start = (new Date()).getTime();
+					var maybeNodes = pub.localmanager.searchNotesbyKeywords(this.words, this.excluded, this.site);
+					//lowercase for all keywords
+					for(var w in this.words){
+						this.words[w] = this.words[w].toLowerCase();
+					}
+					for(var e in this.excluded){
+						this.excluded[e] = this.excluded[e].toLowerCase();
+					}
+					for(var s in this.site){
+						this.site[s] = this.site[s].toLowerCase();
+					}
+					var localNodes = pub.walkAll(maybeNodes, this.words, this.excluded, this.site, true);
+					for(var i in localNodes){
+						topNodes.splice(0,0,pub.putNodeToLevel0(localNodes[i]));
+					}
+					//alert((new Date()).getTime()-start);
 				}
-				for(var e in this.excluded){
-					this.excluded[e] = this.excluded[e].toLowerCase();
-				}
-				for(var s in this.site){
-					this.site[s] = this.site[s].toLowerCase();
-				}
-				var localNodes = pub.walkAll(maybeNodes, this.words, this.excluded, this.site, true);
-				for(var i in localNodes){
-					topNodes.splice(0,0,pub.putNodeToLevel0(localNodes[i]));
-				}
-				//alert((new Date()).getTime()-start);
 				
 				//refresh tree, remove all visibledata and add new ones
         pub.treeView.delSuspensionPoints(-1);
