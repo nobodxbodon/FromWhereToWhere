@@ -657,7 +657,7 @@ pub.mainThread.prototype = {
         return pub.walkAll(maybe.children, words, excluded, site, false);
       }
     }
-		alert(maybe.label);
+		//alert(maybe.label);
 		maybe.haveKeywords = true;
 		//TODO: this is just to check keywords
 		pub.walkAll(maybe.children, words, excluded, site, false);

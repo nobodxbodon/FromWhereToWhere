@@ -118,7 +118,11 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
 
     if(words.length!=0){
       for(var i = words.length-1; i>=0; i--){
-        term = "SELECT content FROM " + term + " WHERE content LIKE '%" + words[i] + "%'";
+        if(i==words.length-1){
+          term = "SELECT content FROM " + term + " WHERE content LIKE '%" + words[i] + "%'";
+        } else if(i!=0){
+          term = "SELECT content FROM (" + term + ") WHERE content LIKE '%" + words[i] + "%'";
+        }
       }
     }
     //alert(term);
