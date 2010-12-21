@@ -642,7 +642,6 @@ pub.mainThread.prototype = {
         return pub.walkAll(maybe.children, words, excluded, site);
       }
     }
-		maybe.haveKeywords = true;
     for(var e in excluded){
       if(label.indexOf(excluded[e].toLowerCase())!=-1){
         return pub.walkAll(maybe.children, words, excluded, site);
@@ -653,8 +652,9 @@ pub.mainThread.prototype = {
         return pub.walkAll(maybe.children, words, excluded, site);
       }
     }
+		maybe.haveKeywords = true;
 		//TODO: this is just to check keywords
-		pub.walkAll(maybe.children, words, [], []);
+		pub.walkAll(maybe.children, words, excluded, site);
     return [].push(maybe);
   };
 	
