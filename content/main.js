@@ -264,7 +264,8 @@ com.wuxuan.fromwheretowhere.main = function(){
       node.children[i] = pub.clearReferedHistoryNode(node.children[i]);
     }
     node.id = null;
-    node.placeId = null;
+		//placeid is not applicable across profiles, so don't use it for sharing at all!
+		node.placeId = null;
     return node;
   };
   
@@ -620,6 +621,43 @@ pub.mainThread.prototype = {
   
   pub.pidwithKeywords = [];
   
+	//walk and search through node, TODO: more generic
+  //TODO: index to speed up
+  pub.walkAll = function(maybes, words, excluded, site){
+    for(var i in maybes){
+      if(pub.walkNode(maybes[i], words, excluded, site).length==0){
+        //alert("rule out:     "+pub.nativeJSON.encode(maybes[i]));
+        maybes.splice(i, 1);
+      }
+    }
+    return maybes;
+  };
+  
+  //indexOf is case-sensitive!
+  pub.walkNode = function(maybe, words, excluded, site){
+    var label = maybe.label.toLowerCase();
+    var url = maybe.url.toLowerCase();
+    for(var w in words){
+      if(label.indexOf(words[w].toLowerCase())==-1){
+        return pub.walkAll(maybe.children, words, excluded, site);
+      }
+    }
+		maybe.haveKeywords = true;
+    for(var e in excluded){
+      if(label.indexOf(excluded[e].toLowerCase())!=-1){
+        return pub.walkAll(maybe.children, words, excluded, site);
+      }
+    }
+    for(var s in site){
+      if(url.indexOf(site[s].toLowerCase())==-1){
+        return pub.walkAll(maybe.children, words, excluded, site);
+      }
+    }
+		//TODO: this is just to check keywords
+		pub.walkAll(maybe.children, words, [], []);
+    return [].push(maybe);
+  };
+	
 	//TODO: call getIncludeExclude here, save passing arguments?
   pub.searchThread = function(threadID, keywords, words, excluded, site) {
     this.threadID = threadID;
@@ -643,10 +681,14 @@ pub.mainThread.prototype = {
         }
 	
 				//search in local notes, latest first
-				var localNodes = pub.localmanager.searchNotesbyKeywords(this.words, this.excluded, this.site);
+				//7 short records 1 long: 7ms; 7 short 11 long: 37ms
+				//var start = (new Date()).getTime();
+				var maybeNodes = pub.localmanager.searchNotesbyKeywords(this.words, this.excluded, this.site);
+				var localNodes = pub.walkAll(maybeNodes, this.words, this.excluded, this.site)
 				for(var i in localNodes){
 					topNodes.splice(0,0,pub.putNodeToLevel0(localNodes[i]));
 				}
+				//alert((new Date()).getTime()-start);
 				
 				//refresh tree, remove all visibledata and add new ones
         pub.treeView.delSuspensionPoints(-1);

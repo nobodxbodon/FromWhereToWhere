@@ -190,7 +190,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     //in case pid is null, which means new imported nodes
     if(pid && pid==main.retrievedId){
       props.AppendElement(main.aserv.getAtom("makeItRed"));
-    }else if(haveKeywords!=-1){
+    }else if(haveKeywords!=-1 || (vis[row].placeId==null && vis[row].haveKeywords)){
       props.AppendElement(main.aserv.getAtom("makeItBlue"));
     }
     //if it's red or blue already, just curve, otherwise make it olive

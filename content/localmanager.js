@@ -130,7 +130,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
         var str = statement.getString(0);
         //alert(str);
         var maybeNotes = pub.nativeJSON.decode(str);
-        nodes = nodes.concat(pub.walkAll(maybeNotes, words, excluded, site));
+        nodes = nodes.concat(maybeNotes);//(pub.walkAll(maybeNotes, words, excluded, site));
       }
       statement.reset();
       return nodes;  
@@ -139,52 +139,6 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
       statement.reset();
     }
   };
-  
-  //TODO: index to speed up
-  pub.walkAll = function(maybes, words, excluded, site){
-    for(var i in maybes){
-      if(pub.walkNode(maybes[i], words, excluded, site).length==0){
-        //alert("rule out:     "+pub.nativeJSON.encode(maybes[i]));
-        maybes.splice(i, 1);
-      }
-    }
-    return maybes;
-  };
-  
-  //indexOf is case-sensitive!
-  pub.walkNode = function(maybe, words, excluded, site){
-    var label = maybe.label.toLowerCase();
-    var url = maybe.url.toLowerCase();
-    for(var w in words){
-      if(label.indexOf(words[w].toLowerCase())==-1){
-        return pub.walkAll(maybe.children, words, excluded, site);
-      }
-    }
-    for(var e in excluded){
-      if(label.indexOf(excluded[e].toLowerCase())!=-1){
-        return pub.walkAll(maybe.children, words, excluded, site);
-      }
-    }
-    for(var s in site){
-      if(url.indexOf(site[s].toLowerCase())==-1){
-        return pub.walkAll(maybe.children, words, excluded, site);
-      }
-    }
-    return [].push(maybe);
-  };
-		//TODO: seems dup condition, to simplify
-    /*var excludeTerm = siteTerm;
-    if(excluded.length!=0){
-      for(var i = excluded.length-1; i>=0; i--){
-        if(i==excluded.length-1){
-          excludeTerm = "(SELECT * FROM " + excludeTerm + " WHERE TITLE NOT LIKE '%" + excluded[i] + "%')";
-        } else {
-          excludeTerm = "(SELECT * FROM " + excludeTerm + " WHERE TITLE NOT LIKE '%" + excluded[i] + "%')";
-        }
-      }
-    }
-    
-  };*/
   
   pub.getNodeContent = function(rowid){
     var statement = pub.localRecord.createStatement("SELECT content from " + pub.RECORDTABLENAME + " where rowid=" + rowid);
