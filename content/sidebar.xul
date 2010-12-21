@@ -16,7 +16,7 @@
     <treecol id="title" label="&table.title;" primary="true" flex="5"/>
        <splitter resizeafter="closest">
       </splitter>
-     <treecol id="date" label="&table.date;" flex="1"/>
+     <treecol id="date" label="&note.savedate;" flex="1"/>
   </treecols>
   <treechildren context="sidebarmenu" ondblclick="com.wuxuan.fromwheretowhere.noteSidebar.openNode()"/>  
 </tree>
