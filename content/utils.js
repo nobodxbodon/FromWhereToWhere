@@ -23,8 +23,20 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return formated;
   };
   
+  pub.containInArray = function(arr, ele){
+    for(var i in arr){
+      //not sure the difference between ==
+      if(arr[i]===ele){
+        return true;
+      }
+    }
+    return false;
+  }
   //TODO: reg expr instead
   pub.splitWithSpaces = function(myString) {
+    if(!myString){
+      return [];
+    }
     var words = myString.split(" ");
     for(var i=0; i<words.length; i++){
       if(words[i]==''){

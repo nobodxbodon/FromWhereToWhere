@@ -296,6 +296,10 @@ pub.mainThread.prototype = {
 			pub.alreadyExpandedPids = [this.item.placeId];
       //CAN'T alert here!! will crash!
       if(this.item.isContainer && this.item.children.length==0){
+				
+				if(pub.topicTracker)
+					pub.topicTracker.followContent(this.item.label);
+				
 				this.item = pub.allChildrenfromPid(this.item);
       }
       //alert(pub.timestats1);
@@ -317,21 +321,24 @@ pub.mainThread.prototype = {
   }
 };
 
-
   pub.allChildrenfromPid = function(parentNode) {
     parentNode.isFolded = true;
     var parentLevel = parentNode.level;
     var allChildrenPId = pub.getAllChildrenfromPlaceId(parentNode.placeId);
     var urls = [];
-
+		
     for(var i=0; i<allChildrenPId.length; i++) {
       var thisid = pub.getIdfromPlaceId(allChildrenPId[i]);
+      var childTitle = pub.getTitlefromId(allChildrenPId[i]);
+      var newChildNode = pub.ReferedHistoryNode(thisid, allChildrenPId[i], childTitle, pub.getUrlfromId(allChildrenPId[i]), false, false, [], parentLevel+1);
       
-      var newChildNode = pub.ReferedHistoryNode(thisid, allChildrenPId[i], pub.getTitlefromId(allChildrenPId[i]), pub.getUrlfromId(allChildrenPId[i]), false, false, [], parentLevel+1);
-      
+			//track topic since expanding, and keep short/long term memory
+			if(pub.topicTracker)
+				pub.topicTracker.followContent(childTitle);
+			
       //TODO: if opened node was container, get the same properties as that!     
       if(!pub.existInVisible(newChildNode)){
-	newChildNode = pub.allChildrenfromPid(newChildNode);
+				newChildNode = pub.allChildrenfromPid(newChildNode);
       }
 
       urls.push(newChildNode);
@@ -525,7 +532,7 @@ pub.mainThread.prototype = {
     for(var i in selectedIndex){
       var node = pub.treeView.visibleData[selectedIndex[i]];
       //clean away id/pid from the node, as it's useless for other instances of FF
-      selected.push(pub.clearReferedHistoryNode(com.wuxuan.fromwheretowhere.utils.cloneObject(node)));
+      selected.push(pub.clearReferedHistoryNode(pub.utils.cloneObject(node)));
     }
     return selected;
   };
@@ -741,7 +748,7 @@ pub.mainThread.prototype = {
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
     pub.treeView.addSuspensionPoints(-1, -1);
     pub.keywords = document.getElementById("keywords").value;
-    var w = com.wuxuan.fromwheretowhere.utils.getIncludeExcluded(pub.keywords);
+    var w = pub.utils.getIncludeExcluded(pub.keywords);
     pub.main.dispatch(new pub.searchThread(1, w.origkeywords, w.words, w.excluded, w.site), pub.main.DISPATCH_NORMAL);
       
   };
@@ -778,6 +785,10 @@ pub.mainThread.prototype = {
     com.wuxuan.fromwheretowhere.sb.urlInit();
     pub.localmanager = com.wuxuan.fromwheretowhere.localmanager;
     pub.localmanager.init();
+		pub.utils = com.wuxuan.fromwheretowhere.utils;
+		pub.topicTracker = com.wuxuan.fromwheretowhere.topicTracker;
+		if(pub.topicTracker)
+			pub.topicTracker.init();
     //document.getElementById("elementList").addEventListener("click", function (){getURLfromNode(treeView);}, false);
   }
   

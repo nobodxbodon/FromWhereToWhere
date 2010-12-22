@@ -47,6 +47,7 @@
 <script src="sbconnect.js" />
 <script src="utils.js" />
 <script src="treeview.js" />
+<script src="topicTracker.js" />
 <script src="main.js" />
 <script src="localmanager.js" />
 
