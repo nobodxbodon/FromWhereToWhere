@@ -10,7 +10,8 @@ com.wuxuan.fromwheretowhere.topicTracker = function(){
 		var dups = [];
 		for(var i in str1Words){
 			if(str2Words.indexOf(str1Words[i])!=-1){
-				dups.push(str1Words[i]);
+				if(!pub.utils.containInArray(pub.specials, str1Words[i]))
+					dups.push(str1Words[i]);
 			}
 		}
 		return dups;
@@ -18,17 +19,21 @@ com.wuxuan.fromwheretowhere.topicTracker = function(){
 	
 	// LR
 	//if the label is a word/words that's not in dictionary, just ignore it? no...url can be a word, so add special case for now
-	// TODO: words around shared word are associated in some way!
+	// TODO: words around shared word are associated in some way! learn the unpredicted in the same way!
 	pub.followContent = function(content){
 		content = content.toLowerCase();
 		var lastContent = pub.mem[pub.mem.length-1];
 		if(pub.utils.containInArray(pub.redirectList, content) || lastContent==content){
-			return;
+			// no more new topic discovered
+			return [""];
 		}
 		pub.mem.push(content);
-		if(lastContent)
-			alert(lastContent + " --- " + content + "\n" + pub.getSameWords(lastContent, content));
-		
+		if(lastContent){
+			var similar = pub.getSameWords(lastContent, content);
+			if(similar.length==0)
+				alert(lastContent + " --- " + content + "\n" + similar);
+			return similar.length>0;
+		}
 	};
 	
 	pub.init = function(){
@@ -36,6 +41,7 @@ com.wuxuan.fromwheretowhere.topicTracker = function(){
 		pub.redirectList = ["url","redirecting"];
 		pub.mem = [];
 		pub.utils = com.wuxuan.fromwheretowhere.utils;
+		pub.specials = ["-",","];
 	};
   return pub;
 }();

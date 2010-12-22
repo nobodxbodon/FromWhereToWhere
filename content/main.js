@@ -297,9 +297,10 @@ pub.mainThread.prototype = {
       //CAN'T alert here!! will crash!
       if(this.item.isContainer && this.item.children.length==0){
 				
+				var onTopic = false;
 				if(pub.topicTracker)
-					pub.topicTracker.followContent(this.item.label);
-				
+					onTopic = pub.topicTracker.followContent(this.item.label);
+				//the sstart of a session, always expand
 				this.item = pub.allChildrenfromPid(this.item);
       }
       //alert(pub.timestats1);
@@ -333,13 +334,20 @@ pub.mainThread.prototype = {
       var newChildNode = pub.ReferedHistoryNode(thisid, allChildrenPId[i], childTitle, pub.getUrlfromId(allChildrenPId[i]), false, false, [], parentLevel+1);
       
 			//track topic since expanding, and keep short/long term memory
-			if(pub.topicTracker)
-				pub.topicTracker.followContent(childTitle);
-			
-      //TODO: if opened node was container, get the same properties as that!     
-      if(!pub.existInVisible(newChildNode)){
-				newChildNode = pub.allChildrenfromPid(newChildNode);
-      }
+			if(pub.topicTracker){
+				var onTopic = pub.topicTracker.followContent(childTitle);
+				if(onTopic){
+					newChildNode = pub.allChildrenfromPid(newChildNode);
+				}else{
+					//if not expand, at least show it can be expanded by user
+					newChildNode.isContainer = (pub.getAllChildrenfromPlaceId(parentNode.placeId).length>0)
+				}
+			} else {
+				//TODO: if opened node was container, get the same properties as that!     
+				if(!pub.existInVisible(newChildNode)){
+					newChildNode = pub.allChildrenfromPid(newChildNode);
+				}
+			}
 
       urls.push(newChildNode);
       
