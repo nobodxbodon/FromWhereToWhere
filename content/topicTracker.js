@@ -17,6 +17,14 @@ com.wuxuan.fromwheretowhere.topicTracker = function(){
 		return dups;
 	};
 	
+	pub.getSharedTopic = function(str1, str2){
+		return pub.getSameWords(str1, str2);
+	};
+	
+	pub.isWanted = function(topics, str){
+		return topics.length>0;
+	};
+	
 	// LR
 	//if the label is a word/words that's not in dictionary, just ignore it? no...url can be a word, so add special case for now
 	// TODO: words around shared word are associated in some way! learn the unpredicted in the same way!
@@ -29,10 +37,11 @@ com.wuxuan.fromwheretowhere.topicTracker = function(){
 		}
 		pub.mem.push(content);
 		if(lastContent){
-			var similar = pub.getSameWords(lastContent, content);
-			if(similar.length==0)
-				alert(lastContent + " --- " + content + "\n" + similar);
-			return similar.length>0;
+			//TODO: for now just expand/recommend based on similar topic, but what's needed is to "understand" the need / tendency based on history (meta-knowledge, like howto A, now is howto B)
+			var topic = pub.getSharedTopic(lastContent, content);
+			//if(similar.length==0)
+			//	alert(lastContent + " --- " + content + "\n" + similar);
+			return pub.isWanted(topic, content);
 		}
 	};
 	
@@ -43,5 +52,6 @@ com.wuxuan.fromwheretowhere.topicTracker = function(){
 		pub.utils = com.wuxuan.fromwheretowhere.utils;
 		pub.specials = ["-",","];
 	};
+	
   return pub;
 }();

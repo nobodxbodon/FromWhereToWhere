@@ -337,10 +337,12 @@ pub.mainThread.prototype = {
 			if(pub.topicTracker){
 				var onTopic = pub.topicTracker.followContent(childTitle);
 				if(onTopic){
-					newChildNode = pub.allChildrenfromPid(newChildNode);
+					if(!pub.existInVisible(newChildNode)){
+						newChildNode = pub.allChildrenfromPid(newChildNode);
+					}
 				}else{
-					//if not expand, at least show it can be expanded by user
-					newChildNode.isContainer = (pub.getAllChildrenfromPlaceId(parentNode.placeId).length>0)
+					//TODO: if not expand, at least show it can be expanded by user
+					newChildNode.isContainer = (pub.getAllChildrenfromPlaceId(newChildNode.placeId).length>0)
 				}
 			} else {
 				//TODO: if opened node was container, get the same properties as that!     
