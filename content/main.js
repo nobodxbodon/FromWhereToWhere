@@ -299,8 +299,14 @@ pub.mainThread.prototype = {
 				//if there are children already, means local notes
 				if(this.item.children.length==0){
 					var onTopic = false;
+					if(this.item.notRelated){
+						//thought not related, but user is interested. learn from this record
+						pub.topicTracker.learnFromCase(this.item);
+						this.item.notRelated=false;
+					}
 					if(pub.topicTracker)
 						onTopic = pub.topicTracker.followContent(this.item.label);
+					//TODO: if still !onTopic, need to re-learn
 					//the start of a session, always expand
 					this.item = pub.allChildrenfromPid(this.item);
 				} else {
@@ -379,6 +385,7 @@ pub.mainThread.prototype = {
 						newChildNode = pub.allChildrenfromPid(newChildNode);
 					}
 				}else{
+					alert("not topic: " + newChildNode.label);
 					newChildNode.notRelated=true;
 					newChildNode.isContainer = (pub.getAllChildrenfromPlaceId(newChildNode.placeId).length>0)
 				}
