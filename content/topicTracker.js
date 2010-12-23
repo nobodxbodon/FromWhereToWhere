@@ -25,6 +25,11 @@ com.wuxuan.fromwheretowhere.topicTracker = function(){
 		return topics.length>0;
 	};
 	
+	// TODO: before this, contextual info should be retrievable, or saved at the not-expanded node in the first place!
+	pub.learnFromCase = function(node){
+		alert("learn sth!"+node.label);
+	};
+	
 	// LR
 	//if the label is a word/words that's not in dictionary, just ignore it? no...url can be a word, so add special case for now
 	// TODO: words around shared word are associated in some way! learn the unpredicted in the same way!
@@ -42,6 +47,9 @@ com.wuxuan.fromwheretowhere.topicTracker = function(){
 			//if(similar.length==0)
 			//	alert(lastContent + " --- " + content + "\n" + similar);
 			return pub.isWanted(topic, content);
+		} else{
+			//nothing known yet, looking forward to anything new
+			return true;
 		}
 	};
 	

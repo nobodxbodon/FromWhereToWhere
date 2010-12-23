@@ -109,11 +109,17 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     var vis = this.visibleData;
     if (!item.children || item.children.length==0) {
       return 0;
+    }else{
+      //if it was considered non-related, don't expand
+      if(item.notRelated){
+        return 0;
+      }
     }
     // need to check here. Otherwise if check the children, the first parent won't be recorded as existInVisible.
     if(isRecord && main.existInVisible(item)){
       return 0;
     }
+    
     item.isFolded = true;
     for (var i = 0; i < item.children.length; i++) {  
       vis.splice(idx + i + 1, 0, item.children[i]);

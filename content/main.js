@@ -295,13 +295,19 @@ pub.mainThread.prototype = {
     try {
 			pub.alreadyExpandedPids = [this.item.placeId];
       //CAN'T alert here!! will crash!
-      if(this.item.isContainer && this.item.children.length==0){
-				
-				var onTopic = false;
-				if(pub.topicTracker)
-					onTopic = pub.topicTracker.followContent(this.item.label);
-				//the sstart of a session, always expand
-				this.item = pub.allChildrenfromPid(this.item);
+      if(this.item.isContainer){
+				//if there are children already, means local notes
+				if(this.item.children.length==0){
+					var onTopic = false;
+					if(pub.topicTracker)
+						onTopic = pub.topicTracker.followContent(this.item.label);
+					//the start of a session, always expand
+					this.item = pub.allChildrenfromPid(this.item);
+				} else {
+					//TODO: make sure after this, the title will be guarantee "onTopic"
+					// walk through the already existed children list, and mark "noNeedExpand"
+					this.item = pub.checkIfExpand(this.item, true);
+				}
       }
       //alert(pub.timestats1);
       // This is where we react to the completion of the working thread.
@@ -322,6 +328,38 @@ pub.mainThread.prototype = {
   }
 };
 
+	pub.checkIfExpandSub = function(ch){
+		//var children = parentNode.children;
+		for(var i=0; i<ch.length; i++) {
+			pub.checkIfExpand(ch[i], false);
+		}
+	};
+	
+	pub.checkIfExpand = function(parentNode, mustExpand){
+		if(mustExpand && parentNode.notRelated){
+			//thought not related, but user is interested. learn from this record
+			pub.topicTracker.learnFromCase(parentNode);
+			parentNode.notRelated=false;
+		}
+		if(pub.topicTracker){
+			var onTopic = pub.topicTracker.followContent(parentNode.label);
+			if(!onTopic){
+				if(mustExpand){
+					//TODO: means learning is not working, or learning can happen here instead
+					//TODO: clean this logic up, too much dup!
+					pub.checkIfExpandSub(parentNode.children);
+				}else{
+					alert("not topic: " + parentNode.label);
+					parentNode.notRelated=true;
+					parentNode.isFolded=false;
+				}
+			}else{
+				pub.checkIfExpandSub(parentNode.children);
+			}
+		}
+    return parentNode;
+	};
+	
   pub.allChildrenfromPid = function(parentNode) {
     parentNode.isFolded = true;
     var parentLevel = parentNode.level;
@@ -341,7 +379,7 @@ pub.mainThread.prototype = {
 						newChildNode = pub.allChildrenfromPid(newChildNode);
 					}
 				}else{
-					//TODO: if not expand, at least show it can be expanded by user
+					newChildNode.notRelated=true;
 					newChildNode.isContainer = (pub.getAllChildrenfromPlaceId(newChildNode.placeId).length>0)
 				}
 			} else {
