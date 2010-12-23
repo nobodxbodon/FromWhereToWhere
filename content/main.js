@@ -570,7 +570,7 @@ pub.mainThread.prototype = {
     return node;
   };
   
-	//TODO: if the node.level=0, no need to move at all
+	//TODO: if node.level==0, no need to shift, but saving is limited
   pub.putNodeToLevel0 = function(node){
     var currentLevel = node.level;
     return pub.decreaseLevelandCollapse(node, currentLevel);
@@ -606,15 +606,14 @@ pub.mainThread.prototype = {
   
 	pub.isSidebarFWTW = function(){
 		var sidebarWindow = pub.mainWindow.document.getElementById("sidebar").contentWindow;
-		//alert(sidebarWindow.location.href);
 		var sidebarRef = "chrome://FromWhereToWhere/content/sidebar.xul".toLowerCase();
 		return sidebarWindow.location.href == sidebarRef;
 	};
 	
   // recordType: 0 - from URI; 1 - from searching keywords; 2 - imported; -1 - invalid.
   // TODO: make constants!
-	// TODO: if sidebar is open, close it first to save the sync trouble
   pub.saveNodetoLocal = function() {
+		// if sidebar is open, close it first to save the sync trouble
 		if (pub.isSidebarFWTW()) {
 			pub.mainWindow.toggleSidebar('viewEmptySidebar');  
 		} 
@@ -690,40 +689,48 @@ pub.mainThread.prototype = {
 	//walk and search through node, TODO: more generic
 	//RM flag: remove or not
   //TODO: index to speed up
-  pub.walkAll = function(maybes, words, excluded, site, RM){
+  pub.walkAll = function(maybes, words, excluded, site){
+		var matches = [];
     for(var i in maybes){
-      if(pub.walkNode(maybes[i], words, excluded, site).length==0 && RM){
-        //alert("rule out:     "+pub.nativeJSON.encode(maybes[i]));
-        maybes.splice(i, 1);
+      if(pub.walkNode(maybes[i], words, excluded, site).length!=0){
+        matches.push(maybes[i]);
       }
     }
-    return maybes;
+    return matches;
   };
   
-  //indexOf is case-sensitive!
-  pub.walkNode = function(maybe, words, excluded, site){
-    var label = maybe.label.toLowerCase();
-    var url = maybe.url.toLowerCase();
-    for(var w in words){
+	pub.matchQuery = function(label, url, words, excluded, site){
+		for(var w in words){
       if(label.indexOf(words[w])==-1){
-        return pub.walkAll(maybe.children, words, excluded, site, false);
+        return false;
       }
     }
     for(var e in excluded){
       if(label.indexOf(excluded[e])!=-1){
-        return pub.walkAll(maybe.children, words, excluded, site, false);
+        return false;
       }
     }
     for(var s in site){
       if(url.indexOf(site[s])==-1){
-        return pub.walkAll(maybe.children, words, excluded, site, false);
+        return false;
       }
     }
-		//alert(maybe.label);
-		maybe.haveKeywords = true;
-		//TODO: this is just to check keywords
-		pub.walkAll(maybe.children, words, excluded, site, false);
-    return [].push(maybe);
+		return true;
+	};
+	
+  //indexOf is case-sensitive!
+  pub.walkNode = function(maybe, words, excluded, site){
+    var label = maybe.label.toLowerCase();
+    var url = maybe.url.toLowerCase();
+		//just to check keywords match
+		if(!pub.matchQuery(label, url, words, excluded, site)){
+      return pub.walkAll(maybe.children, words, excluded, site);
+    }else{
+			//alert(maybe.label);
+			maybe.haveKeywords = true;
+			pub.walkAll(maybe.children, words, excluded, site);
+			return [].push(maybe);
+		}
   };
 	
 	//TODO: call getIncludeExclude here, save passing arguments?
@@ -761,7 +768,7 @@ pub.mainThread.prototype = {
 					for(var s in this.site){
 						this.site[s] = this.site[s].toLowerCase();
 					}
-					var localNodes = pub.walkAll(maybeNodes, this.words, this.excluded, this.site, true);
+					var localNodes = pub.walkAll(maybeNodes, this.words, this.excluded, this.site);
 					for(var i in localNodes){
 						topNodes.splice(0,0,pub.putNodeToLevel0(localNodes[i]));
 					}
