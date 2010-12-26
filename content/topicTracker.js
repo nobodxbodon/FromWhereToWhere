@@ -27,35 +27,52 @@ com.wuxuan.fromwheretowhere.topicTracker = function(){
 	
 	// TODO: before this, contextual info should be retrievable, or saved at the not-expanded node in the first place!
 	pub.learnFromCase = function(node){
-		alert("learn sth!"+node.label);
+		alert("it was considered to be unrelated, why the user chooses to expand it?\n"+node.label);
 	};
 	
 	// LR
 	//if the label is a word/words that's not in dictionary, just ignore it? no...url can be a word, so add special case for now
 	// TODO: words around shared word are associated in some way! learn the unpredicted in the same way!
-	pub.followContent = function(content){
+	pub.followContent = function(content, newSession){
 		content = content.toLowerCase();
-		var lastContent = pub.mem[pub.mem.length-1];
-		if(pub.utils.containInArray(pub.redirectList, content) || lastContent==content){
+		if(newSession){
+			pub.mem.push(pub.curSession);
+			pub.curSession = [];
+		}
+		var lastContent = false;
+		/*if(pub.curSession.length>0){
+			lastContent = pub.curSession[pub.curSession.length-1];
+		}*/
+		//the parent is expanded, so does this same child, but just one way
+		if(pub.utils.containInArray(pub.redirectList, content) || pub.utils.containInArray(pub.curSession, content)){
 			// no more new topic discovered
 			return [""];
 		}
-		pub.mem.push(content);
-		if(lastContent){
+		pub.curSession.push(content);
+		var isWanted = false;
+		for(var i=0; i<pub.curSession.length-1; i++){
+			lastContent = pub.curSession[i];
 			//TODO: for now just expand/recommend based on similar topic, but what's needed is to "understand" the need / tendency based on history (meta-knowledge, like howto A, now is howto B)
 			var topic = pub.getSharedTopic(lastContent, content);
 			//if(similar.length==0)
 			//	alert(lastContent + " --- " + content + "\n" + similar);
-			return pub.isWanted(topic, content);
-		} else{
+			isWanted = pub.isWanted(topic, content);
+			if(isWanted){
+				return true;
+			}
+		}
+		if(pub.curSession.length==1){
 			//nothing known yet, looking forward to anything new
 			return true;
+		}else{
+			return false;
 		}
 	};
 	
 	pub.init = function(){
 		//DON'T rely on filter!!!! should go jumping, can learn this list from context-independent single word?
 		pub.redirectList = ["url","redirecting"];
+		pub.curSession = [];
 		pub.mem = [];
 		pub.utils = com.wuxuan.fromwheretowhere.utils;
 		pub.specials = ["-",","];

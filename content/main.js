@@ -305,7 +305,7 @@ pub.mainThread.prototype = {
 						this.item.notRelated=false;
 					}
 					if(pub.topicTracker)
-						onTopic = pub.topicTracker.followContent(this.item.label);
+						onTopic = pub.topicTracker.followContent(this.item.label, this.item.level==0);
 					//TODO: if still !onTopic, need to re-learn
 					//the start of a session, always expand
 					this.item = pub.allChildrenfromPid(this.item);
@@ -348,7 +348,7 @@ pub.mainThread.prototype = {
 			parentNode.notRelated=false;
 		}
 		if(pub.topicTracker){
-			var onTopic = pub.topicTracker.followContent(parentNode.label);
+			var onTopic = pub.topicTracker.followContent(parentNode.label, parentNode.level==0);
 			if(!onTopic){
 				if(mustExpand){
 					//TODO: means learning is not working, or learning can happen here instead
@@ -379,7 +379,8 @@ pub.mainThread.prototype = {
       
 			//track topic since expanding, and keep short/long term memory
 			if(pub.topicTracker){
-				var onTopic = pub.topicTracker.followContent(childTitle);
+				//child.level always !=0
+				var onTopic = pub.topicTracker.followContent(childTitle, false);
 				if(onTopic){
 					if(!pub.existInVisible(newChildNode)){
 						newChildNode = pub.allChildrenfromPid(newChildNode);
