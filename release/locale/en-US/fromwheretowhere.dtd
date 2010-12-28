@@ -2,8 +2,12 @@
 <!ENTITY contextMenu.openlocalcopy "Open Local Copy">
 <!ENTITY contextMenu.property "Property">
 <!ENTITY contextMenu.importNodes "Import">
-<!ENTITY button.searchallwords "Search titles with all the words">
+<!ENTITY contextMenu.saveNodetoLocal "Save to Local Notes">
+<!ENTITY contextMenu.showLocalNotes "Open/close Notes Sidebar">
+<!ENTITY contextMenu.delete "Delete">
+<!ENTITY button.searchallwords "Search">
 
 <!ENTITY table.title "Title">
 <!ENTITY table.url "URL">
 <!ENTITY table.date "Last Visit">
+<!ENTITY note.savedate "Save Date">

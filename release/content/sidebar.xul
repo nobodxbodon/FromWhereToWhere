@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
+<?xml-stylesheet href="chrome://FromWhereToWhere/skin/treedec.css" type="text/css"?>  
+
+<page id="emptySidebar" title="records" onload="com.wuxuan.fromwheretowhere.noteSidebar.initView();"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
+
+<popupset>
+  <menupopup id="sidebarmenu" onpopupshowing="com.wuxuan.fromwheretowhere.noteSidebar.showMenuItems()">
+    <menuitem id="delete" label="&contextMenu.delete;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.deleteNotes()"/>
+  </menupopup>
+</popupset>
+
+<tree id="recordList" flex="1">  
+  <treecols>  
+    <treecol id="title" label="&table.title;" primary="true" flex="5"/>
+       <splitter resizeafter="closest">
+      </splitter>
+     <treecol id="date" label="&note.savedate;" flex="1"/>
+  </treecols>
+  <treechildren context="sidebarmenu" ondblclick="com.wuxuan.fromwheretowhere.noteSidebar.openNode()"/>  
+</tree>
+
+<script src="namespace.js" />
+<script src="treeview.js" />
+<script src="utils.js" />
+<script src="main.js" />
+<script src="sbconnect.js" />
+<script src="localmanager.js" />
+<script src="noteSidebar.js" />
+</page>
