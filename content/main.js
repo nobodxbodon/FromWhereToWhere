@@ -284,6 +284,11 @@ com.wuxuan.fromwheretowhere.main = function(){
   pub.retrievedId = pub.getIdfromUrl(pub.currentURI);
   //pub.treeView = (function(){return Application.storage.get("fromwheretowhere.currentView", false);})();
 
+	//if a node's level==0, seen as start of a session
+	pub.isNewSession = function(item){
+		return item.level==0;
+	};
+	
 pub.mainThread = function(threadID, item, idx) {
   this.threadID = threadID;
   this.item = item;
@@ -293,7 +298,9 @@ pub.mainThread = function(threadID, item, idx) {
 pub.mainThread.prototype = {
   run: function() {
     try {
-			pub.alreadyExpandedPids = [this.item.placeId];
+			if(pub.isNewSession(this.item))
+				pub.alreadyExpandedPids = [];
+			pub.alreadyExpandedPids.push(this.item.placeId);
       //CAN'T alert here!! will crash!
       if(this.item.isContainer){
 				//if there are children already, means local notes
@@ -305,7 +312,7 @@ pub.mainThread.prototype = {
 						this.item.notRelated=false;
 					}
 					if(pub.topicTracker)
-						onTopic = pub.topicTracker.followContent(this.item.label, this.item.level==0);
+						onTopic = pub.topicTracker.followContent(this.item.label, pub.isNewSession(this.item));
 					//TODO: if still !onTopic, need to re-learn
 					//the start of a session, always expand
 					this.item = pub.allChildrenfromPid(this.item);
@@ -317,7 +324,6 @@ pub.mainThread.prototype = {
       }
       //alert(pub.timestats1);
       // This is where we react to the completion of the working thread.
-      pub.alreadyExpandedPids = [];
       pub.treeView.delSuspensionPoints(this.idx);
       pub.treeView.expandFromNodeInTree(this.item, this.idx);
     } catch(err) {
@@ -348,7 +354,7 @@ pub.mainThread.prototype = {
 			parentNode.notRelated=false;
 		}
 		if(pub.topicTracker){
-			var onTopic = pub.topicTracker.followContent(parentNode.label, parentNode.level==0);
+			var onTopic = pub.topicTracker.followContent(parentNode.label, pub.isNewSession(parentNode));
 			if(!onTopic){
 				if(mustExpand){
 					//TODO: means learning is not working, or learning can happen here instead
