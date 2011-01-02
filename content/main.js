@@ -71,10 +71,17 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryAll(statement, 32, 0);
   };
     
-  pub.getChildren = function(parentId) {
+  pub.getChildren = function(parentId, query) {
     //all from_visit between id and next larger id are the same
-    var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=:id and from_visit< \
-						(SELECT id FROM moz_historyvisits where id>:id limit 1)");
+		var term = "SELECT place_id FROM moz_historyvisits where from_visit>=:id and from_visit< \
+						(SELECT id FROM moz_historyvisits where id>:id limit 1)";
+		if(query){
+			if(query.site.length>0){
+				term = "SELECT id FROM moz_places WHERE id in ("+term+") AND url LIKE '%"+query.site[0]+"%'";
+				//alert("getChildren:\n"+term);
+			}
+		}
+    var statement = pub.mDBConn.createStatement(term);
     statement.params.id=parentId;
     return pub.queryAll(statement, 32, 0);
   };
@@ -91,7 +98,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   /* placeId: the placeId of the parent, which is unique even when this url is visited multiple times
     retrievedId: the id of the child, which correspond to the current url only
     TOOPT: use pure SQL instead of concat and dupcheck*/
-  pub.getAllChildrenfromPlaceId = function(placeId) {
+  pub.getAllChildrenfromPlaceId = function(placeId, query) {
     //var start = (new Date()).getTime();
     var potentialchildren = [];
     /*var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=thisid and from_visit<\
@@ -101,7 +108,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     var ids = pub.getAllIdfromPlaceId(placeId);
     
     for(var j = 0; j<ids.length; j++) {
-      var newChildren = pub.getChildren(ids[j]);
+      var newChildren = pub.getChildren(ids[j], query);
       for(var i in newChildren){
 	potentialchildren = pub.addInArrayNoDup(newChildren[i], potentialchildren);
       }
@@ -203,13 +210,24 @@ com.wuxuan.fromwheretowhere.main = function(){
   };
   //sqlite operations finish
 
-  pub.getParentPlaceidsfromPlaceid = function(pid){
+	// add query restrictions to parents, time and site
+  pub.getParentPlaceidsfromPlaceid = function(pid, query){
     //as id!=0, from_visit=0 doesn't matter
-    var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
+		var term = "SELECT place_id FROM moz_historyvisits \
 					    where id IN (SELECT from_visit FROM moz_historyvisits where \
-						place_id==:id)");
+						place_id==:id)";
+		if(query){
+			if(query.site.length>0){
+				term = "SELECT id FROM moz_places WHERE id in ("+term+") AND url LIKE '%"+query.site[0]+"%'";
+				//alert("getParentPlaceidsfromPlaceid: \n"+ term);
+			}
+			//TODO: visit_date
+		}
+    var statement = pub.mDBConn.createStatement(term);
     statement.params.id=pid;
     var pids = pub.queryAll(statement, 32, 0);
+		//alert(pid + " parents: " + pids);
+		// IF there's no results, maybe it's inaccurate! REPEAT with range!
     if(pids.length==0){
       var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
 						place_id=:id and from_visit!=0");
@@ -218,15 +236,24 @@ com.wuxuan.fromwheretowhere.main = function(){
       if(placeids.length==0){
 	return [];
       } else {
+				var accPids=[];
 	for(var i in placeids){
 	  var rangeStart = 0;
 	  var rangeEnd = 10;
 	  var initInterval = 10;
 	  //limit the range of "order by". Should break far before 10, just in case
 	  for(var j=0;j<10;j++){
-	    var statement1 = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits \
+			var fterm = "SELECT place_id FROM moz_historyvisits \
 					    where id<=:id-:start and id>:id-:end \
-					    order by -id limit 1");
+					    order by -id limit 1";
+			if(query){
+				if(query.site.length>0){
+					fterm = "SELECT id FROM moz_places WHERE id in ("+fterm+") AND url LIKE '%"+query.site[0]+"%'";
+					//alert("getParentPlaceidsfromPlaceid: \n"+ term);
+				}
+				//TODO: visit_date
+			}
+	    var statement1 = pub.mDBConn.createStatement(fterm);
 	    statement1.params.id=placeids[i];
 	    statement1.params.start=rangeStart;
 	    statement1.params.end=rangeEnd;
@@ -241,7 +268,7 @@ com.wuxuan.fromwheretowhere.main = function(){
 	  }
 	}
       }
-    }
+		}
     return pids;
   };
   
@@ -289,10 +316,11 @@ com.wuxuan.fromwheretowhere.main = function(){
 		return item.level==0;
 	};
 	
-pub.mainThread = function(threadID, item, idx) {
+pub.mainThread = function(threadID, item, idx, query) {
   this.threadID = threadID;
   this.item = item;
   this.idx = idx;
+	this.query = query;
 };
 
 pub.mainThread.prototype = {
@@ -315,7 +343,7 @@ pub.mainThread.prototype = {
 						onTopic = pub.topicTracker.followContent(this.item.label, pub.isNewSession(this.item));
 					//TODO: if still !onTopic, need to re-learn
 					//the start of a session, always expand
-					this.item = pub.allChildrenfromPid(this.item);
+					this.item = pub.allChildrenfromPid(this.item, this.query);
 				} else {
 					//TODO: make sure after this, the title will be guarantee "onTopic"
 					// walk through the already existed children list, and mark "noNeedExpand"
@@ -372,10 +400,10 @@ pub.mainThread.prototype = {
     return parentNode;
 	};
 	
-  pub.allChildrenfromPid = function(parentNode) {
+  pub.allChildrenfromPid = function(parentNode, query) {
     parentNode.isFolded = true;
     var parentLevel = parentNode.level;
-    var allChildrenPId = pub.getAllChildrenfromPlaceId(parentNode.placeId);
+    var allChildrenPId = pub.getAllChildrenfromPlaceId(parentNode.placeId, query);
     var urls = [];
 		
     for(var i=0; i<allChildrenPId.length; i++) {
@@ -389,17 +417,17 @@ pub.mainThread.prototype = {
 				var onTopic = pub.topicTracker.followContent(childTitle, false);
 				if(onTopic){
 					if(!pub.existInVisible(newChildNode)){
-						newChildNode = pub.allChildrenfromPid(newChildNode);
+						newChildNode = pub.allChildrenfromPid(newChildNode, query);
 					}
 				}else{
 					alert("not topic: " + newChildNode.label);
 					newChildNode.notRelated=true;
-					newChildNode.isContainer = (pub.getAllChildrenfromPlaceId(newChildNode.placeId).length>0)
+					newChildNode.isContainer = (pub.getAllChildrenfromPlaceId(newChildNode.placeId, query).length>0)
 				}
 			} else {
 				//TODO: if opened node was container, get the same properties as that!     
 				if(!pub.existInVisible(newChildNode)){
-					newChildNode = pub.allChildrenfromPid(newChildNode);
+					newChildNode = pub.allChildrenfromPid(newChildNode, query);
 				}
 			}
 
@@ -431,8 +459,8 @@ pub.mainThread.prototype = {
   };
   
    
-  pub.nodefromPlaceid = function(pid) {
-    var potentialchildren = pub.getAllChildrenfromPlaceId(pid);
+  pub.nodefromPlaceid = function(pid, query) {
+    var potentialchildren = pub.getAllChildrenfromPlaceId(pid, query);
     var hasChildren = (potentialchildren!=null) && (potentialchildren.length>0);
     var id = pub.getIdfromPlaceId(pid);
     return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
@@ -441,7 +469,7 @@ pub.mainThread.prototype = {
   pub.allKnownParentPids = [];
   
   //return all the top ancesters of a placeid, and add to allKnownParents
-  pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids, parentNumber){
+  pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids, parentNumber, query){
     var tops = [];
     //if it's its own ancester, still display it
     if(knownParentPids.indexOf(pid)!=-1){
@@ -451,7 +479,7 @@ pub.mainThread.prototype = {
       }
     }else{
       knownParentPids.push(pid);
-      var pParentPids = pub.getParentPlaceidsfromPlaceid(pid);
+      var pParentPids = pub.getParentPlaceidsfromPlaceid(pid, query);
       if(pParentPids.length==0){
         if(pub.allKnownParentPids.indexOf(pid)==-1){
 	  pub.allKnownParentPids.push(pid);
@@ -463,7 +491,7 @@ pub.mainThread.prototype = {
         for(var j=parentNum-1;j>=0;j--){
 	  if(pub.allKnownParentPids.indexOf(pParentPids[j])==-1){
 	    pub.allKnownParentPids.push(pParentPids[j]);
-	    var anc=pub.getAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum);
+	    var anc=pub.getAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum, query);
 	    for(var k in anc){
 	      tops=pub.addInArrayNoDup(anc[k],tops);
 	    }
@@ -475,19 +503,19 @@ pub.mainThread.prototype = {
   };
   
   // those without parent are also added, can't only highlight the keywords instead of the whole title?
-  pub.createParentNodesCheckDup = function(pids) {
+  pub.createParentNodesCheckDup = function(pids,query) {
     pub.allKnownParentPids = [];
     var nodes = [];
     var ancPids = [];
     //order by time: latest first by default
     for(var i=pids.length-1; i>=0; i--){
-      var anc = pub.getAllAncestorsfromPlaceid(pids[i],[],0);
+      var anc = pub.getAllAncestorsfromPlaceid(pids[i],[],0,query);
       for(var j in anc){
         ancPids = pub.addInArrayNoDup(anc[j],ancPids);
       }
     }
     for(var i in ancPids){
-      nodes.push(pub.nodefromPlaceid(ancPids[i]));
+      nodes.push(pub.nodefromPlaceid(ancPids[i], query));
     }
     return nodes;
   };
@@ -496,7 +524,7 @@ pub.mainThread.prototype = {
   pub.createParentNodes = function(pid) {
     var nodes = [];
     if(pid){
-      nodes = pub.createParentNodesCheckDup([pid]);
+      nodes = pub.createParentNodesCheckDup([pid], null);
 			
 			//add from-to from local notes, using the same URI
 			var rawLocalNotes = pub.localmanager.getNodesRawfromURI(pub.currentURI);
@@ -518,7 +546,7 @@ pub.mainThread.prototype = {
     //show the current url if no parents found
     if(nodes.length==0){
       if(pid){
-	nodes.push(pub.nodefromPlaceid(pid));
+	nodes.push(pub.nodefromPlaceid(pid, query));
       } else {
 	nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
       }
@@ -741,12 +769,13 @@ pub.mainThread.prototype = {
   };
 	
 	//TODO: call getIncludeExclude here, save passing arguments?
-  pub.searchThread = function(threadID, keywords, words, excluded, site) {
+  pub.searchThread = function(threadID, query) {
     this.threadID = threadID;
-    this.keywords = keywords;
-    this.words = words;
-    this.excluded = excluded;
-		this.site = site;
+    this.keywords = query.origkeywords;
+    this.words = query.words;
+    this.excluded = query.excluded;
+		this.site = query.site;
+		this.query = query;
   };
   
   pub.searchThread.prototype = {
@@ -759,7 +788,7 @@ pub.mainThread.prototype = {
           // improve by search id from keywords directly instead of getting urls first
           allpids = pub.searchIdbyKeywords(this.words, this.excluded, this.site);
           pub.pidwithKeywords = [].concat(allpids);
-          topNodes = pub.createParentNodesCheckDup(allpids);
+          topNodes = pub.createParentNodesCheckDup(allpids, this.query);
 	
 					//search in local notes, latest first
 					//7 short records 1 long: 7ms; 7 short 11 long: 37ms
@@ -817,8 +846,8 @@ pub.mainThread.prototype = {
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
     pub.treeView.addSuspensionPoints(-1, -1);
     pub.keywords = document.getElementById("keywords").value;
-    var w = pub.utils.getIncludeExcluded(pub.keywords);
-    pub.main.dispatch(new pub.searchThread(1, w.origkeywords, w.words, w.excluded, w.site), pub.main.DISPATCH_NORMAL);
+		pub.query = pub.utils.getIncludeExcluded(pub.keywords);
+    pub.main.dispatch(new pub.searchThread(1, pub.query), pub.main.DISPATCH_NORMAL);
       
   };
   

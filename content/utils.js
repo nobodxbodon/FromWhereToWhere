@@ -47,6 +47,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return words;
   };
   
+  // PRINCIPLE: conjunction for all
   pub.getIncludeExcluded = function(keywords){
     var origkeywords = keywords;
     var excludePreciseReg = /-\"([\s|\w|\W]*)\"/g;

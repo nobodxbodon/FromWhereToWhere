@@ -165,7 +165,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     }  
     else {
       com.wuxuan.fromwheretowhere.sb.urlInit();
-      main.main.dispatch(new main.mainThread(1, item, idx), main.DISPATCH_NORMAL);
+      main.main.dispatch(new main.mainThread(1, item, idx, main.query), main.DISPATCH_NORMAL);
       this.addSuspensionPoints(item.level, idx);
       
     }  
