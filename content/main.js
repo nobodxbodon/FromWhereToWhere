@@ -149,8 +149,8 @@ com.wuxuan.fromwheretowhere.main = function(){
     return pub.queryOne(statement, "str", 0); 
   };
   
-  pub.getFirstDatefromPid = function(pid){
-    var statement = pub.mDBConn.createStatement("SELECT visit_date FROM moz_historyvisits where place_id=:pid");
+  pub.getLastDatefromPid = function(pid){
+    var statement = pub.mDBConn.createStatement("SELECT visit_date FROM moz_historyvisits where place_id=:pid ORDER BY -visit_date");
     statement.params.pid=pid;
     return pub.queryOne(statement, 64, 0);
   };
@@ -248,7 +248,6 @@ com.wuxuan.fromwheretowhere.main = function(){
 		}
 	};
 
-	//TOFIX: MAX cause overflow here!
 	//singular_table: true-singular, false-table
 	pub.sqlStTimeFilter = function(term, times, singular_table){
 		var fterm = "";
@@ -272,7 +271,7 @@ com.wuxuan.fromwheretowhere.main = function(){
 				else
 					return "SELECT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm;
 			}else{
-				fterm = fterm + t; //" AND visit_date>="+times[i].since*1000+" AND visit_date<" + times[i].till*1000;
+				fterm = fterm + t;
 			}
 		}
 	};
@@ -288,15 +287,12 @@ com.wuxuan.fromwheretowhere.main = function(){
     statement.params.id=pid;
     var pids = pub.queryAll(statement, 32, 0);
 		// IF there's no results, maybe it's inaccurate! REPEAT with range!
-		if(pid==10247)
-			alert("pids: "+pids);
+		//if(pid==10247)
     if(pids.length==0){
       var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
 						place_id=:id and from_visit!=0");
       statement.params.id=pid;
       var placeids = pub.queryAll(statement, 32, 0);
-			if(pid==10247)
-				alert("froms: " + placeids);
       if(placeids.length==0){
 				return [];
       } else {
@@ -310,15 +306,6 @@ com.wuxuan.fromwheretowhere.main = function(){
 						var fterm = "SELECT place_id FROM moz_historyvisits \
 										where id<=:id-:start and id>:id-:end \
 										order by -id limit 1";
-						/*if(query){
-							if(query.site.length>0){
-								fterm = pub.sqlStUrlFilter(fterm, query.site);
-							}
-							if(query.time.length>0){
-								fterm = pub.sqlStTimeFilter(fterm, query.time);
-							}
-						}*/
-						//alert(fterm);
 						var statement1 = pub.mDBConn.createStatement(fterm);
 						statement1.params.id=placeids[i];
 						statement1.params.start=rangeStart;
@@ -335,7 +322,8 @@ com.wuxuan.fromwheretowhere.main = function(){
 				}
       }
 		}
-		//fiter pid
+		//fiter pid after all the keyword query
+		var filtered = [];
 		for(var i in pids){
 			var fterm = pids[i];
 			if(query){
@@ -348,11 +336,11 @@ com.wuxuan.fromwheretowhere.main = function(){
 			}
 			var statement = pub.mDBConn.createStatement(fterm);
 			var thispid = pub.queryOne(statement, 32, 0);
-			if(thispid==null){
-				pids.splice(i,1);
+			if(thispid!=null){
+				filtered.push(pids[i]);
 			}
 		}
-    return pids;
+    return filtered;
   };
   
   // Main Datastructure for each Node

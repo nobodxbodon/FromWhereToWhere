@@ -58,7 +58,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
 	return this.visibleData[idx].url;
       } else if (column.id == "date") {
         if (this.visibleData[idx].placeId){
-            return com.wuxuan.fromwheretowhere.utils.formatDate(main.getFirstDatefromPid(this.visibleData[idx].placeId));
+            return com.wuxuan.fromwheretowhere.utils.formatDate(main.getLastDatefromPid(this.visibleData[idx].placeId));
         } else {
             return null;
         }
