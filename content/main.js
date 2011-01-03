@@ -77,8 +77,7 @@ com.wuxuan.fromwheretowhere.main = function(){
 						(SELECT id FROM moz_historyvisits where id>:id limit 1)";
 		if(query){
 			if(query.site.length>0){
-				term = "SELECT id FROM moz_places WHERE id in ("+term+") AND url LIKE '%"+query.site[0]+"%'";
-				//alert("getChildren:\n"+term);
+				term = pub.sqlStUrlFilter(term, query.site);
 			}
 		}
     var statement = pub.mDBConn.createStatement(term);
@@ -171,7 +170,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     //SELECT * FROM moz_places where title LIKE '%sqlite%';
     //NESTED in reverse order, with the assumption that the word in front is more frequently used, thus return more items in each SELECT
     var term = "";
-		
+
 		//add site filter
 		var siteTerm = "moz_places";
 		if(site.length!=0){
@@ -183,32 +182,57 @@ com.wuxuan.fromwheretowhere.main = function(){
 		//TODO: seems dup condition, to simplify
     var excludeTerm = siteTerm;
     if(excluded.length!=0){
+			var titleNotLike = "";
       for(var i = excluded.length-1; i>=0; i--){
-        if(i==excluded.length-1){
-          excludeTerm = "(SELECT * FROM " + excludeTerm + " WHERE TITLE NOT LIKE '%" + excluded[i] + "%')";
-        } else {
-          excludeTerm = "(SELECT * FROM " + excludeTerm + " WHERE TITLE NOT LIKE '%" + excluded[i] + "%')";
-        }
+				// no proof to be faster
+        /*if(i==excluded.length-1){
+					if(i!=0){
+						titleNotLike = " TITLE NOT LIKE '%" + excluded[i] + "%' AND" + titleNotLike;
+					}
+        } else {*/
+          excludeTerm = "(SELECT * FROM " + excludeTerm + " WHERE" + titleNotLike + " TITLE NOT LIKE '%" + excluded[i] + "%')";
+        //}
       }
     }
     
     if(words.length==1){
       term = "SELECT id FROM " + excludeTerm + " WHERE TITLE LIKE '%" + words[0] + "%'";
     } else {
+			var titleLike = "";
       for(var i = words.length-1; i>=0; i--){
-        if(i==words.length-1){
+				if(i==words.length-1){
           term = "SELECT * FROM " + excludeTerm + " WHERE TITLE LIKE '%" + words[i] + "%'";
         } else if(i!=0){
           term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE '%" + words[i] + "%'";
         } else {
           term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE '%" + words[i] + "%'";
         }
+				// no proof to be faster
+				/*if(i!=0){
+					titleLike = " title LIKE '%"+words[i]+"%' AND" + titleLike;
+        } else {
+          term = "SELECT id FROM (" + excludeTerm + ") WHERE" + titleLike +" TITLE LIKE '%" + words[i] + "%'";
+        }*/
       }
     }
+		//alert(term);
     var statement = pub.mDBConn.createStatement(term);
     return pub.queryAll(statement, 32, 0);
   };
   //sqlite operations finish
+	
+	//add url filter for id, TODO: more general than id - moz_places
+	pub.sqlStUrlFilter = function(term, sites){
+		var fterm = "";
+		var idx = sites.length-1;
+		for(var i in sites){
+			if(i==idx){
+				return "SELECT id FROM moz_places WHERE id in ("+term+") AND url LIKE '%"+sites[i]+"%'" + fterm;
+			}else{
+				fterm = fterm + " AND url LIKE '%"+sites[i]+"%'";
+			}
+		}
+	};
 
 	// add query restrictions to parents, time and site
   pub.getParentPlaceidsfromPlaceid = function(pid, query){
@@ -218,15 +242,13 @@ com.wuxuan.fromwheretowhere.main = function(){
 						place_id==:id)";
 		if(query){
 			if(query.site.length>0){
-				term = "SELECT id FROM moz_places WHERE id in ("+term+") AND url LIKE '%"+query.site[0]+"%'";
-				//alert("getParentPlaceidsfromPlaceid: \n"+ term);
+				term = pub.sqlStUrlFilter(term, query.site);
 			}
 			//TODO: visit_date
 		}
     var statement = pub.mDBConn.createStatement(term);
     statement.params.id=pid;
     var pids = pub.queryAll(statement, 32, 0);
-		//alert(pid + " parents: " + pids);
 		// IF there's no results, maybe it's inaccurate! REPEAT with range!
     if(pids.length==0){
       var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
@@ -234,39 +256,39 @@ com.wuxuan.fromwheretowhere.main = function(){
       statement.params.id=pid;
       var placeids = pub.queryAll(statement, 32, 0);
       if(placeids.length==0){
-	return [];
+				return [];
       } else {
 				var accPids=[];
-	for(var i in placeids){
-	  var rangeStart = 0;
-	  var rangeEnd = 10;
-	  var initInterval = 10;
-	  //limit the range of "order by". Should break far before 10, just in case
-	  for(var j=0;j<10;j++){
-			var fterm = "SELECT place_id FROM moz_historyvisits \
-					    where id<=:id-:start and id>:id-:end \
-					    order by -id limit 1";
-			if(query){
-				if(query.site.length>0){
-					fterm = "SELECT id FROM moz_places WHERE id in ("+fterm+") AND url LIKE '%"+query.site[0]+"%'";
-					//alert("getParentPlaceidsfromPlaceid: \n"+ term);
+				for(var i in placeids){
+					var rangeStart = 0;
+					var rangeEnd = 10;
+					var initInterval = 10;
+					//limit the range of "order by". Should break far before 10, just in case
+					for(var j=0;j<10;j++){
+						var fterm = "SELECT place_id FROM moz_historyvisits \
+										where id<=:id-:start and id>:id-:end \
+										order by -id limit 1";
+						if(query){
+							if(query.site.length>0){
+								fterm = pub.sqlStUrlFilter(fterm, query.site);
+							}
+							//TODO: visit_date
+						}
+						//alert(fterm);
+						var statement1 = pub.mDBConn.createStatement(fterm);
+						statement1.params.id=placeids[i];
+						statement1.params.start=rangeStart;
+						statement1.params.end=rangeEnd;
+						var thispid = pub.queryOne(statement1, 32, 0);
+						if(thispid){
+							pids.push(thispid);
+							break;
+						}
+						initInterval = initInterval * 3;
+						rangeStart = rangeEnd;
+						rangeEnd += initInterval;
+					}
 				}
-				//TODO: visit_date
-			}
-	    var statement1 = pub.mDBConn.createStatement(fterm);
-	    statement1.params.id=placeids[i];
-	    statement1.params.start=rangeStart;
-	    statement1.params.end=rangeEnd;
-	    var thispid = pub.queryOne(statement1, 32, 0);
-	    if(thispid){
-	      pids.push(thispid);
-	      break;
-	    }
-	    initInterval = initInterval * 3;
-	    rangeStart = rangeEnd;
-	    rangeEnd += initInterval;
-	  }
-	}
       }
 		}
     return pids;
@@ -786,7 +808,10 @@ pub.mainThread.prototype = {
         if(this.words.length!=0){
           var allpids = [];
           // improve by search id from keywords directly instead of getting urls first
-          allpids = pub.searchIdbyKeywords(this.words, this.excluded, this.site);
+					//var querytime = (new Date()).getTime();
+					//for(var i=100; i--; i>0)
+						allpids = pub.searchIdbyKeywords(this.words, this.excluded, this.site);
+					//alert(((new Date()).getTime() - querytime)/100);
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.createParentNodesCheckDup(allpids, this.query);
 	
