@@ -89,6 +89,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
         words.splice(i,1);
         i--;
       //get temporal filter
+      //TODO: throw exception and feedback when invalid date
       } else if(words[i].indexOf("time:")==0){
         var ts = words[i].substring(5).split("-");
         // can be ~, need to be smarter, but later

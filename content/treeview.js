@@ -53,7 +53,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   getCellText: function(idx, column) {
     if(this.visibleData[idx]) {
       if(column.id == "element") {
-	return this.visibleData[idx].label;
+        return this.visibleData[idx].placeId+" "+this.visibleData[idx].label;
       } else if (column.id == "url") {
 	return this.visibleData[idx].url;
       } else if (column.id == "date") {

@@ -77,7 +77,10 @@ com.wuxuan.fromwheretowhere.main = function(){
 						(SELECT id FROM moz_historyvisits where id>:id limit 1)";
 		if(query){
 			if(query.site.length>0){
-				term = pub.sqlStUrlFilter(term, query.site);
+				term = pub.sqlStUrlFilter(term, query.site, false);
+			}
+			if(query.time.length>0){
+				term = pub.sqlStTimeFilter(term, query.time, false);
 			}
 		}
     var statement = pub.mDBConn.createStatement(term);
@@ -166,16 +169,17 @@ com.wuxuan.fromwheretowhere.main = function(){
     }catch(e){}
   };
   
-  pub.searchIdbyKeywords = function(words, excluded, site){
+  pub.searchIdbyKeywords = function(words, excluded, site, time){
     //SELECT * FROM moz_places where title LIKE '%sqlite%';
     //NESTED in reverse order, with the assumption that the word in front is more frequently used, thus return more items in each SELECT
     var term = "";
-
+		
 		//add site filter
 		var siteTerm = "moz_places";
+
 		if(site.length!=0){
       for(var i = site.length-1; i>=0; i--){
-        siteTerm = "(SELECT * FROM " + siteTerm + " WHERE URL LIKE '%" + site[i] + "%')";
+        siteTerm = "SELECT * FROM (" + siteTerm + ") WHERE URL LIKE '%" + site[i] + "%'";
       }
     }
 		
@@ -215,46 +219,84 @@ com.wuxuan.fromwheretowhere.main = function(){
         }*/
       }
     }
-		//alert(term);
+		
+		if(time.length>0){
+			term = pub.sqlStTimeFilter(term, time, false);
+			//for(var i = 0; i<time.length;i++)
+			//	term = "SELECT place_id FROM moz_historyvisits where place_id in ("+term+") AND visit_date>="+time[i].since*1000+" AND visit_date<" + time[i].till*1000;
+		}
+		alert(term);
     var statement = pub.mDBConn.createStatement(term);
     return pub.queryAll(statement, 32, 0);
   };
   //sqlite operations finish
 	
 	//add url filter for id, TODO: more general than id - moz_places
-	pub.sqlStUrlFilter = function(term, sites){
+	//singular_table: true-singular, false-table
+	pub.sqlStUrlFilter = function(term, sites, singular_table){
 		var fterm = "";
 		var idx = sites.length-1;
 		for(var i in sites){
 			if(i==idx){
-				return "SELECT id FROM moz_places WHERE id in ("+term+") AND url LIKE '%"+sites[i]+"%'" + fterm;
+				if(true)
+					return "SELECT id FROM moz_places WHERE id="+term+" AND url LIKE '%"+sites[i]+"%'" + fterm;
+				else
+					return "SELECT id FROM moz_places WHERE id in ("+term+") AND url LIKE '%"+sites[i]+"%'" + fterm;
 			}else{
 				fterm = fterm + " AND url LIKE '%"+sites[i]+"%'";
 			}
 		}
 	};
 
+	//TOFIX: MAX cause overflow here!
+	//singular_table: true-singular, false-table
+	pub.sqlStTimeFilter = function(term, times, singular_table){
+		var fterm = "";
+		var idx = times.length-1;
+		for(var i in times){
+			var t = "";
+			var fix = " AND visit_date";
+			if(times[i].since!=-1){
+				t = fix+">="+times[i].since*1000;
+			}
+			if(times[i].till!=Number.MAX_VALUE){
+				t = t+fix+"<"+times[i].till*1000;
+			}
+			//if there's no restriction, leave the term as it was
+			if(t==""){
+				return term;
+			}
+			if(i==idx){
+				if(singular_table)
+					return "SELECT place_id FROM moz_historyvisits WHERE place_id="+term+ t + fterm;
+				else
+					return "SELECT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm;
+			}else{
+				fterm = fterm + t; //" AND visit_date>="+times[i].since*1000+" AND visit_date<" + times[i].till*1000;
+			}
+		}
+	};
+	
 	// add query restrictions to parents, time and site
   pub.getParentPlaceidsfromPlaceid = function(pid, query){
     //as id!=0, from_visit=0 doesn't matter
 		var term = "SELECT place_id FROM moz_historyvisits \
 					    where id IN (SELECT from_visit FROM moz_historyvisits where \
 						place_id==:id)";
-		if(query){
-			if(query.site.length>0){
-				term = pub.sqlStUrlFilter(term, query.site);
-			}
-			//TODO: visit_date
-		}
+		//alert(term);
     var statement = pub.mDBConn.createStatement(term);
     statement.params.id=pid;
     var pids = pub.queryAll(statement, 32, 0);
 		// IF there's no results, maybe it's inaccurate! REPEAT with range!
+		if(pid==10247)
+			alert("pids: "+pids);
     if(pids.length==0){
       var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
 						place_id=:id and from_visit!=0");
       statement.params.id=pid;
       var placeids = pub.queryAll(statement, 32, 0);
+			if(pid==10247)
+				alert("froms: " + placeids);
       if(placeids.length==0){
 				return [];
       } else {
@@ -268,12 +310,14 @@ com.wuxuan.fromwheretowhere.main = function(){
 						var fterm = "SELECT place_id FROM moz_historyvisits \
 										where id<=:id-:start and id>:id-:end \
 										order by -id limit 1";
-						if(query){
+						/*if(query){
 							if(query.site.length>0){
 								fterm = pub.sqlStUrlFilter(fterm, query.site);
 							}
-							//TODO: visit_date
-						}
+							if(query.time.length>0){
+								fterm = pub.sqlStTimeFilter(fterm, query.time);
+							}
+						}*/
 						//alert(fterm);
 						var statement1 = pub.mDBConn.createStatement(fterm);
 						statement1.params.id=placeids[i];
@@ -290,6 +334,23 @@ com.wuxuan.fromwheretowhere.main = function(){
 					}
 				}
       }
+		}
+		//fiter pid
+		for(var i in pids){
+			var fterm = pids[i];
+			if(query){
+				if(query.site.length>0){
+					fterm = pub.sqlStUrlFilter(fterm, query.site, true);
+				}
+				if(query.time.length>0){
+					fterm = pub.sqlStTimeFilter(fterm, query.time, true);
+				}
+			}
+			var statement = pub.mDBConn.createStatement(fterm);
+			var thispid = pub.queryOne(statement, 32, 0);
+			if(thispid==null){
+				pids.splice(i,1);
+			}
 		}
     return pids;
   };
@@ -532,6 +593,7 @@ pub.mainThread.prototype = {
     //order by time: latest first by default
     for(var i=pids.length-1; i>=0; i--){
       var anc = pub.getAllAncestorsfromPlaceid(pids[i],[],0,query);
+			//alert("create anc nodes: " + pids[i] + "\n" + anc);
       for(var j in anc){
         ancPids = pub.addInArrayNoDup(anc[j],ancPids);
       }
@@ -797,6 +859,7 @@ pub.mainThread.prototype = {
     this.words = query.words;
     this.excluded = query.excluded;
 		this.site = query.site;
+		this.time = query.time;
 		this.query = query;
   };
   
@@ -810,7 +873,8 @@ pub.mainThread.prototype = {
           // improve by search id from keywords directly instead of getting urls first
 					//var querytime = (new Date()).getTime();
 					//for(var i=100; i--; i>0)
-						allpids = pub.searchIdbyKeywords(this.words, this.excluded, this.site);
+						allpids = pub.searchIdbyKeywords(this.words, this.excluded, this.site, this.time);
+						alert(allpids);
 					//alert(((new Date()).getTime() - querytime)/100);
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.createParentNodesCheckDup(allpids, this.query);
