@@ -859,6 +859,10 @@ pub.mainThread.prototype = {
 				pub.filtered=pub.filtered.concat(after);
 			}else {
 				nodes[i].children = after;
+				//sync with isContainer to avoid phantom container (expandable but empty)
+				if(after.length==0){
+					nodes[i].isContainer = false;
+				}
 			}
 		}
 		return nodes;
