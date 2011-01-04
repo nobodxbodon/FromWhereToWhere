@@ -849,20 +849,21 @@ pub.mainThread.prototype = {
 	
 	//TODO: pass the ultimate test; fix - isContainer wrong for "gbrowser site:google"
 	pub.filterSiteFromLocal = function(nodes){
-		var results = [];
-		for(var i in nodes){
+		for(var i=0; i<nodes.length; i++){
 			if(!nodes[i].inSite){
 				var after = pub.filterSiteFromLocal(nodes[i].children);
-				if(after==null || after.length==0){
+				//if(after==null || after.length==0){
 					nodes.splice(i,1);
-					i=i-1;
-				}else{
+					i--;
+				/*}else{
 					nodes.splice(i,1,after);
 					i = i+after.length-1;
-				}
+				}*/
+				pub.filtered=pub.filtered.concat(after);
 			}else {
 				//alert("in site");
-				nodes[i].children=pub.filterSiteFromLocal(nodes[i].children);	
+				nodes[i].children=pub.filterSiteFromLocal(nodes[i].children);
+				//pub.filtered.push(nodes[i]);
 			}
 		}
 		return nodes;
@@ -912,7 +913,9 @@ pub.mainThread.prototype = {
 					var localNodes = pub.walkAll(maybeNodes, this.words, this.excluded, this.site);
 					//UGLY way to filter those within site, TOOPT later~~
 					if(this.site.length>0){
+						pub.filtered = [];
 						localNodes = pub.filterSiteFromLocal(localNodes);
+						localNodes=localNodes.concat(pub.filtered);
 					}
 					for(var i in localNodes){
 						topNodes.splice(0,0,pub.putNodeToLevel0(localNodes[i]));
