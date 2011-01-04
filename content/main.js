@@ -324,24 +324,28 @@ com.wuxuan.fromwheretowhere.main = function(){
       }
 		}
 		//fiter pid after all the keyword query
-		var filtered = [];
-		for(var i in pids){
-			var fterm = pids[i];
-			if(query){
-				if(query.site.length>0){
-					fterm = pub.sqlStUrlFilter(fterm, query.site, true);
+		if(query.site.length>0 || query.time.length>0){
+			var filtered = [];
+			for(var i in pids){
+				var fterm = pids[i];
+				if(query){
+					if(query.site.length>0){
+						fterm = pub.sqlStUrlFilter(fterm, query.site, true);
+					}
+					if(query.time.length>0){
+						fterm = pub.sqlStTimeFilter(fterm, query.time, true);
+					}
 				}
-				if(query.time.length>0){
-					fterm = pub.sqlStTimeFilter(fterm, query.time, true);
+				var statement = pub.mDBConn.createStatement(fterm);
+				var thispid = pub.queryOne(statement, 32, 0);
+				if(thispid!=null){
+					filtered.push(pids[i]);
 				}
 			}
-			var statement = pub.mDBConn.createStatement(fterm);
-			var thispid = pub.queryOne(statement, 32, 0);
-			if(thispid!=null){
-				filtered.push(pids[i]);
-			}
+			return filtered;
+		}else{
+			return pids;
 		}
-    return filtered;
   };
   
   // Main Datastructure for each Node
@@ -807,7 +811,14 @@ pub.mainThread.prototype = {
     return matches;
   };
   
-	pub.matchQuery = function(label, url, words, excluded, site){
+	pub.matchQuery = function(maybe, label, url, words, excluded, site){
+		for(var s in site){
+      if(url.indexOf(site[s])==-1){
+        return false;
+      }
+    }
+		if(site.length>0)
+			maybe.inSite=true;
 		for(var w in words){
       if(label.indexOf(words[w])==-1){
         return false;
@@ -815,11 +826,6 @@ pub.mainThread.prototype = {
     }
     for(var e in excluded){
       if(label.indexOf(excluded[e])!=-1){
-        return false;
-      }
-    }
-    for(var s in site){
-      if(url.indexOf(site[s])==-1){
         return false;
       }
     }
@@ -831,7 +837,7 @@ pub.mainThread.prototype = {
     var label = maybe.label.toLowerCase();
     var url = maybe.url.toLowerCase();
 		//just to check keywords match
-		if(!pub.matchQuery(label, url, words, excluded, site)){
+		if(!pub.matchQuery(maybe, label, url, words, excluded, site)){
       return pub.walkAll(maybe.children, words, excluded, site);
     }else{
 			//alert(maybe.label);
@@ -840,6 +846,27 @@ pub.mainThread.prototype = {
 			return [].push(maybe);
 		}
   };
+	
+	//TODO: pass the ultimate test; fix - isContainer wrong for "gbrowser site:google"
+	pub.filterSiteFromLocal = function(nodes){
+		var results = [];
+		for(var i in nodes){
+			if(!nodes[i].inSite){
+				var after = pub.filterSiteFromLocal(nodes[i].children);
+				if(after==null || after.length==0){
+					nodes.splice(i,1);
+					i=i-1;
+				}else{
+					nodes.splice(i,1,after);
+					i = i+after.length-1;
+				}
+			}else {
+				//alert("in site");
+				nodes[i].children=pub.filterSiteFromLocal(nodes[i].children);	
+			}
+		}
+		return nodes;
+	};
 	
 	//TODO: call getIncludeExclude here, save passing arguments?
   pub.searchThread = function(threadID, query) {
@@ -883,6 +910,10 @@ pub.mainThread.prototype = {
 						this.site[s] = this.site[s].toLowerCase();
 					}
 					var localNodes = pub.walkAll(maybeNodes, this.words, this.excluded, this.site);
+					//UGLY way to filter those within site, TOOPT later~~
+					if(this.site.length>0){
+						localNodes = pub.filterSiteFromLocal(localNodes);
+					}
 					for(var i in localNodes){
 						topNodes.splice(0,0,pub.putNodeToLevel0(localNodes[i]));
 					}
