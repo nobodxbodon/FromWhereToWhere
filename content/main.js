@@ -151,7 +151,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   };
   
   pub.getLastDatefromPid = function(pid){
-    var statement = pub.mDBConn.createStatement("SELECT visit_date FROM moz_historyvisits where place_id=:pid ORDER BY -visit_date");
+    var statement = pub.mDBConn.createStatement("SELECT last_visit_date FROM moz_places where id=:pid");
     statement.params.pid=pid;
     return pub.queryOne(statement, 64, 0);
   };
@@ -268,9 +268,9 @@ com.wuxuan.fromwheretowhere.main = function(){
 			}
 			if(i==idx){
 				if(singular_table)
-					return "SELECT place_id FROM moz_historyvisits WHERE place_id=("+term+ ")" + t + fterm;
+					return "SELECT place_id FROM moz_historyvisits WHERE place_id=("+term+ ")" + t + fterm + " GROUP BY place_id";
 				else
-					return "SELECT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm;
+					return "SELECT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm + " GROUP BY place_id";
 			}else{
 				fterm = fterm + t;
 			}
@@ -603,7 +603,6 @@ pub.mainThread.prototype = {
 			
 			//add from-to from local notes, using the same URI
 			var rawLocalNotes = pub.localmanager.getNodesRawfromURI(pub.currentURI);
-			//alert(rawLocalNotes);
 			for(var i in rawLocalNotes){
 				var localNodes = []
 				try{
@@ -613,8 +612,7 @@ pub.mainThread.prototype = {
 						alert("record corrupted:\n" + json + " " + err);
 					//}
 				}
-				//alert(localNodes[0].label);
-				nodes = localNodes.concat(nodes);//splice(0,0,localNodes[0]);	
+				nodes = localNodes.concat(nodes);
 			}
     }
     
@@ -838,7 +836,6 @@ pub.mainThread.prototype = {
 		if(!pub.matchQuery(maybe, label, url, words, excluded, site)){
       return pub.walkAll(maybe.children, words, excluded, site);
     }else{
-			//alert(maybe.label);
 			maybe.haveKeywords = true;
 			pub.walkAll(maybe.children, words, excluded, site);
 			return [].push(maybe);
@@ -901,7 +898,7 @@ pub.mainThread.prototype = {
 					//var querytime = (new Date()).getTime();
 					//for(var i=100; i--; i>0)
 						allpids = pub.searchIdbyKeywords(this.words, this.excluded, this.site, this.time);
-						alert(allpids);
+						alert(allpids.length);
 					//alert(((new Date()).getTime() - querytime)/100);
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.createParentNodesCheckDup(allpids, this.query);
