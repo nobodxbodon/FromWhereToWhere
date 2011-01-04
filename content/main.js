@@ -324,17 +324,15 @@ com.wuxuan.fromwheretowhere.main = function(){
       }
 		}
 		//fiter pid after all the keyword query
-		if(query.site.length>0 || query.time.length>0){
+		if(query && (query.site.length>0 || query.time.length>0)){
 			var filtered = [];
 			for(var i in pids){
 				var fterm = pids[i];
-				if(query){
-					if(query.site.length>0){
-						fterm = pub.sqlStUrlFilter(fterm, query.site, true);
-					}
-					if(query.time.length>0){
-						fterm = pub.sqlStTimeFilter(fterm, query.time, true);
-					}
+				if(query.site.length>0){
+					fterm = pub.sqlStUrlFilter(fterm, query.site, true);
+				}
+				if(query.time.length>0){
+					fterm = pub.sqlStTimeFilter(fterm, query.time, true);
 				}
 				var statement = pub.mDBConn.createStatement(fterm);
 				var thispid = pub.queryOne(statement, 32, 0);
