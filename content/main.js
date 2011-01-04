@@ -793,89 +793,7 @@ pub.mainThread.prototype = {
   };
   
   pub.pidwithKeywords = [];
-  
-	//walk and search through node, TODO: more generic
-	//RM flag: remove or not
-  //TODO: index to speed up
-  pub.walkAll = function(maybes, words, excluded, site){
-		var matches = [];
-    for(var i in maybes){
-      if(pub.walkNode(maybes[i], words, excluded, site).length!=0){
-        matches.push(maybes[i]);
-      }
-    }
-    return matches;
-  };
-  
-	pub.matchQuery = function(maybe, label, url, words, excluded, site){
-		for(var s in site){
-      if(url.indexOf(site[s])==-1){
-        return false;
-      }
-    }
-		if(site.length>0)
-			maybe.inSite=true;
-		for(var w in words){
-      if(label.indexOf(words[w])==-1){
-        return false;
-      }
-    }
-    for(var e in excluded){
-      if(label.indexOf(excluded[e])!=-1){
-        return false;
-      }
-    }
-		return true;
-	};
-	
-  //indexOf is case-sensitive!
-  pub.walkNode = function(maybe, words, excluded, site){
-    var label = maybe.label.toLowerCase();
-    var url = maybe.url.toLowerCase();
-		//just to check keywords match
-		if(!pub.matchQuery(maybe, label, url, words, excluded, site)){
-      return pub.walkAll(maybe.children, words, excluded, site);
-    }else{
-			maybe.haveKeywords = true;
-			pub.walkAll(maybe.children, words, excluded, site);
-			return [].push(maybe);
-		}
-  };
-	
-	//return the subtrees that are inSite
-	//TODO: fix - isContainer wrong for "gbrowser site:google"
-	pub.filterSiteFromLocal = function(nodes){
-		var haveKeyWords=false;
-		for(var i=0; i<nodes.length; i++){
-			var after = pub.filterSiteFromLocal(nodes[i].children);
-			if(!nodes[i].inSite){
-				nodes.splice(i,1);
-				i--;
-				pub.filtered=pub.filtered.concat(after);
-			}else {
-				nodes[i].children = after;
-				//sync with isContainer to avoid phantom container (expandable but empty)
-				if(after.length==0){
-					nodes[i].isContainer = false;
-				}
-			}
-		}
-		return nodes;
-	};
-	
-	//depth searching, return whether there's a leaf having keywords in tree
-	pub.haveKeywordsInTree = function(node){
-		if(node.haveKeywords)
-			return true;
-		var haveKeywords = false;
-		for(var i in node.children){
-			haveKeywords = pub.haveKeywordsInTree(node.children[i]);
-			if(haveKeywords)
-				return true;
-		}
-		return haveKeywords;
-	};
-	
+  	
 	//TODO: call getIncludeExclude here, save passing arguments?
   pub.searchThread = function(threadID, query) {
     this.threadID = threadID;
@@ -906,9 +824,9 @@ pub.mainThread.prototype = {
 					//search in local notes, latest first
 					//7 short records 1 long: 7ms; 7 short 11 long: 37ms
 					//var start = (new Date()).getTime();
-					var maybeNodes = pub.localmanager.searchNotesbyKeywords(this.words, this.excluded, this.site);
+					var filtered = pub.localmanager.searchNotesbyKeywords(this.words, this.excluded, this.site);
 					//lowercase for all keywords
-					for(var w in this.words){
+					/*for(var w in this.words){
 						this.words[w] = this.words[w].toLowerCase();
 					}
 					for(var e in this.excluded){
@@ -928,6 +846,11 @@ pub.mainThread.prototype = {
 						//only add those that have >0 leaf that has keywords
 						if(pub.haveKeywordsInTree(localNodes[i]))
 							topNodes.splice(0,0,pub.putNodeToLevel0(localNodes[i]));
+					}*/
+					//var filtered = pub.localmanager.filterTree(maybeNodes, this.words, this.excluded, this.site);
+					alert("in local: " + filtered);
+					for(var i in filtered){
+						topNodes.splice(0,0,pub.putNodeToLevel0(filtered[i]));
 					}
 					//alert((new Date()).getTime()-start);
 				}
