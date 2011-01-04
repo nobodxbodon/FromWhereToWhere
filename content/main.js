@@ -83,6 +83,7 @@ com.wuxuan.fromwheretowhere.main = function(){
 				term = pub.sqlStTimeFilter(term, query.time, false);
 			}
 		}
+		//alert(term);
     var statement = pub.mDBConn.createStatement(term);
     statement.params.id=parentId;
     return pub.queryAll(statement, 32, 0);
@@ -194,18 +195,18 @@ com.wuxuan.fromwheretowhere.main = function(){
 						titleNotLike = " TITLE NOT LIKE '%" + excluded[i] + "%' AND" + titleNotLike;
 					}
         } else {*/
-          excludeTerm = "(SELECT * FROM " + excludeTerm + " WHERE" + titleNotLike + " TITLE NOT LIKE '%" + excluded[i] + "%')";
+          excludeTerm = "SELECT * FROM (" + excludeTerm + ") WHERE" + titleNotLike + " TITLE NOT LIKE '%" + excluded[i] + "%')";
         //}
       }
     }
     
     if(words.length==1){
-      term = "SELECT id FROM " + excludeTerm + " WHERE TITLE LIKE '%" + words[0] + "%'";
+      term = "SELECT id FROM (" + excludeTerm + ") WHERE TITLE LIKE '%" + words[0] + "%'";
     } else {
 			var titleLike = "";
       for(var i = words.length-1; i>=0; i--){
 				if(i==words.length-1){
-          term = "SELECT * FROM " + excludeTerm + " WHERE TITLE LIKE '%" + words[i] + "%'";
+          term = "SELECT * FROM (" + excludeTerm + ") WHERE TITLE LIKE '%" + words[i] + "%'";
         } else if(i!=0){
           term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE '%" + words[i] + "%'";
         } else {
@@ -225,7 +226,7 @@ com.wuxuan.fromwheretowhere.main = function(){
 			//for(var i = 0; i<time.length;i++)
 			//	term = "SELECT place_id FROM moz_historyvisits where place_id in ("+term+") AND visit_date>="+time[i].since*1000+" AND visit_date<" + time[i].till*1000;
 		}
-		alert(term);
+		//alert(term);
     var statement = pub.mDBConn.createStatement(term);
     return pub.queryAll(statement, 32, 0);
   };
@@ -239,7 +240,7 @@ com.wuxuan.fromwheretowhere.main = function(){
 		for(var i in sites){
 			if(i==idx){
 				if(true)
-					return "SELECT id FROM moz_places WHERE id="+term+" AND url LIKE '%"+sites[i]+"%'" + fterm;
+					return "SELECT id FROM moz_places WHERE id=("+term+") AND url LIKE '%"+sites[i]+"%'" + fterm;
 				else
 					return "SELECT id FROM moz_places WHERE id in ("+term+") AND url LIKE '%"+sites[i]+"%'" + fterm;
 			}else{
@@ -267,7 +268,7 @@ com.wuxuan.fromwheretowhere.main = function(){
 			}
 			if(i==idx){
 				if(singular_table)
-					return "SELECT place_id FROM moz_historyvisits WHERE place_id="+term+ t + fterm;
+					return "SELECT place_id FROM moz_historyvisits WHERE place_id=("+term+ ")" + t + fterm;
 				else
 					return "SELECT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm;
 			}else{
