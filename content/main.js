@@ -847,26 +847,34 @@ pub.mainThread.prototype = {
 		}
   };
 	
-	//TODO: pass the ultimate test; fix - isContainer wrong for "gbrowser site:google"
+	//return the subtrees that are inSite
+	//TODO: fix - isContainer wrong for "gbrowser site:google"
 	pub.filterSiteFromLocal = function(nodes){
+		var haveKeyWords=false;
 		for(var i=0; i<nodes.length; i++){
+			var after = pub.filterSiteFromLocal(nodes[i].children);
 			if(!nodes[i].inSite){
-				var after = pub.filterSiteFromLocal(nodes[i].children);
-				//if(after==null || after.length==0){
-					nodes.splice(i,1);
-					i--;
-				/*}else{
-					nodes.splice(i,1,after);
-					i = i+after.length-1;
-				}*/
+				nodes.splice(i,1);
+				i--;
 				pub.filtered=pub.filtered.concat(after);
 			}else {
-				//alert("in site");
-				nodes[i].children=pub.filterSiteFromLocal(nodes[i].children);
-				//pub.filtered.push(nodes[i]);
+				nodes[i].children = after;
 			}
 		}
 		return nodes;
+	};
+	
+	//depth searching, return whether there's a leaf having keywords in tree
+	pub.haveKeywordsInTree = function(node){
+		if(node.haveKeywords)
+			return true;
+		var haveKeywords = false;
+		for(var i in node.children){
+			haveKeywords = pub.haveKeywordsInTree(node.children[i]);
+			if(haveKeywords)
+				return true;
+		}
+		return haveKeywords;
 	};
 	
 	//TODO: call getIncludeExclude here, save passing arguments?
@@ -918,7 +926,9 @@ pub.mainThread.prototype = {
 						localNodes=localNodes.concat(pub.filtered);
 					}
 					for(var i in localNodes){
-						topNodes.splice(0,0,pub.putNodeToLevel0(localNodes[i]));
+						//only add those that have >0 leaf that has keywords
+						if(pub.haveKeywordsInTree(localNodes[i]))
+							topNodes.splice(0,0,pub.putNodeToLevel0(localNodes[i]));
 					}
 					//alert((new Date()).getTime()-start);
 				}
