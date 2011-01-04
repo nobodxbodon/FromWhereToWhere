@@ -195,7 +195,7 @@ com.wuxuan.fromwheretowhere.main = function(){
 						titleNotLike = " TITLE NOT LIKE '%" + excluded[i] + "%' AND" + titleNotLike;
 					}
         } else {*/
-          excludeTerm = "SELECT * FROM (" + excludeTerm + ") WHERE" + titleNotLike + " TITLE NOT LIKE '%" + excluded[i] + "%')";
+          excludeTerm = "SELECT * FROM (" + excludeTerm + ") WHERE" + titleNotLike + " TITLE NOT LIKE '%" + excluded[i] + "%'";
         //}
       }
     }
@@ -367,6 +367,10 @@ com.wuxuan.fromwheretowhere.main = function(){
     node.id = null;
 		//placeid is not applicable across profiles, so don't use it for sharing at all!
 		node.placeId = null;
+		if(node.haveKeywords)
+			node.haveKeywords = null;
+		if(node.inSite)
+			node.inSite = null;
     return node;
   };
   
@@ -755,7 +759,7 @@ pub.mainThread.prototype = {
       }
       pub.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
 			var savenote = document.getElementById("saved_note");
-			savenote.value = "Note saved:\n"+recordName;
+			savenote.value = "SAVED: "+recordName;
 			document.getElementById("saved_notification").openPopup(null, "", 60, 50, false, false);
     }
   };
@@ -814,45 +818,19 @@ pub.mainThread.prototype = {
           var allpids = [];
           // improve by search id from keywords directly instead of getting urls first
 					//var querytime = (new Date()).getTime();
-					//for(var i=100; i--; i>0)
-						allpids = pub.searchIdbyKeywords(this.words, this.excluded, this.site, this.time);
-						alert(allpids.length);
+					allpids = pub.searchIdbyKeywords(this.words, this.excluded, this.site, this.time);
 					//alert(((new Date()).getTime() - querytime)/100);
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.createParentNodesCheckDup(allpids, this.query);
 	
 					//search in local notes, latest first
-					//7 short records 1 long: 7ms; 7 short 11 long: 37ms
+					//7 short records 1 long: 7ms; 7 short 11 long: 37ms; if site filter: 75ms
 					//var start = (new Date()).getTime();
 					var filtered = pub.localmanager.searchNotesbyKeywords(this.words, this.excluded, this.site);
-					//lowercase for all keywords
-					/*for(var w in this.words){
-						this.words[w] = this.words[w].toLowerCase();
-					}
-					for(var e in this.excluded){
-						this.excluded[e] = this.excluded[e].toLowerCase();
-					}
-					for(var s in this.site){
-						this.site[s] = this.site[s].toLowerCase();
-					}
-					var localNodes = pub.walkAll(maybeNodes, this.words, this.excluded, this.site);
-					//UGLY way to filter those within site, TOOPT later~~
-					if(this.site.length>0){
-						pub.filtered = [];
-						localNodes = pub.filterSiteFromLocal(localNodes);
-						localNodes=localNodes.concat(pub.filtered);
-					}
-					for(var i in localNodes){
-						//only add those that have >0 leaf that has keywords
-						if(pub.haveKeywordsInTree(localNodes[i]))
-							topNodes.splice(0,0,pub.putNodeToLevel0(localNodes[i]));
-					}*/
-					//var filtered = pub.localmanager.filterTree(maybeNodes, this.words, this.excluded, this.site);
-					alert("in local: " + filtered);
+					//alert((new Date()).getTime()-start);
 					for(var i in filtered){
 						topNodes.splice(0,0,pub.putNodeToLevel0(filtered[i]));
 					}
-					//alert((new Date()).getTime()-start);
 				}
 				
 				//refresh tree, remove all visibledata and add new ones

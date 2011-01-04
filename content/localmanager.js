@@ -137,7 +137,6 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
         nodes = nodes.concat(maybeNotes);//(pub.walkAll(maybeNotes, words, excluded, site));
       }
       statement.reset();
-      alert("to filter: "+nodes.length);
       return pub.filterTree(nodes, words, excluded, site);  
     } 
     catch (e) {
