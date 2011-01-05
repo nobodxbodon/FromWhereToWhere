@@ -95,8 +95,12 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   };
   
   pub.showMenuItems = function(){
+    var node = null;
+    if(pub.treeView.selection!=null)
+      node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
+    var openItem = document.getElementById("openlocalnote");
+    openItem.hidden = (node==null);
     var deleteItem = document.getElementById("delete");
-    var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
     deleteItem.hidden = (node==null);
   };
   
@@ -112,7 +116,13 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   //TODO: merge the code with ImportNode in main
   pub.openNode = function(){
     //get nodes content first
-    var json = com.wuxuan.fromwheretowhere.localmanager.getNodeContent(pub.treeView.visibleData[pub.treeView.selection.currentIndex].id);
+    var node = null;
+    if(pub.treeView.selection!=null)
+      node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
+    if(node==null){
+      return;
+    }
+    var json = com.wuxuan.fromwheretowhere.localmanager.getNodeContent(node.id);
 
     var newNodes = [];
     try{
