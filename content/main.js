@@ -798,6 +798,41 @@ pub.mainThread.prototype = {
   
   pub.pidwithKeywords = [];
   	
+	pub.timeInterpret = function(times){
+		var feedback = "";
+		for(var i in times){
+			if(times[i].since!=-1){
+				if(i!=0)
+					feedback = feedback+" AND";
+				feedback = feedback+" since "+(new Date(times[i].since));
+			}
+			if(times[i].till!=Number.MAX_VALUE){
+				if(i!=0)
+					feedback = feedback+" AND";
+				feedback = feedback+" till "+(new Date(times[i].till));
+			}
+		}
+		return feedback;
+	};
+	
+	pub.buildFeedback = function(words, excluded, site, time){
+		var feedback = "No history found ";
+		if(words.length>0){
+			feedback += "with "+words;
+		}
+		if(excluded.length>0){
+			feedback += " AND without " + excluded;
+		}
+		feedback+=" in title";
+		if(site.length>0){
+			feedback+=", AND url with "+site;
+		}
+		if(time.length>0){
+			feedback+=", AND visit time"+pub.timeInterpret(time);
+		}
+		return feedback;
+	};
+	
 	//TODO: call getIncludeExclude here, save passing arguments?
   pub.searchThread = function(threadID, query) {
     this.threadID = threadID;
@@ -842,9 +877,9 @@ pub.mainThread.prototype = {
           return;
         }
         //when allPpids = null/[], show "no result with xxx", to distinguish with normal nothing found
-        if(topNodes.length==0){
+				if(topNodes.length==0){
           var nodes = [];
-          nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found with \""+this.keywords+"\" in title", null, false, false, [], 1));
+          nodes.push(pub.ReferedHistoryNode(-1, -1, pub.buildFeedback(this.words, this.excluded, this.site, this.time), null, false, false, [], 1));
           pub.treeView.visibleData = nodes;
         }else{
           pub.treeView.visibleData = topNodes;
