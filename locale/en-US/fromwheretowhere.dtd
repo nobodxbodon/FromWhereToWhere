@@ -4,9 +4,11 @@
 <!ENTITY contextMenu.importNodes "Import">
 <!ENTITY contextMenu.saveNodetoLocal "Save to Local Notes">
 <!ENTITY contextMenu.showLocalNotes "Open/close Notes Sidebar">
+<!ENTITY contextMenu.openlocalnote "Open Note">
 <!ENTITY contextMenu.delete "Delete">
 <!ENTITY button.searchallwords "Search">
 
+<!ENTITY notesidebar.title "Local Notes">
 <!ENTITY table.title "Title">
 <!ENTITY table.url "URL">
 <!ENTITY table.date "Last Visit">

@@ -2,11 +2,12 @@
 <!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
 <?xml-stylesheet href="chrome://FromWhereToWhere/skin/treedec.css" type="text/css"?>  
 
-<page id="emptySidebar" title="records" onload="com.wuxuan.fromwheretowhere.noteSidebar.initView();"
+<page id="emptySidebar" title="&notesidebar.title;" onload="com.wuxuan.fromwheretowhere.noteSidebar.initView();"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
 
 <popupset>
   <menupopup id="sidebarmenu" onpopupshowing="com.wuxuan.fromwheretowhere.noteSidebar.showMenuItems()">
+    <menuitem id="openlocalnote" label="&contextMenu.openlocalnote;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.openNode()"/>
     <menuitem id="delete" label="&contextMenu.delete;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.deleteNotes()"/>
   </menupopup>
 </popupset>
