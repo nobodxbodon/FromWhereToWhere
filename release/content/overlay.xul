@@ -1,4 +1,5 @@
-<?xml version="1.0"?>  
+<?xml version="1.0"?>
+<!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
 <overlay id="FromWhereToWhereOverlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
   <broadcasterset id="mainBroadcasterSet"> 
@@ -7,7 +8,7 @@
                  type="checkbox"
                  group="sidebar"
                  sidebarurl="chrome://FromWhereToWhere/content/sidebar.xul"
-                 sidebartitle="records" />
+                 sidebartitle="&notesidebar.title;" />
   </broadcasterset>
   
   <menupopup id="menu_ToolsPopup">  

@@ -53,12 +53,12 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   getCellText: function(idx, column) {
     if(this.visibleData[idx]) {
       if(column.id == "element") {
-	return this.visibleData[idx].label;
+        return this.visibleData[idx].label;
       } else if (column.id == "url") {
 	return this.visibleData[idx].url;
       } else if (column.id == "date") {
         if (this.visibleData[idx].placeId){
-            return com.wuxuan.fromwheretowhere.utils.formatDate(main.getFirstDatefromPid(this.visibleData[idx].placeId));
+            return com.wuxuan.fromwheretowhere.utils.formatDate(main.getLastDatefromPid(this.visibleData[idx].placeId));
         } else {
             return null;
         }
@@ -165,7 +165,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     }  
     else {
       com.wuxuan.fromwheretowhere.sb.urlInit();
-      main.main.dispatch(new main.mainThread(1, item, idx), main.DISPATCH_NORMAL);
+      main.main.dispatch(new main.mainThread(1, item, idx, main.query), main.DISPATCH_NORMAL);
       this.addSuspensionPoints(item.level, idx);
       
     }  

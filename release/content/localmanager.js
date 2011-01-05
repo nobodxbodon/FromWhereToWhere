@@ -137,7 +137,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
         nodes = nodes.concat(maybeNotes);//(pub.walkAll(maybeNotes, words, excluded, site));
       }
       statement.reset();
-      return nodes;  
+      return pub.filterTree(nodes, words, excluded, site);  
     } 
     catch (e) {
       statement.reset();
@@ -157,6 +157,114 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
       statement.reset();
     }
   };
+  
+	//walk and search through node, TODO: more generic
+	//RM flag: remove or not
+  //TODO: index to speed up
+  pub.walkAll = function(maybes, words, excluded, site){
+		var matches = [];
+    for(var i in maybes){
+      if(pub.walkNode(maybes[i], words, excluded, site).length!=0){
+        matches.push(maybes[i]);
+      }
+    }
+    return matches;
+  };
+  
+	pub.matchQuery = function(maybe, label, url, words, excluded, site){
+		for(var s in site){
+      if(url.indexOf(site[s])==-1){
+        return false;
+      }
+    }
+		if(site.length>0)
+			maybe.inSite=true;
+		for(var w in words){
+      if(label.indexOf(words[w])==-1){
+        return false;
+      }
+    }
+    for(var e in excluded){
+      if(label.indexOf(excluded[e])!=-1){
+        return false;
+      }
+    }
+		return true;
+	};
+	
+  //indexOf is case-sensitive!
+  pub.walkNode = function(maybe, words, excluded, site){
+    var label = maybe.label.toLowerCase();
+    var url = maybe.url.toLowerCase();
+		//just to check keywords match
+		if(!pub.matchQuery(maybe, label, url, words, excluded, site)){
+      return pub.walkAll(maybe.children, words, excluded, site);
+    }else{
+			maybe.haveKeywords = true;
+			pub.walkAll(maybe.children, words, excluded, site);
+			return [].push(maybe);
+		}
+  };
+	
+	//return the subtrees that are inSite
+	//TODO: fix - isContainer wrong for "gbrowser site:google"
+	pub.filterSiteFromLocal = function(nodes){
+		var haveKeyWords=false;
+		for(var i=0; i<nodes.length; i++){
+			var after = pub.filterSiteFromLocal(nodes[i].children);
+			if(!nodes[i].inSite){
+				nodes.splice(i,1);
+				i--;
+				pub.filtered=pub.filtered.concat(after);
+			}else {
+				nodes[i].children = after;
+				//sync with isContainer to avoid phantom container (expandable but empty)
+				if(after.length==0){
+					nodes[i].isContainer = false;
+				}
+			}
+		}
+		return nodes;
+	};
+	
+	//depth searching, return whether there's a leaf having keywords in tree
+	pub.haveKeywordsInTree = function(node){
+		if(node.haveKeywords)
+			return true;
+		var haveKeywords = false;
+		for(var i in node.children){
+			haveKeywords = pub.haveKeywordsInTree(node.children[i]);
+			if(haveKeywords)
+				return true;
+		}
+		return haveKeywords;
+	};
+  
+  pub.filterTree = function(maybeNodes, words, excluded, site){
+    var filtered = [];
+    for(var w in words){
+			words[w] = words[w].toLowerCase();
+		}
+		for(var e in excluded){
+			excluded[e] = excluded[e].toLowerCase();
+		}
+		for(var s in site){
+			site[s] = site[s].toLowerCase();
+		}
+		var localNodes = pub.walkAll(maybeNodes, words, excluded, site);
+		//UGLY way to filter those within site, TOOPT later~~
+		if(site.length>0){
+			pub.filtered = [];
+			localNodes = pub.filterSiteFromLocal(localNodes);
+			localNodes=localNodes.concat(pub.filtered);
+		}
+		for(var i in localNodes){
+			//only add those that have >0 leaf that has keywords
+			if(pub.haveKeywordsInTree(localNodes[i]))
+				filtered.push(localNodes[i]);
+		}
+    return filtered;
+  }
   
   //built-in rowid, can't guarantee same order as savedate, if renaming is allowed
   pub.init = function(){

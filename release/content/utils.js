@@ -47,6 +47,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return words;
   };
   
+  // PRINCIPLE: conjunction for all
   pub.getIncludeExcluded = function(keywords){
     var origkeywords = keywords;
     var excludePreciseReg = /-\"([\s|\w|\W]*)\"/g;
@@ -75,6 +76,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
     //put quoted words at the end, which will be the first to search from, more likely to reduce results
     
     var site = [];
+    var time = [];
     for(var i=0; i<words.length; i++){
       //get excluded words, single '-' is rec as keyword
       if(words[i][0]=='-' && words[i].length>1){
@@ -86,10 +88,40 @@ com.wuxuan.fromwheretowhere.utils = function(){
         site.push(words[i].substring(5));
         words.splice(i,1);
         i--;
+      //get temporal filter
+      //TODO: throw exception and feedback when invalid date
+      } else if(words[i].indexOf("time:")==0){
+        var ts = words[i].substring(5).split("-");
+        // can be ~, need to be smarter, but later
+        if(ts.length==1)
+          ts = words[i].substring(5).split("~");
+        //if -time1, means till time1
+        var t = {since: -1, till: Number.MAX_VALUE};
+        if(ts[0]==""){
+          var till = new Date(ts[1]).getTime();
+          if(till<t.till)
+            t.till = till;
+        //if time1-, means since time1
+        }else if(ts[1]==""){
+          var since = new Date(ts[0]).getTime();
+          if(since>t.since)
+            t.since = since;
+        //if time1-time2, means since time1 till time2
+        }else{
+          var till = new Date(ts[1]).getTime();
+          var since = new Date(ts[0]).getTime();
+          if(since>t.since)
+            t.since = since;
+          if(till<t.till)
+            t.till = till;
+        }
+        time.push(t);
+        words.splice(i,1);
+        i--;
       }
     }
     words = words.concat(quotedWords);
-    return {origkeywords : origkeywords, words : words, excluded : excluded, site : site};
+    return {origkeywords : origkeywords, words : words, excluded : excluded, site : site, time : time};
   };
   
   return pub;
