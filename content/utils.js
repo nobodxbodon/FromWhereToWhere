@@ -2,6 +2,8 @@
 com.wuxuan.fromwheretowhere.utils = function(){
   var pub={};
   
+  pub.INTERVAL_DEF = {since: -1, till: Number.MAX_VALUE};
+  
   // Utils functions from here
   pub.cloneObject = function(obj){
     if(obj==null){
@@ -45,6 +47,29 @@ com.wuxuan.fromwheretowhere.utils = function(){
       }
     }
     return words;
+  };
+  
+  //ts.length=2
+  // time1-time2 => since time1 till time2
+  // time1- => since time1
+  // -time2 => till time2
+  pub.parseTime = function(ts){
+    var t = pub.cloneObject(pub.INTERVAL_DEF);
+    if(ts[1]!=""){
+      var till = new Date(ts[1]).getTime();
+      if(till<t.till)
+        t.till = till;
+      else
+        alert("Invalid date: "+ts[1]+". Search without it anyway");
+    //if time1-, means since time1
+    }if(ts[0]!=""){
+      var since = new Date(ts[0]).getTime();
+      if(since>t.since)
+        t.since = since;
+      else
+        alert("Invalid date: "+ts[0]+". Search without it anyway");
+    }
+    return t;
   };
   
   // PRINCIPLE: conjunction for all
@@ -91,30 +116,18 @@ com.wuxuan.fromwheretowhere.utils = function(){
       //get temporal filter
       //TODO: throw exception and feedback when invalid date
       } else if(words[i].indexOf("time:")==0){
-        var ts = words[i].substring(5).split("-");
+        var ti = words[i].substring(5);
+        var ts = ti.split("-");
         // can be ~, need to be smarter, but later
         if(ts.length==1)
-          ts = words[i].substring(5).split("~");
-        //if -time1, means till time1
-        var t = {since: -1, till: Number.MAX_VALUE};
-        if(ts[0]==""){
-          var till = new Date(ts[1]).getTime();
-          if(till<t.till)
-            t.till = till;
-        //if time1-, means since time1
-        }else if(ts[1]==""){
-          var since = new Date(ts[0]).getTime();
-          if(since>t.since)
-            t.since = since;
-        //if time1-time2, means since time1 till time2
-        }else{
-          var till = new Date(ts[1]).getTime();
-          var since = new Date(ts[0]).getTime();
-          if(since>t.since)
-            t.since = since;
-          if(till<t.till)
-            t.till = till;
+          ts = ti.split("~");
+        if(ts.length!=2){
+          alert("Fail to parse time interval: "+ti+". Search without it anyway");
+          words.splice(i,1);
+          i--;
+          continue;
         }
+        var t=pub.parseTime(ts);
         time.push(t);
         words.splice(i,1);
         i--;
