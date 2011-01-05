@@ -12,6 +12,12 @@
 12) click "OK" in import dialog will reconstruct the same tree structure as the nodes that the property was copied from
 13) during searching or opening a node, it won't freeze Firefox
 14) icon will show for the url that has been visited
-15) accurate searching a) exact phrase: "keyword1 key2"; b) exclusion: -key3 -"key4 key5"
+15) accurate searching a) exact phrase: "keyword1 key2"; b) exclusion: -key3 -"key4 key5" c) site:mozilla.org d)time:8/2/2010-9/2/2010
 16) columns in the view can be resized using splitters
 17) "Property/Import" work when selecting multiple nodes
+
+------Local Notes Related------
+1) context menu -> "save to local notes" works for all nodes (can multi-select), pop up "saved" if saved successfully and warn if failed
+2) context menu -> "open/close notes sidebar", toggle the local notes sidebar
+3) in sidebar, context menu -> "open note" works for each node, open in new tree view if current isn't
+4) in sidebar, context menu -> "open note" works for each node, remove it from the record and sidebar view

@@ -33,6 +33,10 @@
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010-").time, [{since: new Date("02/02/2010").getTime(), till:Number.MAX_VALUE}], "getIncludeExcluded time 0");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010-02/03/2011").time, [{since: new Date("02/02/2010").getTime(), till: new Date("02/03/2011").getTime()}], "getIncludeExcluded time 1");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:-02/02/2010").time, [{since: -1, till:new Date("02/02/2010").getTime()}], "getIncludeExcluded time 2");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010-fsa").time, [{since: new Date("02/02/2010").getTime(), till:Number.MAX_VALUE}], "getIncludeExcluded time 3");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:--").time, [], "getIncludeExcluded time -1");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010").time, [], "getIncludeExcluded time -2");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010=09/02/2010").time, [], "getIncludeExcluded time -3");
         //isDeeply([1,2].concat([3,4]), [1,2,3,4], "concat");
       </script>
     </pre>
