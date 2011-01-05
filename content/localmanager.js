@@ -34,7 +34,8 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
   
   //for now no automatic merging. No checking for duplicate content (json). 
   pub.addRecord = function(type, name, url, term, currenturi, content, date){
-    var statement = pub.localRecord.createStatement("INSERT INTO " + pub.RECORDTABLENAME + "(type, name, url, searchterm, currentURI, content, savedate) VALUES (:type, :name, :url, :term, :currenturi, :content, :date)")
+    var q = "INSERT INTO " + pub.RECORDTABLENAME + "(type, name, url, searchterm, currentURI, content, savedate) VALUES (:type, :name, :url, :term, :currenturi, :content, :date)";
+    var statement = pub.localRecord.createStatement(q);
     statement.params.type = type;
     statement.params.name = name;
     statement.params.content = content;
@@ -49,11 +50,12 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     
     try {
       statement.executeStep();
-      //alert("saved");
+      return 0;
     } 
     catch (e) {
-      alert("add record exception!");
+      alert("Add record failed. Sorry don't know why yet.");
       statement.reset();
+      return -1;
     }
   };
   
