@@ -757,10 +757,12 @@ pub.mainThread.prototype = {
         // TODO: pick tags
 	recordType = 2;
       }
-      pub.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
-			var savenote = document.getElementById("saved_note");
-			savenote.value = "SAVED: "+recordName;
-			document.getElementById("saved_notification").openPopup(null, "", 60, 50, false, false);
+      var saved = pub.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
+			if(saved!=-1){
+				var savenote = document.getElementById("saved_note");
+				savenote.value = "SAVED: "+recordName;
+				document.getElementById("saved_notification").openPopup(null, "", 60, 50, false, false);
+			}
     }
   };
   
