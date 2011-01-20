@@ -1,7 +1,16 @@
 <?xml version="1.0"?>
 <!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
-<overlay id="FromWhereToWhereOverlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  
+<overlay id="FromWhereToWhereOverlay" onload="com.wuxuan.fromwheretowhere.recommend.init();"
+      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<panel id="currentTitle" fade="fast">
+  <hbox align="start">
+    <vbox>
+      <description id="current_title" value="saved"/>
+    </vbox>
+  </hbox>
+</panel>
+
   <broadcasterset id="mainBroadcasterSet"> 
     <broadcaster id="viewEmptySidebar" 
                  autoCheck="false"
@@ -12,10 +21,13 @@
   </broadcasterset>
   
   <menupopup id="menu_ToolsPopup">  
-    <menuitem id="helloworldMenuitem" label="FromWhereToWhere" insertbefore="sanitizeSeparator"  
+    <menuitem id="fwtwMenuitem" label="FromWhereToWhere" insertbefore="sanitizeSeparator"  
      oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
+    <menuitem id="recommendMenuitem" label="recommend" insertbefore="sanitizeSeparator"  
+     oncommand="com.wuxuan.fromwheretowhere.recommendation.init();" />
   </menupopup>
   
 <script src="namespace.js" />
 <script src="openwindow.js" />
+<script src="recommend.js" />
 </overlay>  
