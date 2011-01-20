@@ -2,8 +2,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   var pub={};
   
   var lasttitle = "";
-    
+  var eventNum = 0;
   pub.onPageLoad = function(event){
+    eventNum +=1;
     // this is the content document of the loaded page.
     var doc = event.originalTarget;
     
@@ -22,8 +23,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           /*var savenote = document.getElementById("current_title");
           savenote.value = "title: "+doc.title;
           document.getElementById("currentTitle").openPopup(null, "", 60, 50, false, false);*/
-          alert(doc.title);
           lasttitle=doc.title;
+          alert(eventNum + " "+doc.title + " " + lasttitle);
+          
         }
         //Application.storage.set("currentPage", doc.title);
       }
@@ -31,8 +33,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.init = function(){
-    //gbrowser.addEventListener("DOMContentLoaded", _onPageLoad, false);
-    window.addEventListener("DOMTitleChanged", pub.onPageLoad, false);
+    window.addEventListener("DOMContentLoaded", pub.onPageLoad, false);
+    //window.addEventListener("DOMTitleChanged", pub.onPageLoad, false);
     alert("init recommend");
   };
     
