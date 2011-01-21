@@ -623,7 +623,7 @@ pub.mainThread.prototype = {
     //show the current url if no parents found
     if(nodes.length==0){
       if(pid){
-	nodes.push(pub.nodefromPlaceid(pid, query));
+	nodes.push(pub.nodefromPlaceid(pid, null));
       } else {
 	nodes.push(pub.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
       }
