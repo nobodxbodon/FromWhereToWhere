@@ -6,7 +6,7 @@
 <panel id="currentTitle" fade="fast">
   <hbox align="start">
     <vbox>
-      <description id="current_title" value="saved"/>
+      <description id="current_title" value="title"/>
     </vbox>
   </hbox>
 </panel>
@@ -24,10 +24,12 @@
     <menuitem id="fwtwMenuitem" label="FromWhereToWhere" insertbefore="sanitizeSeparator"  
      oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
     <menuitem id="recommendMenuitem" label="recommend" insertbefore="sanitizeSeparator"  
-     oncommand="com.wuxuan.fromwheretowhere.recommendation.init();" />
+     oncommand="com.wuxuan.fromwheretowhere.events.init();" />
   </menupopup>
   
 <script src="namespace.js" />
 <script src="openwindow.js" />
+<script src="events.js" />
 <script src="recommend.js" />
+<script src="stopwords_en.js" />
 </overlay>  
