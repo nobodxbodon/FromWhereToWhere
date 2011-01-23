@@ -12,7 +12,21 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         i--;
       }
     }
-    alert(allwords);
+    //alert(allwords);
+    /*var savenote = document.getElementById("current_title");
+    savenote.value = "title: "+allwords;
+    document.getElementById("currentTitle").openPopup(null, "", 60, 50, false, false);
+    */
+    //document.commandDispatcher.focusedWindow.
+    var links = document.commandDispatcher.focusedWindow.document.getElementsByTagNameNS("*", "a")
+    var len = links.length;
+    var alllinks = [];
+    for(var i=0;i<len;i++){
+      if(links[i]){
+        alllinks.push(links[i].text);//links[i].href;
+      }
+    }
+    alert(alllinks);
   };
 
   pub.init = function(){

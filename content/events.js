@@ -27,10 +27,6 @@ com.wuxuan.fromwheretowhere.events = function(){
           //alert(currentDoc.title);
           com.wuxuan.fromwheretowhere.recommendation.recommend(lasttitle);
           //can't get from overlay, still wondering
-          /*var savenote = currentDoc.getElementById("current_title");
-          savenote.value = "title: "+currentDoc.title;
-          currentDoc.getElementById("currentTitle").openPopup(null, "", 60, 50, false, false);
-          */
           //alert(eventNum + " "+doc.title + " " + lasttitle);
           
         }
