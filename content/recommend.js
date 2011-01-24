@@ -17,7 +17,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     savenote.value = "title: "+allwords;
     document.getElementById("currentTitle").openPopup(null, "", 60, 50, false, false);
     */
-    //document.commandDispatcher.focusedWindow.
+    //get all the links on current page, and their texts shown on page
     var links = document.commandDispatcher.focusedWindow.document.getElementsByTagNameNS("*", "a")
     var len = links.length;
     var alllinks = [];

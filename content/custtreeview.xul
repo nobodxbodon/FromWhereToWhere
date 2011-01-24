@@ -14,6 +14,8 @@
     <menuitem id="importNodes" label="&contextMenu.importNodes;" oncommand="com.wuxuan.fromwheretowhere.main.importNodes()"/>
     <menuitem id="saveNodetoLocal" label="&contextMenu.saveNodetoLocal;" oncommand="com.wuxuan.fromwheretowhere.main.saveNodetoLocal()"/>
     <menuitem id="opensidebar" label="&contextMenu.showLocalNotes;" oncommand="com.wuxuan.fromwheretowhere.main.showLocalNotes()"/>
+    <menuseparator/>
+    <menuitem id="stats" label="stats" oncommand="com.wuxuan.fromwheretowhere.stats.all()"/>
   </menupopup>
 </popupset>
 
@@ -49,6 +51,7 @@
 <script src="treeview.js" />
 <script src="topicTracker.js" />
 <script src="main.js" />
+<script src="stats.js" />
 <script src="localmanager.js" />
-
+<script src="stopwords_en.js" />
 </window>  
