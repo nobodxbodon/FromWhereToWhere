@@ -29,7 +29,7 @@ com.wuxuan.fromwheretowhere.events = function(){
         while (doc.defaultView.frameElement) {
           doc = doc.defaultView.frameElement.ownerDocument;
         }
-        var currentDoc = pub.mainWindow.document;//gBrowser.selectedBrowser.contentDocument;
+        var currentDoc = gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
         if(currentDoc.title!=lasttitle){
           lasttitle=currentDoc.title;
           //alert(document.title);
@@ -70,7 +70,6 @@ com.wuxuan.fromwheretowhere.events = function(){
     
           //can't get from overlay, still wondering
           //alert(eventNum + " "+doc.title + " " + lasttitle);
-          
         }
         //Application.storage.set("currentPage", doc.title);
       }
