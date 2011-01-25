@@ -3,14 +3,6 @@
 <overlay id="FromWhereToWhereOverlay" onload="com.wuxuan.fromwheretowhere.recommend.init();"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-<panel id="currentTitle" fade="fast">
-  <hbox align="start">
-    <vbox>
-      <description id="current_title" value="title"/>
-    </vbox>
-  </hbox>
-</panel>
-
   <broadcasterset id="mainBroadcasterSet"> 
     <broadcaster id="viewEmptySidebar" 
                  autoCheck="false"
@@ -23,8 +15,10 @@
   <menupopup id="menu_ToolsPopup">  
     <menuitem id="fwtwMenuitem" label="FromWhereToWhere" insertbefore="sanitizeSeparator"  
      oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
-    <menuitem id="recommendMenuitem" label="recommend" insertbefore="sanitizeSeparator"  
+    <menuitem id="recommendMenuitem" label="recommend" insertbefore="sanitizeSeparator"
      oncommand="com.wuxuan.fromwheretowhere.events.init();" />
+    <menuitem id="disrecommendMenuitem" label="disable recommend" insertbefore="sanitizeSeparator"
+     oncommand="com.wuxuan.fromwheretowhere.events.down();" />
   </menupopup>
   
 <script src="namespace.js" />

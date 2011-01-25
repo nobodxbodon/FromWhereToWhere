@@ -4,7 +4,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.recommend = function(title){
     var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     var allwords = title.split(" ");
-    alert(allwords);
+    //alert(allwords);
     for(var i=0; i<allwords.length; i++){
       allwords[i] = allwords[i].toLowerCase();
       if(stopwords.indexOf(allwords[i])>-1){
@@ -12,12 +12,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         i--;
       }
     }
-    //alert(allwords);
-    /*var savenote = document.getElementById("current_title");
-    savenote.value = "title: "+allwords;
-    document.getElementById("currentTitle").openPopup(null, "", 60, 50, false, false);
-    */
-    //get all the links on current page, and their texts shown on page
     var links = document.commandDispatcher.focusedWindow.document.getElementsByTagNameNS("*", "a")
     var len = links.length;
     var alllinks = [];
@@ -26,7 +20,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         alllinks.push(links[i].text);//links[i].href;
       }
     }
-    alert(alllinks);
+    return alllinks;
   };
 
   pub.init = function(){
