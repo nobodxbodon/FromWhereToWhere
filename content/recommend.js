@@ -1,7 +1,7 @@
 com.wuxuan.fromwheretowhere.recommendation = function(){
   var pub={};
   
-  pub.recommend = function(title){
+  pub.recommend = function(title, allLinks){
     var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     var allwords = title.split(" ");
     //alert(allwords);
@@ -12,15 +12,18 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         i--;
       }
     }
-    var links = document.commandDispatcher.focusedWindow.document.getElementsByTagNameNS("*", "a")
-    var len = links.length;
-    var alllinks = [];
-    for(var i=0;i<len;i++){
-      if(links[i]){
-        alllinks.push(links[i].text);//links[i].href;
+    //without any history tracking
+    var recLinks = [];
+    for(var i=0;i<allLinks.length;i++){
+      var text = allLinks[i].text;
+      for(var j=0;j<allwords.length;j++){
+        if(text.indexOf(allwords[j])>-1){
+          alert(text + " has "+ allwords[j]);
+          recLinks.push(allLinks[i]);
+        }
       }
     }
-    return alllinks;
+    return recLinks;
   };
 
   pub.init = function(){

@@ -17,7 +17,7 @@ com.wuxuan.fromwheretowhere.events = function(){
     eventNum +=1;
     // this is the content document of the loaded page.
     var doc = event.originalTarget;
-    var alllinks=[];
+    var recLinks=[];
     //Application.storage.set("currentPage", doc.location.href);
     if (doc.nodeName == "#document") {
     //if (doc instanceof HTMLDocument) {
@@ -34,7 +34,15 @@ com.wuxuan.fromwheretowhere.events = function(){
           lasttitle=currentDoc.title;
           //alert(document.title);
           //alert(currentDoc.title);
-          alllinks = com.wuxuan.fromwheretowhere.recommendation.recommend(lasttitle);
+          var links = document.commandDispatcher.focusedWindow.document.getElementsByTagNameNS("*", "a")
+          var len = links.length;
+          var alllinks = [];
+          for(var i=0;i<len;i++){
+            if(links[i]){
+              alllinks.push(links[i]);//links[i].href;
+            }
+          }
+          recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(lasttitle, alllinks);
           //pub.title.value = "title: "+alllinks;
           //pub.panel.openPopup(null, "", 60, 50, false, false);
       
@@ -58,7 +66,11 @@ com.wuxuan.fromwheretowhere.events = function(){
     //var desc = document.createElement("description");
     //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
     var desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"10", "cols":"100"})
-    desc.setAttribute("value","title: "+lasttitle+"\n"+lasttitle);
+    var outputLinks = "";
+    for(var i=0;i<recLinks.length;i++){
+      outputLinks+=recLinks[i].text+"\n";
+    }
+    desc.setAttribute("value",outputLinks);
     vbox.appendChild(desc);
     savePanel.appendChild(vbox);
     //this put the panel on the menu bar
