@@ -3,17 +3,13 @@ com.wuxuan.fromwheretowhere.events = function(){
   
   var lasttitle = "";
   var eventNum = 0;
-  
+
   pub.createElement = function(parent, name, atts){
     var ele=parent.createElement(name);
     for(var i in atts){
       ele.setAttribute(i, atts[i]);
     }
     return ele;
-  };
-  
-  String.prototype.trim = function () {
-    return this.replace(/^\s*/, "").replace(/\s*$/, "");
   };
 
   pub.recommendThread = function(threadID, doc) {
@@ -24,59 +20,62 @@ com.wuxuan.fromwheretowhere.events = function(){
   pub.recommendThread.prototype = {
     run: function() {
       try {
+        var starttime = (new Date()).getTime();
         var recLinks=[];
         //TODO: this.doc seems unnecessary??
-          if (this.doc.nodeName == "#document") {
-          //if (doc instanceof HTMLDocument) {
-            // is this an inner frame?
-            if (this.doc.defaultView.frameElement) {
-              // Frame within a tab was loaded.
-              // Find the root document:
-              //com.wuxuan.fromwheretowhere.currentPage = doc;
-              while (this.doc.defaultView.frameElement) {
-                this.doc = this.doc.defaultView.frameElement.ownerDocument;
-              }
-              var currentDoc = gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
-              if(currentDoc.title!=lasttitle){
-                lasttitle=currentDoc.title;
-                //alert(currentDoc.title);
-                var links = document.commandDispatcher.focusedWindow.document.getElementsByTagNameNS("*", "a")
-                var len = links.length;
-                var alllinks = [];
-                for(var i=0;i<len;i++){
-                  if(links[i]){
-                    alllinks.push(links[i]);//links[i].href;
-                  }
+        if (this.doc.nodeName == "#document") {
+        //if (doc instanceof HTMLDocument) {
+          // is this an inner frame?
+          if (this.doc.defaultView.frameElement) {
+            // Frame within a tab was loaded.
+            // Find the root document:
+            //com.wuxuan.fromwheretowhere.currentPage = doc;
+            while (this.doc.defaultView.frameElement) {
+              this.doc = this.doc.defaultView.frameElement.ownerDocument;
+            }
+            var currentDoc = gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
+            if(currentDoc.title!=lasttitle){
+              lasttitle=currentDoc.title;
+              //alert(currentDoc.title);
+              var links = document.commandDispatcher.focusedWindow.document.getElementsByTagNameNS("*", "a")
+              var len = links.length;
+              var alllinks = [];
+              for(var i=0;i<len;i++){
+                if(links[i]){
+                  alllinks.push(links[i]);//links[i].href;
                 }
-                recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(lasttitle, alllinks);
-                var menus = document.getElementById("menu_ToolsPopup");
-                //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-                //var overlay = document.getElementById("FromWhereToWhereOverlay");
-                var savePanel = document.createElement("panel");
-                savePanel.setAttribute("fade", "fast");
-                var vbox = document.createElement("vbox");
-                //var desc = document.createElement("description");
-                //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
-                var desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"10", "cols":"100"})
-                var outputLinks = "";
-                for(var i=0;i<recLinks.length;i++){
-                  outputLinks+=recLinks[i].text.trim()+"\n";
-                }
-                desc.setAttribute("value",outputLinks);
-                vbox.appendChild(desc);
-                savePanel.appendChild(vbox);
-                //this put the panel on the menu bar
-                //menus.parentNode.appendChild(savePanel);
-                menus.parentNode.parentNode.appendChild(savePanel);
-                //overlay.appendChild(savePanel);
-                savePanel.openPopup(null, "", 60, 50, false, false);
-                //get all the links on current page, and their texts shown on page
-                
-                //can't get from overlay, still wondering
-                //alert(eventNum + " "+doc.title + " " + lasttitle);
               }
+              recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(lasttitle, alllinks);
+              var menus = document.getElementById("menu_ToolsPopup");
+              //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+              //var overlay = document.getElementById("FromWhereToWhereOverlay");
+              var savePanel = document.createElement("panel");
+              savePanel.setAttribute("fade", "fast");
+              var vbox = document.createElement("vbox");
+              //var desc = document.createElement("description");
+              //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
+              //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
+              var desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"10", "cols":"100"})
+              var outputLinks = "";
+              outputLinks += "time: "+((new Date()).getTime()-starttime)+"\n";
+              for(var i=0;i<recLinks.length;i++){
+                outputLinks+=recLinks[i].text+"\n";
+              }
+              desc.setAttribute("value",outputLinks);
+              vbox.appendChild(desc);
+              savePanel.appendChild(vbox);
+              //this put the panel on the menu bar
+              //menus.parentNode.appendChild(savePanel);
+              menus.parentNode.parentNode.appendChild(savePanel);
+              //overlay.appendChild(savePanel);
+              savePanel.openPopup(null, "", 60, 50, false, false);
+              //get all the links on current page, and their texts shown on page
+              
+              //can't get from overlay, still wondering
+              //alert(eventNum + " "+doc.title + " " + lasttitle);
             }
           }
+        }
       } catch(err) {
         Components.utils.reportError(err);
       }

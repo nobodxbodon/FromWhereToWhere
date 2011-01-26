@@ -1,6 +1,7 @@
 com.wuxuan.fromwheretowhere.recommendation = function(){
   var pub={};
   
+  //remove all duplicate element from an array
   Array.prototype.unique = function() {
     var a = this.concat();
     for(var i=0; i<a.length; ++i) {
@@ -10,6 +11,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         }
     }
     return a;
+  };
+      
+  //remove all spaces \n in front and at end of a string
+  String.prototype.trim = function () {
+    return this.replace(/^\s*/, "").replace(/\s*$/, "");
   };
 
   pub.getTopic = function(title, stopwords, specials){
@@ -25,6 +31,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return allwords;
   };
   
+  //TODO: those with , and : -- useful semantic, but for now clean up
   pub.recommend = function(title, allLinks){
     var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     var specials = com.wuxuan.fromwheretowhere.corpus.special;
@@ -47,17 +54,25 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       allRelated=allRelated.concat(relatedWords);
     }
     allRelated = allRelated.unique();
-    alert(allRelated);
+    //alert(allRelated);
     //first get all "context" word, can be anormous...let's see
     var recLinks = [];
+    var recTitles = [];
     for(var i=0;i<allLinks.length;i++){
-      var text = allLinks[i].text.split(" ");
+      var t = allLinks[i].text;
+      //remove the duplicate links (titles)
+      if(recTitles.indexOf(t)>-1){
+        continue;
+      }else{
+        recTitles.push(t);
+      }
+      var text = t.split(" ");
       for(var j=0;j<allRelated.length;j++){
         if(text.indexOf(allRelated[j])>-1){
           //don't recommend those with only one word, like "msnbc.com"
           if(text.length==1 && text[0]==allRelated[j])
             break;
-          //alert(text + " has "+ allwords[j]);
+          allLinks[i].text = t.trim() + " +++ "+ allRelated[j];
           recLinks.push(allLinks[i]);
           //TODO: less rigid
           break;
