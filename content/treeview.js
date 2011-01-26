@@ -58,7 +58,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
 	return this.visibleData[idx].url;
       } else if (column.id == "date") {
         if (this.visibleData[idx].placeId){
-            return com.wuxuan.fromwheretowhere.utils.formatDate(main.getLastDatefromPid(this.visibleData[idx].placeId));
+            return com.wuxuan.fromwheretowhere.utils.formatDate(main.history.getLastDatefromPid(this.visibleData[idx].placeId));
         } else {
             return null;
         }
@@ -136,7 +136,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   },
   
   addSuspensionPoints: function(level, idx) {
-    var sp = main.ReferedHistoryNode(-1, -1, "searching...", null, false, false, [], level+1);
+    var sp = main.history.ReferedHistoryNode(-1, -1, "searching...", null, false, false, [], level+1);
     this.visibleData.splice(idx+ 1, 0, sp);
     this.treeBox.rowCountChanged(idx + 1, 1);
   },
@@ -175,7 +175,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   getImageSrc: function(idx, column) {
     var vis = this.visibleData;
     if(column.id == "element") {
-      return main.getImagefromUrl(vis[idx].url);
+      return main.history.getImagefromUrl(vis[idx].url);
     }
   },
   
