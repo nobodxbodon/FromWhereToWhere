@@ -24,6 +24,7 @@
 <script src="namespace.js" />
 <script src="openwindow.js" />
 <script src="events.js" />
+<script src="historyQuery.js" />
 <script src="recommend.js" />
 <script src="corpus_en.js" />
 </overlay>  

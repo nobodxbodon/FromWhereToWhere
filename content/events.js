@@ -129,6 +129,7 @@ com.wuxuan.fromwheretowhere.events = function(){
       false
     );*/
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
+    com.wuxuan.fromwheretowhere.recommendation.init();
     alert("init recommend");
   };
   
