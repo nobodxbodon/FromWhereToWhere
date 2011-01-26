@@ -18,12 +18,15 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return this.replace(/^\s*/, "").replace(/\s*$/, "");
   };
 
-  pub.getTopic = function(title, stopwords, specials){
-    var allwords = title.split(" ");
-    //alert(allwords);
+  pub.filter = function(allwords, stopwords, specials){
     for(var i=0; i<allwords.length; i++){
       allwords[i] = allwords[i].toLowerCase();
-      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1){
+      //stupid way to get rid of special char from the utterance
+      //those with , and : -- useful semantic, but for now clean up
+      for(var j=0;j<specials.length;j++){
+        allwords[i]=allwords[i].replace(specials[j],"");
+      }
+      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i]==" "){
         allwords.splice(i, 1);
         i--;
       }
@@ -31,7 +34,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return allwords;
   };
   
-  //TODO: those with , and : -- useful semantic, but for now clean up
+  pub.getTopic = function(title, stopwords, specials){
+    var allwords = title.split(" ");
+    //alert(allwords);
+    return pub.filter(allwords, stopwords, specials);
+  };
+  
   pub.recommend = function(title, allLinks){
     var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     var specials = com.wuxuan.fromwheretowhere.corpus.special;
@@ -41,8 +49,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //TODO: only pick the words related to interest, not every non-stopword
     //TODO: search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
     var pidsWithWord=[];
+    //var mapWordToPids=[];
     for(var i=0;i<allwords.length;i++){
       var pids = pub.history.searchIdbyKeywords([allwords[i]], [], [], []);
+      //mapWordToPids[allwords[i]]=pids;
       //if too many pids with one single word, may mean sth...
       pidsWithWord = pidsWithWord.concat(pids);
     }
@@ -54,7 +64,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       allRelated=allRelated.concat(relatedWords);
     }
     allRelated = allRelated.unique();
-    //alert(allRelated);
     //first get all "context" word, can be anormous...let's see
     var recLinks = [];
     var recTitles = [];

@@ -1,7 +1,7 @@
 com.wuxuan.fromwheretowhere.corpus = function(){
   var pub={};
   
-  pub.special = ["-","&"];
+  pub.special = ["-","&",":",","];
   
   pub.stopwords_en_NLTK = ["i",
 "me",
