@@ -39,10 +39,12 @@ com.wuxuan.fromwheretowhere.mainView = function(){
         this.treeBox = treeBox;
     }
     //refresh the tree
+    //what's this for??
     if(newNodes.length>0){
       this.visibleData = [];
       this.treeBox.rowCountChanged(0, -1);
     }
+    //??
     for (var i = 0; i < newNodes.length; i++) {
       newNodes[i]=main.putNodeToLevel0(newNodes[i]);
       this.visibleData.splice(this.visibleData.length, 0, newNodes[i]);

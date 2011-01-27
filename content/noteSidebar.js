@@ -12,7 +12,9 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
  .getInterface(Components.interfaces.nsIDOMWindow);
  
   pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
-    
+  
+  pub.localManager = com.wuxuan.fromwheretowhere.localmanager;
+  
   pub.initView = function(){
     document.getElementById("recordList").view = pub.treeView;
   };
@@ -21,7 +23,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   // have to separate the looks of node from the content!!!!!!
   
     visibleData : function(){
-      return com.wuxuan.fromwheretowhere.localmanager.queryAll();
+      return pub.localManager.queryAll();
     }(),
   
     treeBox: null,  
@@ -30,7 +32,18 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     get rowCount()                     { return this.visibleData.length; },
     
     setTree: function(treeBox){
-      this.treeBox = treeBox;
+      //get the length of last visibleData, for rowCountChanged
+      var lastVisibleLen = 0;
+      if(this.visibleData!=null){
+          lastVisibleLen = this.visibleData.length;
+      }
+      if(treeBox==null){
+        //refresh the tree
+        this.visibleData = pub.localManager.queryAll();
+        this.treeBox.rowCountChanged(lastVisibleLen,this.visibleData.length-lastVisibleLen);
+      }else{
+        this.treeBox = treeBox;
+      }
     },
     
     getCellText: function(idx, column) {
@@ -39,10 +52,9 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
           return this.visibleData[idx].name;
         } else if (column.id == "date") {
           return new Date(this.visibleData[idx].date);
-        } else {
-          return "NotDefined";
         }
       }
+      return "NotDefined";
     },
       
     isContainer: function(idx){

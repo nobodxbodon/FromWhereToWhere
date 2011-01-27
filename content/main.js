@@ -296,11 +296,6 @@ pub.mainThread.prototype = {
   // recordType: 0 - from URI; 1 - from searching keywords; 2 - imported; -1 - invalid.
   // TODO: make constants!
   pub.saveNodetoLocal = function() {
-		// if sidebar is open, close it first to save the sync trouble
-		if (pub.isSidebarFWTW()) {
-			pub.mainWindow.toggleSidebar('viewEmptySidebar');  
-		} 
-
     var select = pub.getCurrentSelected();
     var json = pub.nativeJSON.encode(select);
     var recordName = "";
@@ -334,6 +329,19 @@ pub.mainThread.prototype = {
 				savenote.value = "SAVED: "+recordName;
 				document.getElementById("saved_notification").openPopup(null, "", 60, 50, false, false);
 			}
+			// if sidebar is open, close it first to save the sync trouble
+			if (pub.isSidebarFWTW()) {
+				//pub.mainWindow.toggleSidebar('viewEmptySidebar');
+				//refresh the note view
+				var ele = pub.mainWindow.document.getElementById("sidebar").contentDocument.getElementById("recordList");
+				var treeView = ele.view;
+				if(treeView==null){
+				  //for 3.6.x
+				  treeView = ele.wrappedJSObject.view;
+				}
+				//just to reset visibleData, seems this hack works
+				treeView.setTree(null);
+			} 
     }
   };
   
