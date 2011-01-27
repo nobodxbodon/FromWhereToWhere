@@ -1,6 +1,7 @@
 com.wuxuan.fromwheretowhere.recommendation = function(){
   var pub={};
   
+  var starttime = 0;
   //remove all duplicate element from an array
   Array.prototype.unique = function() {
     var a = this.concat();
@@ -41,6 +42,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.recommend = function(title, allLinks){
+    starttime = (new Date()).getTime();
     var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     var specials = com.wuxuan.fromwheretowhere.corpus.special;
     //TODO: put in topicTracker
@@ -82,16 +84,59 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           //don't recommend those with only one word, like "msnbc.com"
           if(text.length==1 && text[0]==allRelated[j])
             break;
-          allLinks[i].text = trimed + " +++ "+ allRelated[j];
+          //allLinks[i].text = trimed + " +++ "+ allRelated[j];
           recLinks.push(allLinks[i]);
           //TODO: less rigid
           break;
         }
       }
     }
+    pub.popUp(recLinks);
     return recLinks;
   };
 
+  pub.createElement = function(parent, name, atts){
+    var ele=parent.createElement(name);
+    for(var i in atts){
+      ele.setAttribute(i, atts[i]);
+    }
+    return ele;
+  };
+
+  pub.popUp = function(recLinks){
+    var menus = document.getElementById("menu_ToolsPopup");
+    //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+    //var overlay = document.getElementById("FromWhereToWhereOverlay");
+    var savePanel = pub.createElement(document, "panel", {"titlebar":"normal","noautohide":"true","close":"true"});
+    //popup.hidePopup();
+    //savePanel.setAttribute("fade", "fast");
+    var vbox = document.createElement("vbox");
+    //var desc = document.createElement("description");
+    //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
+    //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
+    var desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"10", "cols":"100"})
+    var outputLinks = "";
+    outputLinks += "time: "+((new Date()).getTime()-starttime)+"\n";
+    for(var i=0;i<recLinks.length;i++){
+      outputLinks+=recLinks[i].text.trim()+"\n";
+    }
+    if(recLinks.length>0){
+      var testLink = pub.createElement(document, "label", {"value":"test link","onclick":"window.open(\'"+recLinks[0].href+"\')"});
+      savePanel.appendChild(testLink);
+    }
+    desc.setAttribute("value",outputLinks);
+    vbox.appendChild(desc);
+    savePanel.appendChild(vbox);
+    //this put the panel on the menu bar
+    //menus.parentNode.appendChild(savePanel);
+    menus.parentNode.parentNode.appendChild(savePanel);
+    //overlay.appendChild(savePanel);
+    savePanel.openPopup(null, "", 60, 50, false, false);
+    //get all the links on current page, and their texts shown on page
+    //can't get from overlay, still wondering
+    //alert(eventNum + " "+doc.title + " " + lasttitle);
+  };
+  
   pub.init = function(){
     pub.history = com.wuxuan.fromwheretowhere.historyQuery;
   };
