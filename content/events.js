@@ -49,8 +49,9 @@ com.wuxuan.fromwheretowhere.events = function(){
               var menus = document.getElementById("menu_ToolsPopup");
               //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
               //var overlay = document.getElementById("FromWhereToWhereOverlay");
-              var savePanel = document.createElement("panel");
-              savePanel.setAttribute("fade", "fast");
+              var savePanel = pub.createElement(document, "panel", {"titlebar":"normal","noautohide":"true","close":"true"});
+              //popup.hidePopup();
+              //savePanel.setAttribute("fade", "fast");
               var vbox = document.createElement("vbox");
               //var desc = document.createElement("description");
               //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>

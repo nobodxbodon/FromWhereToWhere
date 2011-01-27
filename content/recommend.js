@@ -68,7 +68,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var recLinks = [];
     var recTitles = [];
     for(var i=0;i<allLinks.length;i++){
-      var t = allLinks[i].text;
+      var trimed = allLinks[i].text.trim();
+      var t = trimed.toLowerCase();
       //remove the duplicate links (titles)
       if(recTitles.indexOf(t)>-1){
         continue;
@@ -81,7 +82,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           //don't recommend those with only one word, like "msnbc.com"
           if(text.length==1 && text[0]==allRelated[j])
             break;
-          allLinks[i].text = t.trim() + " +++ "+ allRelated[j];
+          allLinks[i].text = trimed + " +++ "+ allRelated[j];
           recLinks.push(allLinks[i]);
           //TODO: less rigid
           break;
