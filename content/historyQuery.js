@@ -169,10 +169,8 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   };
   
   pub.getImagefromUrl = function(url){
-    try{
-      var uri = pub.ios.newURI(url, null, null);
-      return pub.fis.getFaviconImageForPage(uri).spec;
-    }catch(e){}
+    var uri = pub.ios.newURI(url, null, null);
+    return pub.fis.getFaviconImageForPage(uri).spec;
   };
   
   pub.searchIdbyKeywords = function(words, excluded, site, time){
@@ -388,27 +386,27 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     if(knownParentPids.indexOf(pid)!=-1){
       //if there's only one parent, the link circle is closed from pid
       if(parentNumber==1){
-	tops=pub.addInArrayNoDup(pid,tops);
+        tops=pub.addInArrayNoDup(pid,tops);
       }
     }else{
       knownParentPids.push(pid);
       var pParentPids = pub.getParentPlaceidsfromPlaceid(pid, query);
       if(pParentPids.length==0){
         if(pub.allKnownParentPids.indexOf(pid)==-1){
-	  pub.allKnownParentPids.push(pid);
+          pub.allKnownParentPids.push(pid);
         }
         tops.push(pid);
       } else {
-	//if multiple ancestors, latest first
-	var parentNum = pParentPids.length;
+        //if multiple ancestors, latest first
+        var parentNum = pParentPids.length;
         for(var j=parentNum-1;j>=0;j--){
-	  if(pub.allKnownParentPids.indexOf(pParentPids[j])==-1){
-	    pub.allKnownParentPids.push(pParentPids[j]);
-	    var anc=pub.getAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum, query);
-	    for(var k in anc){
-	      tops=pub.addInArrayNoDup(anc[k],tops);
-	    }
-	  }
+          if(pub.allKnownParentPids.indexOf(pParentPids[j])==-1){
+            pub.allKnownParentPids.push(pParentPids[j]);
+            var anc=pub.getAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum, query);
+            for(var k in anc){
+              tops=pub.addInArrayNoDup(anc[k],tops);
+            }
+          }
         }
       }
     }
