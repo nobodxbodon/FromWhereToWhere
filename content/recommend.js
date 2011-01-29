@@ -1,6 +1,13 @@
 com.wuxuan.fromwheretowhere.recommendation = function(){
   var pub={};
-  
+    
+  pub.mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+        .getInterface(Components.interfaces.nsIWebNavigation)
+        .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+        .rootTreeItem
+        .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+        .getInterface(Components.interfaces.nsIDOMWindow);
+ 
   var starttime = 0;
   //remove all duplicate element from an array
   Array.prototype.unique = function() {
@@ -59,6 +66,26 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       pidsWithWord = pidsWithWord.concat(pids);
     }
     pidsWithWord = pidsWithWord.unique();
+    //alert("with word: " + pidsWithWord);
+    var children = [];
+    //get their children in history
+    for(var i=0;i<pidsWithWord.length;i++){
+      var c = pub.history.getAllChildrenfromPlaceId(pidsWithWord[i], null);
+      //alert("child of " + pidsWithWord[i] + ": " + c);
+      children = children.concat(c);
+    }
+    //alert("all children: "+children);
+    pidsWithWord = pidsWithWord.concat(children);
+    pidsWithWord = pidsWithWord.unique();
+    //stupid, somehow there's some code piece of unique in the array??!!WTF??
+    for(var i=0;i<pidsWithWord.length;i++){
+      if(!(pidsWithWord[i]>0)){
+        //alert("removing "+pidsWithWord[i]);
+        pidsWithWord.splice(i,1);
+        i--;
+      }
+    }
+    //alert(pidsWithWord);
     var allRelated=[];
     for(var i=0;i<pidsWithWord.length;i++){
       var t = pub.history.getTitlefromId(pidsWithWord[i]);
@@ -91,7 +118,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         }
       }
     }
-    pub.popUp(recLinks);
+    pub.popUp(recLinks,allLinks);
     return recLinks;
   };
 
@@ -103,7 +130,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return ele;
   };
 
-  pub.popUp = function(recLinks){
+  pub.popUp = function(recLinks, allLinks){
     var menus = document.getElementById("menu_ToolsPopup");
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     //var overlay = document.getElementById("FromWhereToWhereOverlay");
@@ -117,6 +144,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"10", "cols":"100"})
     var outputLinks = "";
     outputLinks += "time: "+((new Date()).getTime()-starttime)+"\n";
+    outputLinks += "ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
     for(var i=0;i<recLinks.length;i++){
       outputLinks+=recLinks[i].text.trim()+"\n";
     }
@@ -130,6 +158,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //this put the panel on the menu bar
     //menus.parentNode.appendChild(savePanel);
     menus.parentNode.parentNode.appendChild(savePanel);
+    //pub.mainWindow.document.appendChild(savePanel);
     //overlay.appendChild(savePanel);
     savePanel.openPopup(null, "", 60, 50, false, false);
     //get all the links on current page, and their texts shown on page
