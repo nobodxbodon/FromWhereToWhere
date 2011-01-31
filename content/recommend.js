@@ -8,7 +8,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIDOMWindow);
  
-  var starttime = 0;
+  pub.TOOFEWWORDS = 4
+  pub.starttime = 0;
+  
   //remove all duplicate element from an array
   Array.prototype.unique = function(freq) {
     var a = this.concat();
@@ -67,8 +69,17 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return pub.filter(allwords, stopwords, specials);
   };
   
+  pub.tooSimple = function(allwords){
+    var rmSpecials = pub.filter(allwords, [], com.wuxuan.fromwheretowhere.corpus.special);
+    if(rmSpecials.length<pub.TOOFEWWORDS){
+      return true;
+    }else{
+      return false;
+    }
+  };
+  
   pub.recommend = function(title, allLinks){
-    starttime = (new Date()).getTime();
+    pub.starttime = (new Date()).getTime();
     var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     var specials = com.wuxuan.fromwheretowhere.corpus.special;
     //TODO: put in topicTracker
@@ -136,8 +147,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         recTitles.push(t);
       }
       var text = t.split(" ");
+      //var origTextLen = text.length;
       //remove dup word in the title, for freq mult
       text = text.unique(false);
+      //if there's too few words (<3 for now), either catalog or tag, or very obvious already
+      if(pub.tooSimple(text)){
+        continue;
+      }
       //get the mul of keyword freq in all titles to be sorted
       var oF = 1;
       var keywords = [];
@@ -182,7 +198,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
     var desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"10", "cols":"100"})
     var outputLinks = "";
-    outputLinks += "time: "+((new Date()).getTime()-starttime)+"\n";
+    outputLinks += "time: "+((new Date()).getTime()-pub.starttime)+"\n";
     outputLinks += "ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
     for(var i=0;i<recLinks.length;i++){
       outputLinks+=recLinks[i].link.text.trim()+" "+recLinks[i].kw+" "+ recLinks[i].overallFreq + "\n";
