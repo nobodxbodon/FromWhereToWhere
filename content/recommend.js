@@ -53,7 +53,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //stupid way to get rid of special char from the utterance
       //those with , and : -- useful semantic, but for now clean up
       for(var j=0;j<specials.length;j++){
-        allwords[i]=allwords[i].replace(specials[j],"");
+        allwords[i]=allwords[i].replace(new RegExp(specials[j],"g"),"");
       }
       if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i]==" "){
         allwords.splice(i, 1);
@@ -89,6 +89,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //TODO: search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
     var pidsWithWord=[];
     //var mapWordToPids=[];
+    //alert(allwords);
+    //if new tab or no title at all, no recommendation
+    if(allwords.length==0){
+      return [];
+    }
     for(var i=0;i<allwords.length;i++){
       var pids = pub.history.searchIdbyKeywords([allwords[i]], [], [], []);
       //mapWordToPids[allwords[i]]=pids;
@@ -185,6 +190,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return ele;
   };
 
+  pub.testOpen = function(link){
+    alert("opend "+link);
+    //window.open(link);
+    gBrowser.addTab(link);
+  };
+  
   pub.popUp = function(recLinks, allLinks){
     var menus = document.getElementById("menu_ToolsPopup");
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
@@ -203,8 +214,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     for(var i=0;i<recLinks.length;i++){
       outputLinks+=recLinks[i].link.text.trim()+" "+recLinks[i].kw+" "+ recLinks[i].overallFreq + "\n";
     }
-    if(recLinks.length>0){
-      var testLink = pub.createElement(document, "label", {"value":"test link","onclick":"window.open(\'"+recLinks[0].href+"\')"});
+    //if(recLinks.length>0){
+    for(var i=0;i<recLinks.length;i++){
+      var testLink = pub.createElement(document, "label", {"value":recLinks[i].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+recLinks[i].link.href+"\')"});
       savePanel.appendChild(testLink);
     }
     desc.setAttribute("value",outputLinks);
