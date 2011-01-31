@@ -10,13 +10,32 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
  
   var starttime = 0;
   //remove all duplicate element from an array
-  Array.prototype.unique = function() {
+  Array.prototype.unique = function(freq) {
     var a = this.concat();
+    //only work for string type
+    var origLen = a.length;
+    var allfreq = [];
     for(var i=0; i<a.length; ++i) {
-        for(var j=i+1; j<a.length; ++j) {
-            if(a[i] === a[j])
-                a.splice(j, 1);
+      if(freq){
+          allfreq[a[i]]=1;
+      }
+      for(var j=i+1; j<a.length; ++j) {
+        if(a[i] === a[j]){
+          a.splice(j, 1);
+          //HAVE to go back one
+          j--;
+          if(freq){
+            allfreq[a[i]]+=1;
+          }
         }
+      }
+    }
+    if(freq){
+      //allfreq.length always 0, can only get through word index
+      /*for(var i=0;i<allfreq.length;i++){
+        allfreq[i]=(allfreq[i]+0.0)/origLen;
+      }*/
+      return {arr:a,freq:allfreq};
     }
     return a;
   };
@@ -65,7 +84,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //if too many pids with one single word, may mean sth...
       pidsWithWord = pidsWithWord.concat(pids);
     }
-    pidsWithWord = pidsWithWord.unique();
+    pidsWithWord = pidsWithWord.unique(false);
     //alert("with word: " + pidsWithWord);
     var children = [];
     //get their children in history
@@ -76,7 +95,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     //alert("all children: "+children);
     pidsWithWord = pidsWithWord.concat(children);
-    pidsWithWord = pidsWithWord.unique();
+    pidsWithWord = pidsWithWord.unique(false);
     //stupid, somehow there's some code piece of unique in the array??!!WTF??
     for(var i=0;i<pidsWithWord.length;i++){
       if(!(pidsWithWord[i]>0)){
@@ -92,7 +111,18 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var relatedWords=pub.getTopic(t, stopwords, specials);
       allRelated=allRelated.concat(relatedWords);
     }
-    allRelated = allRelated.unique();
+    var origLen = allRelated.length;
+    var a = allRelated.unique(true);
+    //get frequency of word (number of titles that contains it/number of all titles)
+    allRelated = a.arr;
+    var freq = a.freq;
+    //LATER: getNumofPidWithWord might be more precise, but much more time consuming.
+    //       for now just use the wf in "relatedWords"
+    /*var relFreq = [];
+    var allPids = pub.history.getNumOfPid();
+    for(var i=0;i<allRelated.length;i++){
+      relFreq[allRelated[i]]=(pub.history.getNumofPidWithWord(allRelated[i])+0.0)/allPids;
+    }*/
     //first get all "context" word, can be anormous...let's see
     var recLinks = [];
     var recTitles = [];
@@ -106,18 +136,27 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         recTitles.push(t);
       }
       var text = t.split(" ");
+      //remove dup word in the title, for freq mult
+      text = text.unique(false);
+      //get the mul of keyword freq in all titles to be sorted
+      var oF = 1;
+      var keywords = [];
       for(var j=0;j<allRelated.length;j++){
         if(text.indexOf(allRelated[j])>-1){
           //don't recommend those with only one word, like "msnbc.com"
           if(text.length==1 && text[0]==allRelated[j])
             break;
           //allLinks[i].text = trimed + " +++ "+ allRelated[j];
-          recLinks.push(allLinks[i]);
-          //TODO: less rigid
-          break;
+          keywords.push(allRelated[j]);
+          oF=oF*((freq[allRelated[j]]+0.0)/origLen);
         }
       }
+      if(oF<1){
+        recLinks.push({link:allLinks[i],overallFreq:oF,kw:keywords});
+      }
     }
+    //sort by overallFreq
+    recLinks.sort(function(a,b){return a.overallFreq-b.overallFreq});
     pub.popUp(recLinks,allLinks);
     return recLinks;
   };
@@ -146,7 +185,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     outputLinks += "time: "+((new Date()).getTime()-starttime)+"\n";
     outputLinks += "ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
     for(var i=0;i<recLinks.length;i++){
-      outputLinks+=recLinks[i].text.trim()+"\n";
+      outputLinks+=recLinks[i].link.text.trim()+" "+recLinks[i].kw+" "+ recLinks[i].overallFreq + "\n";
     }
     if(recLinks.length>0){
       var testLink = pub.createElement(document, "label", {"value":"test link","onclick":"window.open(\'"+recLinks[0].href+"\')"});
