@@ -231,7 +231,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //var menus = document.getElementById("menu_ToolsPopup");
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     //var overlay = document.getElementById("FromWhereToWhereOverlay");
-    var savePanel = pub.createElement(document, "panel", {"label":"&mainMenu.recommend;","titlebar":"normal","noautohide":"true","close":"true"});
+    var savePanel = pub.createElement(document, "panel", {"label":"Seemingly Related Links","titlebar":"normal","noautohide":"true","close":"true"});
     //popup.hidePopup();
     //savePanel.setAttribute("fade", "fast");
     var vbox = document.createElement("vbox");

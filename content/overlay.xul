@@ -17,7 +17,7 @@
       <menupopup id="new-popup">
         <menuitem id="searchitem" label="&mainMenu.search;" accesskey="H"
          oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
-        <menuitem id="recommend" label="&mainMenu.recommend;" accesskey="I" type="checkbox" autocheck="false"
+        <menuitem id="recommend" label="&mainMenu.recommend;" accesskey="S" type="checkbox" autocheck="false"
           oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event);"/>
       </menupopup>
     </menu>
