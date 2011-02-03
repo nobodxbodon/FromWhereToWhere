@@ -183,7 +183,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
       var uri = pub.ios.newURI(url, null, null);
       return pub.fis.getFaviconImageForPage(uri).spec;
     }catch(e){
-      alert(url);
+      //alert(url);
       return null;
     }
   };
