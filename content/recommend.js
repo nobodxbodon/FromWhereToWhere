@@ -65,7 +65,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   pub.getTopic = function(title, stopwords, specials){
     var allwords = title.split(" ");
-    //alert(allwords);
     return pub.filter(allwords, stopwords, specials);
   };
   
@@ -88,39 +87,31 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //TODO: only pick the words related to interest, not every non-stopword
     //TODO: search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
     var pidsWithWord=[];
-    //var mapWordToPids=[];
-    //alert(allwords);
     //if new tab or no title at all, no recommendation
     if(allwords.length==0){
       return [];
     }
     for(var i=0;i<allwords.length;i++){
       var pids = pub.history.searchIdbyKeywords([allwords[i]], [], [], []);
-      //mapWordToPids[allwords[i]]=pids;
       //if too many pids with one single word, may mean sth...
       pidsWithWord = pidsWithWord.concat(pids);
     }
     pidsWithWord = pidsWithWord.unique(false);
-    //alert("with word: " + pidsWithWord);
     var children = [];
     //get their children in history
     for(var i=0;i<pidsWithWord.length;i++){
       var c = pub.history.getAllChildrenfromPlaceId(pidsWithWord[i], null);
-      //alert("child of " + pidsWithWord[i] + ": " + c);
       children = children.concat(c);
     }
-    //alert("all children: "+children);
     pidsWithWord = pidsWithWord.concat(children);
     pidsWithWord = pidsWithWord.unique(false);
     //stupid, somehow there's some code piece of unique in the array??!!WTF??
     for(var i=0;i<pidsWithWord.length;i++){
       if(!(pidsWithWord[i]>0)){
-        //alert("removing "+pidsWithWord[i]);
         pidsWithWord.splice(i,1);
         i--;
       }
     }
-    //alert(pidsWithWord);
     var allRelated=[];
     for(var i=0;i<pidsWithWord.length;i++){
       var t = pub.history.getTitlefromId(pidsWithWord[i]);
@@ -152,7 +143,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         recTitles.push(t);
       }
       var text = t.split(" ");
-      //var origTextLen = text.length;
       //remove dup word in the title, for freq mult
       text = text.unique(false);
       //if there's too few words (<3 for now), either catalog or tag, or very obvious already
@@ -167,7 +157,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           //don't recommend those with only one word, like "msnbc.com"
           if(text.length==1 && text[0]==allRelated[j])
             break;
-          //allLinks[i].text = trimed + " +++ "+ allRelated[j];
           keywords.push(allRelated[j]);
           oF=oF*freq[allRelated[j]];
         }
@@ -228,14 +217,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.rec = [];
   
   pub.popUp = function(recLinks, allLinks){
-    //var menus = document.getElementById("menu_ToolsPopup");
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-    //var overlay = document.getElementById("FromWhereToWhereOverlay");
     var savePanel = pub.createElement(document, "panel", {"label":"Seemingly Related Links","titlebar":"normal","noautohide":"true","close":"true"});
-    //popup.hidePopup();
-    //savePanel.setAttribute("fade", "fast");
     var vbox = document.createElement("vbox");
-    //var desc = document.createElement("description");
     //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
     //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
     var desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"10", "cols":"100"})
@@ -262,11 +246,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //document.parentNode.appendChild(savePanel); ->document.parentNode is null
     //document.appendChild(savePanel); -> node can't be inserted
     //pub.mainWindow.document.appendChild(savePanel);
-    //overlay.appendChild(savePanel);
     savePanel.openPopup(document.documentElement, "Links of Interest", 60, 50, false, false);
     //get all the links on current page, and their texts shown on page
     //can't get from overlay, still wondering
-    //alert(eventNum + " "+doc.title + " " + lasttitle);
   };
   
   pub.init = function(){
