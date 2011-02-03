@@ -47,6 +47,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return this.replace(/^\s*/, "").replace(/\s*$/, "");
   };
 
+  //also remove all numbers, as they don't seem to carry much "theme" info
   pub.filter = function(allwords, stopwords, specials){
     for(var i=0; i<allwords.length; i++){
       allwords[i] = allwords[i].toLowerCase();
@@ -55,7 +56,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       for(var j=0;j<specials.length;j++){
         allwords[i]=allwords[i].replace(new RegExp(specials[j],"g"),"");
       }
-      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i]==" "){
+      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i]==" " || allwords[i].match(/[0-9]/)!=null){
         allwords.splice(i, 1);
         i--;
       }
@@ -167,7 +168,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     //sort by overallFreq
     recLinks.sort(function(a,b){return a.overallFreq-b.overallFreq});
-    pub.popUp(recLinks,allLinks);
+    //don't pop up if there's no related links
+    if(recLinks.length>0)
+      pub.popUp(recLinks,allLinks);
     return recLinks;
   };
 
