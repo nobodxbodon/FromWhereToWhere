@@ -66,6 +66,16 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     }
   };
   
+  pub.getNumOfPid = function(){
+    var statement = pub.mDBConn.createStatement("SELECT count(id) FROM moz_places");
+    try{
+      statement.params.pid=pid;
+    }catch(err){
+      alert(err);
+    }
+    return pub.queryAll(statement, 32, 0);
+  };
+  
   /* the url visited before are all associated with the first place_id */
   pub.getAllIdfromPlaceId = function(pid){
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits where place_id=:pid");
@@ -169,8 +179,13 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   };
   
   pub.getImagefromUrl = function(url){
-    var uri = pub.ios.newURI(url, null, null);
-    return pub.fis.getFaviconImageForPage(uri).spec;
+    try{
+      var uri = pub.ios.newURI(url, null, null);
+      return pub.fis.getFaviconImageForPage(uri).spec;
+    }catch(e){
+      alert(url);
+      return null;
+    }
   };
   
   pub.searchIdbyKeywords = function(words, excluded, site, time){
