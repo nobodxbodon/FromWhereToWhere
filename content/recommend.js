@@ -34,9 +34,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     if(freq){
       //allfreq.length always 0, can only get through word index
-      /*for(var i=0;i<allfreq.length;i++){
+      for(var i in allfreq){
         allfreq[i]=(allfreq[i]+0.0)/origLen;
-      }*/
+      }
       return {arr:a,freq:allfreq};
     }
     return a;
@@ -169,7 +169,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
             break;
           //allLinks[i].text = trimed + " +++ "+ allRelated[j];
           keywords.push(allRelated[j]);
-          oF=oF*((freq[allRelated[j]]+0.0)/origLen);
+          oF=oF*freq[allRelated[j]];
         }
       }
       if(oF<1){
@@ -196,11 +196,42 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     gBrowser.addTab(link);
   };
   
+  pub.testFocus = function(idx){
+    alert(idx);
+    var amount = 4;
+    //var range = document.createRange();
+    var el = pub.rec[idx];
+    /*var oRange = d.createTextRange();
+    oRange.moveStart("character", 0);
+    oRange.moveEnd("character", amount - d.value.length);
+    oRange.select();
+    d.focus();
+    alert(focus);
+    range.setStart(focus, 0);
+    range.setEnd(focus, amount);*/
+    //range.selectNode(focus);
+    var body = document.body, range, sel;
+    if (body && body.createTextRange) {
+        range = body.createTextRange();
+        range.moveToElementText(el);
+        range.select();
+    } else if (document.createRange && window.getSelection) {
+        range = document.createRange();
+        range.selectNodeContents(el);
+        sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+    //el.focus();  --> is not a function
+  };
+  
+  pub.rec = [];
+  
   pub.popUp = function(recLinks, allLinks){
-    var menus = document.getElementById("menu_ToolsPopup");
+    //var menus = document.getElementById("menu_ToolsPopup");
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     //var overlay = document.getElementById("FromWhereToWhereOverlay");
-    var savePanel = pub.createElement(document, "panel", {"titlebar":"normal","noautohide":"true","close":"true"});
+    var savePanel = pub.createElement(document, "panel", {"label":"&mainMenu.recommend;","titlebar":"normal","noautohide":"true","close":"true"});
     //popup.hidePopup();
     //savePanel.setAttribute("fade", "fast");
     var vbox = document.createElement("vbox");
@@ -214,20 +245,25 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     for(var i=0;i<recLinks.length;i++){
       outputLinks+=recLinks[i].link.text.trim()+" "+recLinks[i].kw+" "+ recLinks[i].overallFreq + "\n";
     }
-    //if(recLinks.length>0){
-    for(var i=0;i<recLinks.length;i++){
-      var testLink = pub.createElement(document, "label", {"value":recLinks[i].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+recLinks[i].link.href+"\')"});
+    pub.rec = recLinks;
+    /*if(recLinks.length>0){
+    //for(var i=0;i<recLinks.length;i++){
+      //var testLink = pub.createElement(document, "label", {"value":recLinks[i].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+recLinks[i].link.href+"\')"});
+      var testLink = pub.createElement(document, "label", {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testFocus("+0+")"});
       savePanel.appendChild(testLink);
-    }
+    }*/
     desc.setAttribute("value",outputLinks);
     vbox.appendChild(desc);
     savePanel.appendChild(vbox);
     //this put the panel on the menu bar
     //menus.parentNode.appendChild(savePanel);
-    menus.parentNode.parentNode.appendChild(savePanel);
+    //menus.parentNode.parentNode.appendChild(savePanel);
+    document.documentElement.appendChild(savePanel);
+    //document.parentNode.appendChild(savePanel); ->document.parentNode is null
+    //document.appendChild(savePanel); -> node can't be inserted
     //pub.mainWindow.document.appendChild(savePanel);
     //overlay.appendChild(savePanel);
-    savePanel.openPopup(null, "", 60, 50, false, false);
+    savePanel.openPopup(document.documentElement, "Links of Interest", 60, 50, false, false);
     //get all the links on current page, and their texts shown on page
     //can't get from overlay, still wondering
     //alert(eventNum + " "+doc.title + " " + lasttitle);
