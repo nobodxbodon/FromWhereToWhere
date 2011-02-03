@@ -68,7 +68,21 @@ com.wuxuan.fromwheretowhere.events = function(){
       .rootTreeItem
       .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
       .getInterface(Components.interfaces.nsIDOMWindow);
-        
+  
+  pub.toggleRecommend = function(event){
+    //alert("in toggle");
+    var rec = event.target;
+    if (rec.getAttribute("checked") == "true"){
+      com.wuxuan.fromwheretowhere.events.down();
+      rec.removeAttribute("checked");
+    }
+    else{
+      com.wuxuan.fromwheretowhere.events.init();
+      rec.setAttribute("checked", "true");
+    }
+    //alert("toggle exit");
+  };
+  
   pub.init = function(){
     //TODO: document.? gbrowser.? difference?
     pub.mainWindow.addEventListener("DOMContentLoaded", pub.onPageLoad, false);
@@ -83,13 +97,13 @@ com.wuxuan.fromwheretowhere.events = function(){
     );*/
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     com.wuxuan.fromwheretowhere.recommendation.init();
-    alert("init recommend");
+    //alert("init recommend");
   };
   
   pub.down = function(){
     pub.mainWindow.removeEventListener("DOMContentLoaded", pub.onPageLoad, false);
     //window.addEventListener("DOMTitleChanged", pub.onPageLoad, false);
-    alert("rm recommend");
+    //alert("rm recommend");
   };
     
   return pub;
