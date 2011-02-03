@@ -1,3 +1,6 @@
+<!ENTITY mainMenu.search "Search History">
+<!ENTITY mainMenu.recommend "Link Suggestion">
+
 <!ENTITY contextMenu.openinnewtab "Open Page in New Tab">
 <!ENTITY contextMenu.openlocalcopy "Open Local Copy">
 <!ENTITY contextMenu.property "Property">
