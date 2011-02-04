@@ -83,6 +83,15 @@ com.wuxuan.fromwheretowhere.events = function(){
     //alert("toggle exit");
   };
   
+  pub.closePanel = function(event){
+    var savePanel = document.getElementById("fwtwRelPanel");
+    if(savePanel!=null){
+      savePanel.hidePopup();
+    } else{
+      alert("no panel detected!");
+    }
+  };
+  
   pub.init = function(){
     //TODO: document.? gbrowser.? difference?
     pub.mainWindow.addEventListener("DOMContentLoaded", pub.onPageLoad, false);
@@ -95,6 +104,8 @@ com.wuxuan.fromwheretowhere.events = function(){
       },
       false
     );*/
+    //TODO: when current document is closed, the current suggestion should be closed too
+    //pub.mainWindow.addEventListener("close", pub.closePanel, false);
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     com.wuxuan.fromwheretowhere.recommendation.init();
     //alert("init recommend");
