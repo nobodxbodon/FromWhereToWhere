@@ -29,4 +29,5 @@
 <script src="historyQuery.js" />
 <script src="recommend.js" />
 <script src="corpus_en.js" />
+<script src="utils.js" />
 </overlay>  

@@ -137,5 +137,14 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return {origkeywords : origkeywords, words : words, excluded : excluded, site : site, time : time};
   };
   
+  pub.getFFVersion = function(){
+    if (/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){ //test for Firefox/x.x or Firefox x.x (ignoring remaining digits);
+      var ffversion=new Number(RegExp.$1) // capture x.x portion and store as a number
+      return ffversion;
+    }
+    else
+      return null;
+  };
+  
   return pub;
 }();

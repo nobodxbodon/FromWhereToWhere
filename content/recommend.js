@@ -8,6 +8,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIDOMWindow);
  
+  pub.DEBUG = false;
   pub.TOOFEWWORDS = 4
   pub.starttime = 0;
   
@@ -220,36 +221,57 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.rec = [];
   
   pub.popUp = function(recLinks, allLinks){
-    //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-    var savePanel = pub.createElement(document, "panel", {"label":"Seemingly Related Links","titlebar":"normal","noautohide":"true","close":"true"});
-    var vbox = document.createElement("vbox");
-    //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
-    //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
-    var desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"10", "cols":"100"})
     var outputLinks = "";
-    outputLinks += "time: "+((new Date()).getTime()-pub.starttime)+"\n";
-    outputLinks += "ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
+    outputLinks += "time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s\n";
+    if(pub.DEBUG)
+      outputLinks += "ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
     for(var i=0;i<recLinks.length;i++){
-      outputLinks+=recLinks[i].link.text.trim()+" "+recLinks[i].kw+" "+ recLinks[i].overallFreq + "\n";
+      outputLinks+=recLinks[i].link.text.trim();
+      if(pub.DEBUG)
+        outputLinks+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
+      outputLinks+="\n";
     }
-    pub.rec = recLinks;
+    //pub.rec = recLinks;
     /*if(recLinks.length>0){
     //for(var i=0;i<recLinks.length;i++){
       //var testLink = pub.createElement(document, "label", {"value":recLinks[i].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+recLinks[i].link.href+"\')"});
       var testLink = pub.createElement(document, "label", {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testFocus("+0+")"});
       savePanel.appendChild(testLink);
     }*/
+    //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+    var version = com.wuxuan.fromwheretowhere.utils.getFFVersion();
+    var savePanel = document.getElementById("fwtwRelPanel");
+    var vbox,desc;
+    //only reuse the panel for ff 4
+    if(version>=4 && savePanel!=null){
+      alert("there's panel!");
+      vbox = savePanel.firstChild;
+      desc = vbox.firstChild;
+    }else{
+      alert("creating new panel");
+      var panelAttr = null;
+      //close, label, titlebar only for ff 4
+      if(version>=4)
+        panelAttr = {"id":"fwtwRelPanel","label":"Seemingly Related Links","titlebar":"normal","noautohide":"true","close":"true"};
+      else
+        panelAttr = {"id":"fwtwRelPanel","noautohide":"false"};//"fade":"fast",
+      savePanel = pub.createElement(document, "panel", panelAttr);
+      vbox = document.createElement("vbox");
+      //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
+      //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
+      desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"10", "cols":"100"})  
+      vbox.appendChild(desc);
+      savePanel.appendChild(vbox);
+      //this put the panel on the menu bar
+      //menus.parentNode.appendChild(savePanel);
+      //menus.parentNode.parentNode.appendChild(savePanel);
+      document.documentElement.appendChild(savePanel);
+    }
     desc.setAttribute("value",outputLinks);
-    vbox.appendChild(desc);
-    savePanel.appendChild(vbox);
-    //this put the panel on the menu bar
-    //menus.parentNode.appendChild(savePanel);
-    //menus.parentNode.parentNode.appendChild(savePanel);
-    document.documentElement.appendChild(savePanel);
     //document.parentNode.appendChild(savePanel); ->document.parentNode is null
     //document.appendChild(savePanel); -> node can't be inserted
     //pub.mainWindow.document.appendChild(savePanel);
-    savePanel.openPopup(document.documentElement, "Links of Interest", 60, 50, false, false);
+    savePanel.openPopup(document.documentElement, "", 60, 50, false, false);
     //get all the links on current page, and their texts shown on page
     //can't get from overlay, still wondering
   };
