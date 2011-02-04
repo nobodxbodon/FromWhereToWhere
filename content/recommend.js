@@ -178,8 +178,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return recLinks;
   };
 
-  pub.createDOMElement = function(parent, name, atts){
-    var ele=parent.createElement(name);
+  pub.setAttrDOMElement = function(ele, atts){
     for(var i in atts){
       ele.setAttribute(i, atts[i]);
     }
@@ -260,11 +259,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         //alert("create panel for ff3");
         panelAttr = {"id":"fwtwRelPanel"};//"fade":"fast",
       }
-      savePanel = pub.createDOMElement(document, "panel", panelAttr);
+      savePanel = document.createElement("panel");
+      savePanel = pub.setAttrDOMElement(savePanel, panelAttr);
       vbox = document.createElement("vbox");
       //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
       //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
-      desc = pub.createDOMElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"8", "cols":"70"})  
+      desc = document.createElement("textbox");
+      desc = pub.setAttrDOMElement(desc, {"readonly":"true", "multiline":"true", "rows":"8", "cols":"70"})  
       vbox.appendChild(desc);
       savePanel.appendChild(vbox);
       //this put the panel on the menu bar
