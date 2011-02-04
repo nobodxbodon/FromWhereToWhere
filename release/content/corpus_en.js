@@ -1,7 +1,7 @@
 com.wuxuan.fromwheretowhere.corpus = function(){
   var pub={};
   
-  pub.special = ["-","&",":",",","&","\'","\""];
+  pub.special = ["-","&",":",",","&","\'","\"","\/"]; //"\\" lead to exception in reg exp
   
   pub.stopwords_en_NLTK = ["i",
 "me",
