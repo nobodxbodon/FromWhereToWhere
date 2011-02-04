@@ -13,8 +13,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.starttime = 0;
   
   //remove all duplicate element from an array
-  Array.prototype.unique = function(freq) {
-    var a = this.concat();
+  pub.uniqueArray = function(arr, freq) {
+    var a = arr.concat();
     //only work for string type
     var origLen = a.length;
     var allfreq = [];
@@ -44,8 +44,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
       
   //remove all spaces \n in front and at end of a string
-  String.prototype.trim = function () {
-    return this.replace(/^\s*/, "").replace(/\s*$/, "");
+  pub.trimString = function (str) {
+    return str.replace(/^\s*/, "").replace(/\s*$/, "");
   };
 
   //also remove all numbers, as they don't seem to carry much "theme" info
@@ -101,7 +101,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //if too many pids with one single word, may mean sth...
       pidsWithWord = pidsWithWord.concat(pids);
     }
-    pidsWithWord = pidsWithWord.unique(false);
+    pidsWithWord = pub.uniqueArray(pidsWithWord, false);
     var children = [];
     //get their children in history
     for(var i=0;i<pidsWithWord.length;i++){
@@ -109,7 +109,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       children = children.concat(c);
     }
     pidsWithWord = pidsWithWord.concat(children);
-    pidsWithWord = pidsWithWord.unique(false);
+    pidsWithWord = pub.uniqueArray(pidsWithWord, false);
     //stupid, somehow there's some code piece of unique in the array??!!WTF??
     for(var i=0;i<pidsWithWord.length;i++){
       if(!(pidsWithWord[i]>0)){
@@ -124,7 +124,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       allRelated=allRelated.concat(relatedWords);
     }
     var origLen = allRelated.length;
-    var a = allRelated.unique(true);
+    var a = pub.uniqueArray(allRelated, true);
     //get frequency of word (number of titles that contains it/number of all titles)
     allRelated = a.arr;
     var freq = a.freq;
@@ -139,7 +139,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var recLinks = [];
     var recTitles = [];
     for(var i=0;i<allLinks.length;i++){
-      var trimed = allLinks[i].text.trim();
+      var trimed = pub.trimString(allLinks[i].text);
       var t = trimed.toLowerCase();
       //remove the duplicate links (titles)
       if(recTitles.indexOf(t)>-1){
@@ -149,7 +149,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
       var text = t.split(" ");
       //remove dup word in the title, for freq mult
-      text = text.unique(false);
+      text = pub.uniqueArray(text, false);
       //if there's too few words (<3 for now), either catalog or tag, or very obvious already
       if(pub.tooSimple(text)){
         continue;
@@ -178,8 +178,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return recLinks;
   };
 
-  pub.createElement = function(parent, name, atts){
-    var ele=parent.createElement(name);
+  pub.setAttrDOMElement = function(ele, atts){
     for(var i in atts){
       ele.setAttribute(i, atts[i]);
     }
@@ -229,7 +228,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(pub.DEBUG)
       outputLinks += "ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
     for(var i=0;i<recLinks.length;i++){
-      outputLinks+=recLinks[i].link.text.trim();
+      outputLinks+=pub.trimString(recLinks[i].link.text);
       if(pub.DEBUG)
         outputLinks+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
       outputLinks+="\n";
@@ -260,11 +259,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         //alert("create panel for ff3");
         panelAttr = {"id":"fwtwRelPanel"};//"fade":"fast",
       }
-      savePanel = pub.createElement(document, "panel", panelAttr);
+      savePanel = document.createElement("panel");
+      savePanel = pub.setAttrDOMElement(savePanel, panelAttr);
       vbox = document.createElement("vbox");
       //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
       //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
-      desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"8", "cols":"70"})  
+      desc = document.createElement("textbox");
+      desc = pub.setAttrDOMElement(desc, {"readonly":"true", "multiline":"true", "rows":"8", "cols":"70"})  
       vbox.appendChild(desc);
       savePanel.appendChild(vbox);
       //this put the panel on the menu bar
