@@ -66,6 +66,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.getTopic = function(title, stopwords, specials){
+    if(title==null){
+      return [];
+    }
     var allwords = title.split(" ");
     return pub.filter(allwords, stopwords, specials);
   };
@@ -252,7 +255,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var panelAttr = null;
       //close, label, titlebar only for ff 4
       if(version>=4)
-        panelAttr = {"id":"fwtwRelPanel","label":"Seemingly Related Links","titlebar":"normal","noautohide":"true","close":"true"};
+        panelAttr = {"id":"fwtwRelPanel","label":"Seemingly Related or Interesting Links","titlebar":"normal","noautohide":"true","close":"true"};
       else{
         //alert("create panel for ff3");
         panelAttr = {"id":"fwtwRelPanel"};//"fade":"fast",
