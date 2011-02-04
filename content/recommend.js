@@ -244,22 +244,24 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var vbox,desc;
     //only reuse the panel for ff 4
     if(version>=4 && savePanel!=null){
-      alert("there's panel!");
+      //alert("there's panel!");
       vbox = savePanel.firstChild;
       desc = vbox.firstChild;
     }else{
-      alert("creating new panel");
+      //alert("creating new panel");
       var panelAttr = null;
       //close, label, titlebar only for ff 4
       if(version>=4)
         panelAttr = {"id":"fwtwRelPanel","label":"Seemingly Related Links","titlebar":"normal","noautohide":"true","close":"true"};
-      else
-        panelAttr = {"id":"fwtwRelPanel","noautohide":"false"};//"fade":"fast",
+      else{
+        //alert("create panel for ff3");
+        panelAttr = {"id":"fwtwRelPanel"};//"fade":"fast",
+      }
       savePanel = pub.createElement(document, "panel", panelAttr);
       vbox = document.createElement("vbox");
       //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
       //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
-      desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"10", "cols":"100"})  
+      desc = pub.createElement(document, "textbox", {"readonly":"true", "multiline":"true", "rows":"8", "cols":"70"})  
       vbox.appendChild(desc);
       savePanel.appendChild(vbox);
       //this put the panel on the menu bar
@@ -271,7 +273,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //document.parentNode.appendChild(savePanel); ->document.parentNode is null
     //document.appendChild(savePanel); -> node can't be inserted
     //pub.mainWindow.document.appendChild(savePanel);
-    savePanel.openPopup(document.documentElement, "", 60, 50, false, false);
+    
+    if(version<4){
+      //can't anchor as in 4. WHY?
+      savePanel.openPopup(null, "start_end", 60, 80, false, false);
+    }else{
+      savePanel.openPopup(document.documentElement, "start_end", 60, 80, false, false);
+    }
     //get all the links on current page, and their texts shown on page
     //can't get from overlay, still wondering
   };
