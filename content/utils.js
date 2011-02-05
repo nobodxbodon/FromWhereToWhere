@@ -34,6 +34,43 @@ com.wuxuan.fromwheretowhere.utils = function(){
     }
     return false;
   }
+  
+  //remove all duplicate element from an array
+  pub.uniqueArray = function(arr, freq) {
+    var a = arr.concat();
+    //only work for string type
+    var origLen = a.length;
+    var allfreq = [];
+    for(var i=0; i<a.length; ++i) {
+      if(freq){
+          allfreq[a[i]]=1;
+      }
+      for(var j=i+1; j<a.length; ++j) {
+        if(a[i] === a[j]){
+          a.splice(j, 1);
+          //HAVE to go back one
+          j--;
+          if(freq){
+            allfreq[a[i]]+=1;
+          }
+        }
+      }
+    }
+    if(freq){
+      //allfreq.length always 0, can only get through word index
+      for(var i in allfreq){
+        allfreq[i]=(allfreq[i]+0.0)/origLen;
+      }
+      return {arr:a,freq:allfreq};
+    }
+    return a;
+  };
+      
+  //remove all spaces \n in front and at end of a string
+  pub.trimString = function (str) {
+    return str.replace(/^\s*/, "").replace(/\s*$/, "");
+  };
+
   //TODO: reg expr instead
   pub.splitWithSpaces = function(myString) {
     if(!myString){

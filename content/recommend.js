@@ -8,46 +8,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIDOMWindow);
  
-  pub.DEBUG = false;
+  pub.DEBUG = true;
   pub.TOOFEWWORDS = 4
+  pub.MULTILINE_LIMIT = 3;
   pub.starttime = 0;
   
-  //remove all duplicate element from an array
-  pub.uniqueArray = function(arr, freq) {
-    var a = arr.concat();
-    //only work for string type
-    var origLen = a.length;
-    var allfreq = [];
-    for(var i=0; i<a.length; ++i) {
-      if(freq){
-          allfreq[a[i]]=1;
-      }
-      for(var j=i+1; j<a.length; ++j) {
-        if(a[i] === a[j]){
-          a.splice(j, 1);
-          //HAVE to go back one
-          j--;
-          if(freq){
-            allfreq[a[i]]+=1;
-          }
-        }
-      }
-    }
-    if(freq){
-      //allfreq.length always 0, can only get through word index
-      for(var i in allfreq){
-        allfreq[i]=(allfreq[i]+0.0)/origLen;
-      }
-      return {arr:a,freq:allfreq};
-    }
-    return a;
-  };
-      
-  //remove all spaces \n in front and at end of a string
-  pub.trimString = function (str) {
-    return str.replace(/^\s*/, "").replace(/\s*$/, "");
-  };
-
   //also remove all numbers, as they don't seem to carry much "theme" info
   pub.filter = function(allwords, stopwords, specials){
     for(var i=0; i<allwords.length; i++){
@@ -101,7 +66,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //if too many pids with one single word, may mean sth...
       pidsWithWord = pidsWithWord.concat(pids);
     }
-    pidsWithWord = pub.uniqueArray(pidsWithWord, false);
+    pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);
     var children = [];
     //get their children in history
     for(var i=0;i<pidsWithWord.length;i++){
@@ -109,7 +74,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       children = children.concat(c);
     }
     pidsWithWord = pidsWithWord.concat(children);
-    pidsWithWord = pub.uniqueArray(pidsWithWord, false);
+    pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);
     //stupid, somehow there's some code piece of unique in the array??!!WTF??
     for(var i=0;i<pidsWithWord.length;i++){
       if(!(pidsWithWord[i]>0)){
@@ -124,7 +89,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       allRelated=allRelated.concat(relatedWords);
     }
     var origLen = allRelated.length;
-    var a = pub.uniqueArray(allRelated, true);
+    var a = pub.utils.uniqueArray(allRelated, true);
     //get frequency of word (number of titles that contains it/number of all titles)
     allRelated = a.arr;
     var freq = a.freq;
@@ -139,7 +104,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var recLinks = [];
     var recTitles = [];
     for(var i=0;i<allLinks.length;i++){
-      var trimed = pub.trimString(allLinks[i].text);
+      var trimed = pub.utils.trimString(allLinks[i].text);
       var t = trimed.toLowerCase();
       //remove the duplicate links (titles)
       if(recTitles.indexOf(t)>-1){
@@ -149,7 +114,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
       var text = t.split(" ");
       //remove dup word in the title, for freq mult
-      text = pub.uniqueArray(text, false);
+      text = pub.utils.uniqueArray(text, false);
       //if there's too few words (<3 for now), either catalog or tag, or very obvious already
       if(pub.tooSimple(text)){
         continue;
@@ -228,10 +193,16 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(pub.DEBUG)
       outputLinks += "ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
     for(var i=0;i<recLinks.length;i++){
-      outputLinks+=pub.trimString(recLinks[i].link.text);
-      if(pub.DEBUG)
-        outputLinks+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
-      outputLinks+="\n";
+      var title = pub.utils.trimString(recLinks[i].link.text)
+      //remove those titles > 3 lines, can be functions...
+      if(title.split("\n").length<=pub.MULTILINE_LIMIT){
+        outputLinks+=title;
+        if(pub.DEBUG)
+          outputLinks+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
+        outputLinks+="\n";
+      }else{
+        //alert("multiline>3:\n"+title);
+      }
     }
     //pub.rec = recLinks;
     /*if(recLinks.length>0){
@@ -241,7 +212,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       savePanel.appendChild(testLink);
     }*/
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-    var version = com.wuxuan.fromwheretowhere.utils.getFFVersion();
+    var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
     var vbox,desc;
     //only reuse the panel for ff 4
@@ -289,6 +260,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.init = function(){
+    pub.utils = com.wuxuan.fromwheretowhere.utils;
     pub.history = com.wuxuan.fromwheretowhere.historyQuery;
   };
     
