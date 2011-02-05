@@ -14,6 +14,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.starttime = 0;
   
   //also remove all numbers, as they don't seem to carry much "theme" info
+  //remove word.length==1
   pub.filter = function(allwords, stopwords, specials){
     for(var i=0; i<allwords.length; i++){
       allwords[i] = allwords[i].toLowerCase();
@@ -22,7 +23,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       for(var j=0;j<specials.length;j++){
         allwords[i]=allwords[i].replace(new RegExp(specials[j],"g"),"");
       }
-      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i]==" " || allwords[i].match(/[0-9]/)!=null){
+      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length==1 || allwords[i].match(/[0-9]/)!=null){
         allwords.splice(i, 1);
         i--;
       }
@@ -89,9 +90,15 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       allRelated=allRelated.concat(relatedWords);
     }
     var origLen = allRelated.length;
+    //sort the string array by string length, can speed up later processing
+    allRelated.sort(function(a,b){return a.length-b.length});
     var a = pub.utils.uniqueArray(allRelated, true);
     //get frequency of word (number of titles that contains it/number of all titles)
+    var len = a.arr.length;
+    a = pub.utils.removeHaveSubstring(a);
+    var removed = a.arr.length-len;
     allRelated = a.arr;
+    //alert(allRelated);
     var freq = a.freq;
     //LATER: getNumofPidWithWord might be more precise, but much more time consuming.
     //       for now just use the wf in "relatedWords"
@@ -138,8 +145,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //sort by overallFreq
     recLinks.sort(function(a,b){return a.overallFreq-b.overallFreq});
     //don't pop up if there's no related links
-    if(recLinks.length>0)
-      pub.popUp(recLinks,allLinks);
+    if(recLinks.length>0){
+      var o = pub.output(recLinks,allLinks);
+      if(pub.DEBUG)
+        o="removed: "+removed+"\n"+o;
+      pub.popUp(o);
+    }
     return recLinks;
   };
 
@@ -187,11 +198,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   pub.rec = [];
   
-  pub.popUp = function(recLinks, allLinks){
+  pub.output = function(recLinks, allLinks){
     var outputLinks = "";
-    outputLinks += "time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s\n";
-    if(pub.DEBUG)
-      outputLinks += "ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
+    outputLinks += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s        \n";
+    outputLinks += "Ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
     for(var i=0;i<recLinks.length;i++){
       var title = pub.utils.trimString(recLinks[i].link.text)
       //remove those titles > 3 lines, can be functions...
@@ -204,6 +214,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         //alert("multiline>3:\n"+title);
       }
     }
+    return outputLinks;
+  };
+    
+  pub.popUp = function(outputLinks){
     //pub.rec = recLinks;
     /*if(recLinks.length>0){
     //for(var i=0;i<recLinks.length;i++){

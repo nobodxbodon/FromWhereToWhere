@@ -53,6 +53,9 @@ com.wuxuan.fromwheretowhere.utils = function(){
           if(freq){
             allfreq[a[i]]+=1;
           }
+        }//ONLY work for sorted arr. If length isn't the same, str[i] has no dup afterwards
+        else if(a[i].length!=a[j].length){
+          break;
         }
       }
     }
@@ -71,6 +74,25 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return str.replace(/^\s*/, "").replace(/\s*$/, "");
   };
 
+  //remove all string that contain one other element, str is with freq
+  //NOTE: a.arr is sorted by string length (ascend) already, and have no dup
+  //this is very naive form of stemming
+  pub.removeHaveSubstring = function(a){
+    var str = a.arr;
+    var freq = a.freq;
+    for(var i=0;i<str.length;i++){
+      for(var j=i+1;j<str.length;j++){
+        if(str[j].indexOf(str[i])>-1){
+          freq[i]+=freq[j];
+          str.splice(j,1);
+          freq.splice(j,1);
+          j--;
+        }
+      }
+    }
+    return a;
+  };
+  
   //TODO: reg expr instead
   pub.splitWithSpaces = function(myString) {
     if(!myString){
