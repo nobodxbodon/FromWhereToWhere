@@ -50,6 +50,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.recommend = function(title, allLinks){
+    pub.DEBUGINFO = "";
     pub.starttime = (new Date()).getTime();
     var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     var specials = com.wuxuan.fromwheretowhere.corpus.special;
@@ -97,7 +98,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //get frequency of word (number of titles that contains it/number of all titles)
     var len = a.arr.length;
 
-    a = pub.utils.removeHaveSubstring(a);
+    /*a = pub.utils.removeHaveSubstring(a);*/
     var removed = a.arr.length-len;
     allRelated = a.arr;
     if(pub.DEBUG){
@@ -157,9 +158,14 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //don't pop up if there's no related links
     if(recLinks.length>0){
       var o = pub.output(recLinks,allLinks);
-      if(pub.DEBUG)
+      if(pub.DEBUG){
         o="removed "+removed+" from "+len+"\n"+o;
+      }
       pub.popUp(o);
+    }else{
+      if(pub.DEBUG){
+        alert("alllinks:\n"+allLinks);
+      }
     }
     return recLinks;
   };
@@ -238,12 +244,14 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
-    var vbox,desc;
+    var vbox,desc,debugtext;
     //only reuse the panel for ff 4
     if(version>=4 && savePanel!=null){
       //alert("there's panel!");
       vbox = savePanel.firstChild;
       desc = vbox.firstChild;
+      if(pub.DEBUG)
+        debugtext = desc.nextSibling;
     }else{
       //alert("creating new panel");
       var panelAttr = null;
@@ -264,9 +272,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       vbox.appendChild(desc);
       //create another textbox for just debug info
       if(pub.DEBUG){
-        var debugtext = document.createElement("textbox");
+        debugtext = document.createElement("textbox");
         debugtext = pub.setAttrDOMElement(debugtext, {"readonly":"true", "multiline":"true", "rows":"20", "cols":"70"})
-        debugtext.setAttribute("value",pub.DEBUGINFO);
         vbox.appendChild(debugtext);
       }
       savePanel.appendChild(vbox);
@@ -276,6 +283,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       document.documentElement.appendChild(savePanel);
     }
     desc.setAttribute("value",outputLinks);
+    debugtext.setAttribute("value",pub.DEBUGINFO);
     //document.parentNode.appendChild(savePanel); ->document.parentNode is null
     //document.appendChild(savePanel); -> node can't be inserted
     //pub.mainWindow.document.appendChild(savePanel);
