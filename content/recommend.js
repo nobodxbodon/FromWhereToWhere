@@ -9,6 +9,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .getInterface(Components.interfaces.nsIDOMWindow);
  
   pub.DEBUG = true;
+  pub.DEBUGINFO = "";
   pub.TOOFEWWORDS = 4
   pub.MULTILINE_LIMIT = 3;
   pub.starttime = 0;
@@ -20,9 +21,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       allwords[i] = allwords[i].toLowerCase();
       //stupid way to get rid of special char from the utterance
       //those with , and : -- useful semantic, but for now clean up
-      for(var j=0;j<specials.length;j++){
+      /*for(var j=0;j<specials.length;j++){
         allwords[i]=allwords[i].replace(new RegExp(specials[j],"g"),"");
-      }
+      }*/
       if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length==1 || allwords[i].match(/[0-9]/)!=null){
         allwords.splice(i, 1);
         i--;
@@ -35,7 +36,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(title==null){
       return [];
     }
-    var allwords = title.split(" ");
+    var allwords = title.split(" ");//(" ");/\W/
     return pub.filter(allwords, stopwords, specials);
   };
   
@@ -95,9 +96,18 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var a = pub.utils.uniqueArray(allRelated, true);
     //get frequency of word (number of titles that contains it/number of all titles)
     var len = a.arr.length;
+
     a = pub.utils.removeHaveSubstring(a);
     var removed = a.arr.length-len;
     allRelated = a.arr;
+    if(pub.DEBUG){
+      var allover = 0;
+      for(var i=0;i<a.arr.length;i++){
+        pub.DEBUGINFO+=a.arr[i]+ " " +a.freq[a.arr[i]]+"\n";
+        allover+=a.freq[a.arr[i]];
+      }
+      pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
+    }
     //alert(allRelated);
     var freq = a.freq;
     //LATER: getNumofPidWithWord might be more precise, but much more time consuming.
@@ -148,7 +158,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(recLinks.length>0){
       var o = pub.output(recLinks,allLinks);
       if(pub.DEBUG)
-        o="removed: "+removed+"\n"+o;
+        o="removed "+removed+" from "+len+"\n"+o;
       pub.popUp(o);
     }
     return recLinks;
@@ -252,6 +262,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       desc = document.createElement("textbox");
       desc = pub.setAttrDOMElement(desc, {"readonly":"true", "multiline":"true", "rows":"8", "cols":"70"})  
       vbox.appendChild(desc);
+      //create another textbox for just debug info
+      if(pub.DEBUG){
+        var debugtext = document.createElement("textbox");
+        debugtext = pub.setAttrDOMElement(debugtext, {"readonly":"true", "multiline":"true", "rows":"20", "cols":"70"})
+        debugtext.setAttribute("value",pub.DEBUGINFO);
+        vbox.appendChild(debugtext);
+      }
       savePanel.appendChild(vbox);
       //this put the panel on the menu bar
       //menus.parentNode.appendChild(savePanel);

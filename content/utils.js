@@ -83,7 +83,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
     for(var i=0;i<str.length;i++){
       for(var j=i+1;j<str.length;j++){
         if(str[j].indexOf(str[i])>-1){
-          freq[i]+=freq[j];
+          freq[str[i]]+=freq[str[j]];
           str.splice(j,1);
           freq.splice(j,1);
           j--;
