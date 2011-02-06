@@ -1,5 +1,5 @@
 -- Add-on Summary 
-List the pages from where you visited one page, and all the other pages you visited from those pages. Keywords searching in page title is supported from version 0.09, enhanced in 0.19; Scrapbook support from 0.12. Naive sharing from 0.14.
+List the pages from where you visited one page, and all the other pages you visited from those pages. Keywords searching in page title since version 0.09; Scrapbook support since 0.12; Naive sharing since 0.14; Link suggestion since 0.21.
 
 -- Add-on Description 
 <b>Everyday Use Case:</b>
@@ -20,7 +20,7 @@ Similar to "Referrer History", it shows the pages from where you got to current 
 
 <b>HOWTO:</b>
 
-Open the tree view in a new tab by "Tools -> FromWhereToWhere" when your current page is the one you want to see where-from and where-to links. You can search for the pages with titles that have all the keywords you input.
+Open the tree view in a new tab by "Tools -> FromWhereToWhere -> Search History" when your current page is the one you want to see where-from and where-to links. You can search for the pages with titles that have all the keywords you input.
 
 In the tree view, a node can be expanded if there are URLs that you visited from the URL it stands for. As expanding is recursively performed, the total number of descents can be thousands, and suspension points mean the querying is in progress. You can open a URL by right click on the node -> "open in new tab", or simple double click.
 
@@ -31,6 +31,21 @@ From 0.12, if a link had been captured by the add-on Scrapbook, it'll be highlig
 From 0.14, "property" and "import" are added to the menu for sharing with other users. Select the nodes that you want to share, right click -> "property", select the property (all the text) in the opened dialog.  <b> NOTE: </b> the sub-nodes won't be included in the property of the node if the node hasn't been expanded ever, so please take this chance to examine if the sub-nodes are the exact content that you want to share. The last visited dates are not included in property for now. Send the text to whoever you want to share, and in their FromWhereToWhere view, select "import", paste the whole text, and the same nodes will be displayed in their view, with all the sub-nodes if you include them in the property.
 
 From 0.19 more accurate searching is supported as "key1 key2".  An extreme and potentially time-consuming example is "", which lists all the history in tree structure. Exclusion is supported too, in the form of -keyword3 or -"key4 key5".
+
+From 0.19.9, two more searching options are added. Below leads to results with url containing "mozilla.org":
+    site:mozilla.org
+Another will search for those pages visited during the specified time interval (more than one date format supported, like "2010/7/1", but no space in the option as always please):
+    time:7/1/2010-9/1/2010
+    time:7/1/2010-                    (since 7/1/2010)
+    time:-9/1/2010                    (till 9/1/2010)
+    time:1/5/2011/16:00:00-
+(tip for developers: any form is fine as far as the time can be parsed by "new Date()" in Javascript)
+NOTE: the "Last Visit" time shown may be later than the specified time interval, which only means you visited that page later at least once.
+
+Also from 0.19.9, instead of copying the property of a node and saving to local file manually, now similar function is done through "save to local note" in the menu. All the saved notes can be shown in sidebar, and can be deleted one by one. Searching covers both local notes and history, and the results are shown together. The difference is that "time:" doesn't apply to local notes, as there's no visit date information saved. <b> NOTE: </b> the notes are saved in local database under your profile.
+
+From 0.21.0, link suggestion is added. Instead of sending any keywords to search engine APIs online, this suggestion is purely based on your local browsing history. If "Link Suggestion" is selected, a panel will show related or interesting links on the page that's been loaded. For now only titles are shown and you can't jump to the link location on that page.
+NOTE: the last screenshot is taken under FF4. As titlebar is only supported in FF4, in FF3 the panel is closed whenever you click outside it.
 
 -- Developer Comments 
 1. the add-on is still in a pre-alpha stage; 
