@@ -188,6 +188,22 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     }
   };
   
+	pub.searchIdbyAnyKeyword = function(words){
+		if(!words || words.length==0){
+			return [];
+		}
+		var term = "SELECT id FROM moz_places WHERE";
+		for(var i=0;i<words.length;i++){
+			if(i==0){
+				term+=" TITLE LIKE '%" + words[i] + "%'"
+			}else{
+				term+=" OR TITLE LIKE '%" + words[i] + "%'"
+			}
+		}
+		var statement = pub.mDBConn.createStatement(term);
+    return pub.queryAll(statement, 32, 0);
+	};
+	
   pub.searchIdbyKeywords = function(words, excluded, site, time){
     //SELECT * FROM moz_places where title LIKE '%sqlite%';
     //NESTED in reverse order, with the assumption that the word in front is more frequently used, thus return more items in each SELECT
