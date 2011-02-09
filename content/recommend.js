@@ -13,6 +13,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.TOOFEWWORDS = 4
   pub.MULTILINE_LIMIT = 3;
   pub.starttime = 0;
+  pub.sqltime = {};
   
   //also remove all numbers, as they don't seem to carry much "theme" info
   //remove word.length==1
@@ -64,12 +65,18 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(allwords.length==0){
       return [];
     }
-    for(var i=0;i<allwords.length;i++){
+    pub.tmp = (new Date()).getTime();
+    /*for(var i=0;i<allwords.length;i++){
       var pids = pub.history.searchIdbyKeywords([allwords[i]], [], [], []);
       //if too many pids with one single word, may mean sth...
       pidsWithWord = pidsWithWord.concat(pids);
     }
-    pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);
+    pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);*/
+    pidsWithWord = pub.history.searchIdbyAnyKeyword(allwords);
+    
+    pub.sqltime.searchid = (new Date()).getTime()-pub.tmp;
+    pub.tmp = (new Date()).getTime();
+    
     var children = [];
     //get their children in history
     for(var i=0;i<pidsWithWord.length;i++){
@@ -78,6 +85,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     pidsWithWord = pidsWithWord.concat(children);
     pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);
+    
+    pub.sqltime.getchild = (new Date()).getTime()-pub.tmp;
+    
     //stupid, somehow there's some code piece of unique in the array??!!WTF??
     for(var i=0;i<pidsWithWord.length;i++){
       if(!(pidsWithWord[i]>0)){
@@ -86,11 +96,15 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
     }
     var allRelated=[];
+    pub.tmp = (new Date()).getTime();
+    
     for(var i=0;i<pidsWithWord.length;i++){
       var t = pub.history.getTitlefromId(pidsWithWord[i]);
       var relatedWords=pub.getTopic(t, stopwords, specials);
       allRelated=allRelated.concat(relatedWords);
     }
+    pub.sqltime.gettitle = (new Date()).getTime() -pub.tmp;
+    
     var origLen = allRelated.length;
     //sort the string array by string length, can speed up later processing
     allRelated.sort(function(a,b){return a.length-b.length});
@@ -108,6 +122,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         allover+=a.freq[a.arr[i]];
       }
       pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
+      pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild + " gettitle: "+pub.sqltime.gettitle+"\n"+pub.DEBUGINFO;
     }
     //alert(allRelated);
     var freq = a.freq;
@@ -161,7 +176,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       if(pub.DEBUG){
         o="removed "+removed+" from "+len+"\n"+o;
       }
-      pub.popUp(o);
+      pub.popUp(o, recLinks);
     }else{
       if(pub.DEBUG){
         alert("alllinks:\n"+allLinks);
@@ -215,25 +230,25 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.rec = [];
   
   pub.output = function(recLinks, allLinks){
-    var outputLinks = "";
-    outputLinks += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s        \n";
-    outputLinks += "Ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
+    var outputText = "";
+    outputText += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s        \n";
+    outputText += "Ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
     for(var i=0;i<recLinks.length;i++){
       var title = pub.utils.trimString(recLinks[i].link.text)
       //remove those titles > 3 lines, can be functions...
-      if(title.split("\n").length<=pub.MULTILINE_LIMIT){
-        outputLinks+=title;
+      //if(title.split("\n").length<=pub.MULTILINE_LIMIT){
+        outputText+=title;
         if(pub.DEBUG)
-          outputLinks+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
-        outputLinks+="\n";
-      }else{
+          outputText+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
+        outputText+="\n";
+      //}else{
         //alert("multiline>3:\n"+title);
-      }
+      //}
     }
-    return outputLinks;
+    return outputText;
   };
     
-  pub.popUp = function(outputLinks){
+  pub.popUp = function(outputLinks, recLinks){
     //pub.rec = recLinks;
     /*if(recLinks.length>0){
     //for(var i=0;i<recLinks.length;i++){
@@ -244,7 +259,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
-    var vbox,desc,debugtext;
+    var vbox,desc,debugtext,linkBox;
     //only reuse the panel for ff 4
     if(version>=4 && savePanel!=null){
       //alert("there's panel!");
@@ -257,7 +272,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var panelAttr = null;
       //close, label, titlebar only for ff 4
       if(version>=4)
-        panelAttr = {"id":"fwtwRelPanel","label":"Seemingly Related or Interesting Link Titles","titlebar":"normal","noautohide":"true","close":"true"};
+        panelAttr = {"id":"fwtwRelPanel","label":"Seemingly Related or Interesting Link Titles","titlebar":"normal","noautohide":"true","close":"true","maxheight":"100"};
       else{
         //alert("create panel for ff3");
         panelAttr = {"id":"fwtwRelPanel"};//"fade":"fast",
@@ -273,9 +288,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //create another textbox for just debug info
       if(pub.DEBUG){
         debugtext = document.createElement("textbox");
-        debugtext = pub.setAttrDOMElement(debugtext, {"readonly":"true", "multiline":"true", "rows":"20", "cols":"70"})
+        debugtext = pub.setAttrDOMElement(debugtext, {"readonly":"true", "multiline":"true", "rows":"10", "cols":"70"})
         vbox.appendChild(debugtext);
       }
+      //linkBox = document.createElement("vbox");
+      //linkBox = pub.setAttrDOMElement(linkBox, {"flex":"1", "style":"overflow:auto", "height":"40"});
+      //savePanel.appendChild(linkBox);
       savePanel.appendChild(vbox);
       //this put the panel on the menu bar
       //menus.parentNode.appendChild(savePanel);
@@ -284,6 +302,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     desc.setAttribute("value",outputLinks);
     debugtext.setAttribute("value",pub.DEBUGINFO);
+    /*document.documentElement.appendChild(recLinks[0].link);
+    var testLink = document.createElement("a");
+    alert("text:"+recLinks[0].link.text+" link:"+recLinks[0].link.href);
+    testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text,"href":recLinks[0].link.href});
+    document.documentElement.appendChild(testLink);*/
     //document.parentNode.appendChild(savePanel); ->document.parentNode is null
     //document.appendChild(savePanel); -> node can't be inserted
     //pub.mainWindow.document.appendChild(savePanel);
