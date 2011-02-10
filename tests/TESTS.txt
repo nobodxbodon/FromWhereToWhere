@@ -18,6 +18,14 @@
 
 ------Local Notes Related------
 1) context menu -> "save to local notes" works for all nodes (can multi-select), pop up "saved" if saved successfully and warn if failed
+   If the note sidebar is open at the moment, a new item will show in it.
 2) context menu -> "open/close notes sidebar", toggle the local notes sidebar
 3) in sidebar, context menu -> "open note" works for each node, open in new tree view if current isn't
-4) in sidebar, context menu -> "open note" works for each node, remove it from the record and sidebar view
+4) double click works as in 3)
+4) in sidebar, context menu -> "delete" works for each node, remove it from the record and sidebar view
+
+------Link Suggestion Related------
+1) for FF4, if toggled, one floating panel will refresh (be created if not exist) when a new page is loaded and switched as current page.
+   The panel can be repositioned.
+2) for FF3, if toggled, one floating panel will be created when a new page is loaded.
+   The panel can't be repositioned, and will hide if click outside.
