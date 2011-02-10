@@ -235,6 +235,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     outputText += "Ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
     for(var i=0;i<recLinks.length;i++){
       var title = pub.utils.trimString(recLinks[i].link.text)
+      var title = pub.utils.removeEmptyLine(title);
       //remove those titles > 3 lines, can be functions...
       //if(title.split("\n").length<=pub.MULTILINE_LIMIT){
         outputText+=title;

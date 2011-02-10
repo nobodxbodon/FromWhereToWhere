@@ -73,7 +73,21 @@ com.wuxuan.fromwheretowhere.utils = function(){
   pub.trimString = function (str) {
     return str.replace(/^\s*/, "").replace(/\s*$/, "");
   };
-
+  
+  //remove all empty lines in between (there's no empty lines at front/end in input)
+  //don't think it can be infinite loop, but just be cautious, set max loop 40
+  pub.removeEmptyLine = function(str){
+    var rs = "";
+    for(var i=0;i<40;i++){
+      rs = str.replace(/\n\n/g, "\n");
+      if(rs==str)
+        break;
+      else
+        str = rs;
+    }
+    return rs;
+  };
+  
   //remove all string that contain one other element, str is with freq
   //NOTE: a.arr is sorted by string length (ascend) already, and have no dup
   //this is very naive form of stemming
