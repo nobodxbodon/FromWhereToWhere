@@ -34,6 +34,79 @@ com.wuxuan.fromwheretowhere.utils = function(){
     }
     return false;
   }
+  
+  //remove all duplicate element from an array
+  pub.uniqueArray = function(arr, freq) {
+    var a = arr.concat();
+    //only work for string type
+    var origLen = a.length;
+    var allfreq = [];
+    for(var i=0; i<a.length; ++i) {
+      if(freq){
+          allfreq[a[i]]=1;
+      }
+      for(var j=i+1; j<a.length; ++j) {
+        if(a[i] === a[j]){
+          a.splice(j, 1);
+          //HAVE to go back one
+          j--;
+          if(freq){
+            allfreq[a[i]]+=1;
+          }
+        }//ONLY work for sorted arr. If length isn't the same, str[i] has no dup afterwards
+        else if(a[i].length!=a[j].length){
+          break;
+        }
+      }
+    }
+    if(freq){
+      //allfreq.length always 0, can only get through word index
+      for(var i in allfreq){
+        allfreq[i]=(allfreq[i]+0.0)/origLen;
+      }
+      return {arr:a,freq:allfreq};
+    }
+    return a;
+  };
+      
+  //remove all spaces \n in front and at end of a string
+  pub.trimString = function (str) {
+    return str.replace(/^\s*/, "").replace(/\s*$/, "");
+  };
+  
+  //remove all empty lines in between (there's no empty lines at front/end in input)
+  //don't think it can be infinite loop, but just be cautious, set max loop 40
+  pub.removeEmptyLine = function(str){
+    var rs = "";
+    for(var i=0;i<40;i++){
+      rs = str.replace(/\n\n/g, "\n");
+      if(rs==str)
+        break;
+      else
+        str = rs;
+    }
+    return rs;
+  };
+  
+  //remove all string that contain one other element, str is with freq
+  //NOTE: a.arr is sorted by string length (ascend) already, and have no dup
+  //this is very naive form of stemming
+  pub.removeHaveSubstring = function(a){
+    var str = a.arr;
+    var freq = a.freq;
+    for(var i=0;i<str.length;i++){
+      for(var j=i+1;j<str.length;j++){
+        if(str[j].indexOf(str[i])>-1){
+          freq[str[i]]+=freq[str[j]];
+          str.splice(j,1);
+          freq.splice(j,1);
+          j--;
+        }
+      }
+    }
+    return a;
+  };
+  
   //TODO: reg expr instead
   pub.splitWithSpaces = function(myString) {
     if(!myString){
