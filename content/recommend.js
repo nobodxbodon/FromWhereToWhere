@@ -231,8 +231,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   pub.output = function(recLinks, allLinks){
     var outputText = "";
-    outputText += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s        \n";
-    outputText += "Ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
+    outputText += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s      ";
+    outputText += "Ratio(Num. of suggested/Num. of all links): "+(0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10+"%\n";
     for(var i=0;i<recLinks.length;i++){
       var title = pub.utils.trimString(recLinks[i].link.text)
       var title = pub.utils.removeEmptyLine(title);
@@ -302,7 +302,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       document.documentElement.appendChild(savePanel);
     }
     desc.setAttribute("value",outputLinks);
-    debugtext.setAttribute("value",pub.DEBUGINFO);
+    if(pub.DEBUG)
+      debugtext.setAttribute("value",pub.DEBUGINFO);
     /*document.documentElement.appendChild(recLinks[0].link);
     var testLink = document.createElement("a");
     alert("text:"+recLinks[0].link.text+" link:"+recLinks[0].link.href);
