@@ -134,6 +134,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       relFreq[allRelated[i]]=(pub.history.getNumofPidWithWord(allRelated[i])+0.0)/allPids;
     }*/
     //first get all "context" word, can be anormous...let's see
+    //recLinks have object which format is: {link:xx,overallFreq:0.xx,kw:somewords}
     var recLinks = [];
     var recTitles = [];
     for(var i=0;i<allLinks.length;i++){
@@ -233,7 +234,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var outputText = "";
     outputText += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s      ";
     outputText += "Ratio(Num. of suggested/Num. of all links): "+(0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10+"%\n";
-    for(var i=0;i<recLinks.length;i++){
+    /*for(var i=0;i<recLinks.length;i++){
       var title = pub.utils.trimString(recLinks[i].link.text)
       var title = pub.utils.removeEmptyLine(title);
       //remove those titles > 3 lines, can be functions...
@@ -245,7 +246,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //}else{
         //alert("multiline>3:\n"+title);
       //}
-    }
+    }*/
     return outputText;
   };
     
@@ -304,6 +305,28 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     desc.setAttribute("value",outputLinks);
     if(pub.DEBUG)
       debugtext.setAttribute("value",pub.DEBUGINFO);
+    //add the recLinks to top of body
+    var body = gBrowser.selectedBrowser.contentDocument.body;//getElementsByTagName("body")[0];
+    if(body){
+      //alert(recLinks[0].link.localName);
+      var div=document.createElement("div");
+      var info = document.createElement("p");
+      info.appendChild(document.createTextNode(outputLinks));
+      div.appendChild(info);
+      
+      var p=document.createElement("p");
+      p = pub.setAttrDOMElement(p,{"style":"height: 100px;overflow:auto"})
+      //var a=document.createElement("a");
+      //a=pub.setAttrDOMElement(a,{"text":recLinks[0].link});
+      for(var i=0;i<recLinks.length;i++){
+        recLinks[i].link.appendChild(document.createElement("br"));
+        p.appendChild(recLinks[i].link);
+      }
+      div.appendChild(p);
+      body.insertBefore(div,body.firstChild);//appendChild(div);//recLinks[0]);
+    }else{
+      alert("body is null: "+body.tagName);
+    }
     /*document.documentElement.appendChild(recLinks[0].link);
     var testLink = document.createElement("a");
     alert("text:"+recLinks[0].link.text+" link:"+recLinks[0].link.href);

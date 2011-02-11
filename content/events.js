@@ -17,6 +17,7 @@ com.wuxuan.fromwheretowhere.events = function(){
         if (this.doc.nodeName == "#document") {
         //if (doc instanceof HTMLDocument) {
           // is this an inner frame?
+          //TODO: defaultView can be null!
           if (this.doc.defaultView.frameElement) {
             // Frame within a tab was loaded.
             // Find the root document:
