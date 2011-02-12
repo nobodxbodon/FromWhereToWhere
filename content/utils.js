@@ -107,6 +107,15 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return a;
   };
   
+  //return the count of occurrences of ch in str
+  pub.countChar = function(ch, str){
+    var all = str.match(new RegExp(ch,"g"));
+    if(all)
+      return all.length;
+    else
+      return 0;
+  };
+  
   //TODO: reg expr instead
   pub.splitWithSpaces = function(myString) {
     if(!myString){

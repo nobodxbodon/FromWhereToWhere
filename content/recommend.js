@@ -301,15 +301,16 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var panelAttr = null;
       //close, label, titlebar only for ff 4
       if(version>=4)
-        panelAttr = {"id":"fwtwRelPanel","label":"Seemingly Related or Interesting Link Titles","titlebar":"normal","noautohide":"true","close":"true","maxheight":"100"};
+        panelAttr = {"id":"fwtwRelPanel","label":"Seemingly Related or Interesting Link Titles","titlebar":"normal","noautohide":"true","close":"true","height":"100"};
       else{
         //alert("create panel for ff3");
         panelAttr = {"id":"fwtwRelPanel"};//"fade":"fast",
       }
       savePanel = document.createElement("panel");
       savePanel = pub.setAttrDOMElement(savePanel, panelAttr);
+      
       vbox = document.createElement("vbox");
-      vbox = pub.setAttrDOMElement(vbox, {"style":"overflow:auto","width":"500","height":"100"});
+      vbox = pub.setAttrDOMElement(vbox, {"flex":"1","style":"overflow:auto","width":"500","height":"100"});
       //alert("vbox created");
       //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
       //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
@@ -345,9 +346,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         var title = pub.utils.trimString(recLinks[i].link.text);
         title = pub.utils.removeEmptyLine(title);
         if(i%2==0)
-          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#EEEEEE"});
+          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "multiline":"true", "rows":new Number(1+pub.utils.countChar("\n",title)).toString(), "value":title, "style":"background-color:#EEEEEE"});
         else
-          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#FFFFFF"});
+          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "multiline":"true", "rows":new Number(1+pub.utils.countChar("\n",title)).toString(), "value":title, "style":"background-color:#FFFFFF"});
         vbox.appendChild(l);
       }
     if(pub.DEBUG)
@@ -367,6 +368,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //can't anchor as in 4. WHY?
       savePanel.openPopup(null, "start_end", 60, 80, false, false);
     }else{
+      var resizer = document.createElement("resizer");
+      resizer = pub.setAttrDOMElement(resizer, {"dir":"bottomright", "element":"fwtwRelPanel", "right":"0", "bottom":"0", "width":"0", "height":"0"});
+      savePanel.appendChild(resizer);
       savePanel.openPopup(document.documentElement, "start_end", 60, 80, false, false);
     }
     //get all the links on current page, and their texts shown on page
