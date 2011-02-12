@@ -38,6 +38,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(title==null){
       return [];
     }
+    //TODO: some language requires more complex segmentation, like CHN
     var allwords = title.split(" ");//(" ");/\W/
     return pub.filter(allwords, stopwords, specials);
   };
@@ -237,7 +238,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     outputText += "Ratio(Num. of suggested/Num. of all links): "+(0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10+"%\n";
     for(var i=0;i<recLinks.length;i++){
       var title = pub.utils.trimString(recLinks[i].link.text)
-      var title = pub.utils.removeEmptyLine(title);
+      title = pub.utils.removeEmptyLine(title);
       //remove those titles > 3 lines, can be functions...
       //if(title.split("\n").length<=pub.MULTILINE_LIMIT){
         outputText+=title;
@@ -292,7 +293,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(version>=4 && savePanel!=null){
       //alert("there's panel!");
       vbox = savePanel.firstChild;
-      desc = vbox.firstChild;
+      //desc = vbox.firstChild;
       if(pub.DEBUG)
         debugtext = desc.nextSibling;
     }else{
@@ -308,11 +309,18 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       savePanel = document.createElement("panel");
       savePanel = pub.setAttrDOMElement(savePanel, panelAttr);
       vbox = document.createElement("vbox");
+      vbox = pub.setAttrDOMElement(vbox, {"style":"overflow:auto","width":"500","height":"100"});
+      //alert("vbox created");
       //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
       //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
-      desc = document.createElement("textbox");
-      desc = pub.setAttrDOMElement(desc, {"readonly":"true", "multiline":"true", "rows":"8", "cols":"70"})  
-      vbox.appendChild(desc);
+      //add label instead
+      
+      //alert("all label added");
+      //add textbox
+      /*desc = document.createElement("textbox");
+      desc = pub.setAttrDOMElement(desc, {"readonly":"true", "multiline":"true", "rows":"8", "cols":"70"})
+      desc.setAttribute("value",outputText);
+      vbox.appendChild(desc);*/
       //create another textbox for just debug info
       if(pub.DEBUG){
         debugtext = document.createElement("textbox");
@@ -323,12 +331,25 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //linkBox = pub.setAttrDOMElement(linkBox, {"flex":"1", "style":"overflow:auto", "height":"40"});
       //savePanel.appendChild(linkBox);
       savePanel.appendChild(vbox);
+      //alert("vbox added");
       //this put the panel on the menu bar
       //menus.parentNode.appendChild(savePanel);
       //menus.parentNode.parentNode.appendChild(savePanel);
       document.documentElement.appendChild(savePanel);
     }
-    desc.setAttribute("value",outputText);
+    while(vbox.hasChildNodes()){
+      vbox.removeChild(vbox.firstChild);
+    }
+    for(var i=0;i<recLinks.length;i++){
+        var l = document.createElement("textbox");
+        var title = pub.utils.trimString(recLinks[i].link.text);
+        title = pub.utils.removeEmptyLine(title);
+        if(i%2==0)
+          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#EEEEEE"});
+        else
+          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#FFFFFF"});
+        vbox.appendChild(l);
+      }
     if(pub.DEBUG)
       debugtext.setAttribute("value",pub.DEBUGINFO);
     if(pub.INPAGE)
