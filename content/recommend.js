@@ -8,7 +8,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIDOMWindow);
  
-  pub.DEBUG = true;
+  pub.DEBUG = false;
+  pub.INPAGE = false;
   pub.DEBUGINFO = "";
   pub.TOOFEWWORDS = 4
   pub.MULTILINE_LIMIT = 3;
@@ -234,7 +235,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var outputText = "";
     outputText += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s      ";
     outputText += "Ratio(Num. of suggested/Num. of all links): "+(0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10+"%\n";
-    /*for(var i=0;i<recLinks.length;i++){
+    for(var i=0;i<recLinks.length;i++){
       var title = pub.utils.trimString(recLinks[i].link.text)
       var title = pub.utils.removeEmptyLine(title);
       //remove those titles > 3 lines, can be functions...
@@ -246,11 +247,36 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //}else{
         //alert("multiline>3:\n"+title);
       //}
-    }*/
+    }
     return outputText;
   };
-    
-  pub.popUp = function(outputLinks, recLinks){
+  
+  pub.addToPage = function(outputText, recLinks){
+    //add the recLinks to top of body
+    var body = gBrowser.selectedBrowser.contentDocument.body;//getElementsByTagName("body")[0];
+    if(body){
+      //alert(recLinks[0].link.localName);
+      var div=document.createElement("div");
+      var info = document.createElement("p");
+      info.appendChild(document.createTextNode(outputText));
+      div.appendChild(info);
+      
+      var p=document.createElement("p");
+      p = pub.setAttrDOMElement(p,{"style":"height: 100px;overflow:auto"})
+      //var a=document.createElement("a");
+      //a=pub.setAttrDOMElement(a,{"text":recLinks[0].link});
+      for(var i=0;i<recLinks.length;i++){
+        recLinks[i].link.appendChild(document.createElement("br"));
+        p.appendChild(recLinks[i].link);
+      }
+      div.appendChild(p);
+      body.insertBefore(div,body.firstChild);//appendChild(div);//recLinks[0]);
+    }else{
+      alert("body is null: "+body.tagName);
+    }
+  };
+  
+  pub.popUp = function(outputText, recLinks){
     //pub.rec = recLinks;
     /*if(recLinks.length>0){
     //for(var i=0;i<recLinks.length;i++){
@@ -302,31 +328,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //menus.parentNode.parentNode.appendChild(savePanel);
       document.documentElement.appendChild(savePanel);
     }
-    desc.setAttribute("value",outputLinks);
+    desc.setAttribute("value",outputText);
     if(pub.DEBUG)
       debugtext.setAttribute("value",pub.DEBUGINFO);
-    //add the recLinks to top of body
-    var body = gBrowser.selectedBrowser.contentDocument.body;//getElementsByTagName("body")[0];
-    if(body){
-      //alert(recLinks[0].link.localName);
-      var div=document.createElement("div");
-      var info = document.createElement("p");
-      info.appendChild(document.createTextNode(outputLinks));
-      div.appendChild(info);
-      
-      var p=document.createElement("p");
-      p = pub.setAttrDOMElement(p,{"style":"height: 100px;overflow:auto"})
-      //var a=document.createElement("a");
-      //a=pub.setAttrDOMElement(a,{"text":recLinks[0].link});
-      for(var i=0;i<recLinks.length;i++){
-        recLinks[i].link.appendChild(document.createElement("br"));
-        p.appendChild(recLinks[i].link);
-      }
-      div.appendChild(p);
-      body.insertBefore(div,body.firstChild);//appendChild(div);//recLinks[0]);
-    }else{
-      alert("body is null: "+body.tagName);
-    }
+    if(pub.INPAGE)
+      pub.addToPage(outputText, recLinks);
     /*document.documentElement.appendChild(recLinks[0].link);
     var testLink = document.createElement("a");
     alert("text:"+recLinks[0].link.text+" link:"+recLinks[0].link.href);
