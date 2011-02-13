@@ -236,7 +236,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var outputText = "";
     outputText += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s      ";
     outputText += "Ratio(Num. of suggested/Num. of all links): "+(0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10+"%\n";
-    for(var i=0;i<recLinks.length;i++){
+    /*for(var i=0;i<recLinks.length;i++){
       var title = pub.utils.trimString(recLinks[i].link.text)
       title = pub.utils.removeEmptyLine(title);
       //remove those titles > 3 lines, can be functions...
@@ -248,7 +248,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //}else{
         //alert("multiline>3:\n"+title);
       //}
-    }
+    }*/
     return outputText;
   };
   
@@ -308,7 +308,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
       savePanel = document.createElement("panel");
       savePanel = pub.setAttrDOMElement(savePanel, panelAttr);
-      
+
       vbox = document.createElement("vbox");
       vbox = pub.setAttrDOMElement(vbox, {"flex":"1","style":"overflow:auto","width":"500","height":"100"});
       //alert("vbox created");
@@ -332,6 +332,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //linkBox = pub.setAttrDOMElement(linkBox, {"flex":"1", "style":"overflow:auto", "height":"40"});
       //savePanel.appendChild(linkBox);
       savePanel.appendChild(vbox);
+      var resizer = document.createElement("resizer");
+      resizer = pub.setAttrDOMElement(resizer, {"dir":"bottomright", "element":"fwtwRelPanel"});//, "right":"0", "bottom":"0", "width":"0", "height":"0"});
+      savePanel.appendChild(resizer);
       //alert("vbox added");
       //this put the panel on the menu bar
       //menus.parentNode.appendChild(savePanel);
@@ -341,14 +344,21 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     while(vbox.hasChildNodes()){
       vbox.removeChild(vbox.firstChild);
     }
+    var l = document.createElement("textbox");
+    l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "multiline":"true", "rows":1, "value":outputText, "style":"background-color:#FFFFFF"});
+    vbox.appendChild(l);
     for(var i=0;i<recLinks.length;i++){
         var l = document.createElement("textbox");
         var title = pub.utils.trimString(recLinks[i].link.text);
         title = pub.utils.removeEmptyLine(title);
+        var numLine = pub.utils.countChar("\n",title);
+        if(numLine>0){
+          l=pub.setAttrDOMElement(l, {"multiline":"true", "rows":new Number(numLine).toString()});
+        }
         if(i%2==0)
-          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "multiline":"true", "rows":new Number(1+pub.utils.countChar("\n",title)).toString(), "value":title, "style":"background-color:#EEEEEE"});
+          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#EEEEEE"});
         else
-          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "multiline":"true", "rows":new Number(1+pub.utils.countChar("\n",title)).toString(), "value":title, "style":"background-color:#FFFFFF"});
+          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#FFFFFF"});
         vbox.appendChild(l);
       }
     if(pub.DEBUG)
@@ -368,9 +378,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //can't anchor as in 4. WHY?
       savePanel.openPopup(null, "start_end", 60, 80, false, false);
     }else{
-      var resizer = document.createElement("resizer");
-      resizer = pub.setAttrDOMElement(resizer, {"dir":"bottomright", "element":"fwtwRelPanel", "right":"0", "bottom":"0", "width":"0", "height":"0"});
-      savePanel.appendChild(resizer);
       savePanel.openPopup(document.documentElement, "start_end", 60, 80, false, false);
     }
     //get all the links on current page, and their texts shown on page
