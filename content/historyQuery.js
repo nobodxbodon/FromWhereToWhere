@@ -278,7 +278,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			//for(var i = 0; i<time.length;i++)
 			//	term = "SELECT place_id FROM moz_historyvisits where place_id in ("+term+") AND visit_date>="+time[i].since*1000+" AND visit_date<" + time[i].till*1000;
 		}
-		alert(term);
+		//alert(term);
     var statement = pub.mDBConn.createStatement(term);
     return pub.queryAll(statement, 32, 0);
   };
