@@ -397,15 +397,15 @@ pub.mainThread.prototype = {
 	};
 	
 	pub.buildFeedback = function(words, optional, excluded, site, time){
-		var feedback = "No history found ";
+		var feedback = "No history found";
 		if(words.length>0){
-			feedback += "with "+words;
+			feedback += " with all of ["+words+"],";
 		}
 		if(optional.length>0){
-			feedback += "with any of "+optional;
+			feedback += " with any of ["+optional+"],";
 		}
 		if(excluded.length>0){
-			feedback += " AND without " + excluded;
+			feedback += " without " + excluded;
 		}
 		feedback+=" in title";
 		if(site.length>0){
