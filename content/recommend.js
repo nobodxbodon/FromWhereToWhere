@@ -294,8 +294,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //alert("there's panel!");
       vbox = savePanel.firstChild;
       //desc = vbox.firstChild;
-      if(pub.DEBUG)
-        debugtext = desc.nextSibling;
+      //if(pub.DEBUG)
+      //  debugtext = desc.nextSibling;
     }else{
       //alert("creating new panel");
       var panelAttr = null;
@@ -323,11 +323,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       desc.setAttribute("value",outputText);
       vbox.appendChild(desc);*/
       //create another textbox for just debug info
-      if(pub.DEBUG){
-        debugtext = document.createElement("textbox");
-        debugtext = pub.setAttrDOMElement(debugtext, {"readonly":"true", "multiline":"true", "rows":"10", "cols":"70"})
-        vbox.appendChild(debugtext);
-      }
       //linkBox = document.createElement("vbox");
       //linkBox = pub.setAttrDOMElement(linkBox, {"flex":"1", "style":"overflow:auto", "height":"40"});
       //savePanel.appendChild(linkBox);
@@ -361,8 +356,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#FFFFFF"});
         vbox.appendChild(l);
       }
-    if(pub.DEBUG)
+    if(pub.DEBUG){
+      debugtext = document.createElement("textbox");
+      debugtext = pub.setAttrDOMElement(debugtext, {"readonly":"true", "multiline":"true", "rows":"10", "cols":"70"})
+      vbox.appendChild(debugtext);
       debugtext.setAttribute("value",pub.DEBUGINFO);
+    }
     if(pub.INPAGE)
       pub.addToPage(outputText, recLinks);
     /*document.documentElement.appendChild(recLinks[0].link);
