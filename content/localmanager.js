@@ -139,7 +139,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     if(optional.length>0)
       term = "SELECT content FROM (" + term + ") WHERE" + optionalTerm;
     
-    alert(term);
+    //alert(term);
     var statement = pub.localRecord.createStatement(term);
     var nodes = [];
     try {
@@ -150,6 +150,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
         var maybeNotes = pub.nativeJSON.decode(str);
         nodes = nodes.concat(maybeNotes);//(pub.walkAll(maybeNotes, words, excluded, site));
       }
+      
       statement.reset();
       return pub.filterTree(nodes, words, optional, excluded, site);  
     } 
@@ -199,7 +200,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
       }
     }
     for(var o in optional){
-      if(label.indexOf(optional[w])>-1){
+      if(label.indexOf(optional[o])>-1){
         return true;
       }
     }
@@ -265,7 +266,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
 			words[w] = words[w].toLowerCase();
 		}
     for(var o in optional){
-			optional[w] = optional[w].toLowerCase();
+			optional[o] = optional[o].toLowerCase();
 		}
 		for(var e in excluded){
 			excluded[e] = excluded[e].toLowerCase();
