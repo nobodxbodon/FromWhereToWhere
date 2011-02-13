@@ -215,8 +215,8 @@ com.wuxuan.fromwheretowhere.utils = function(){
         i--;
       }
     }
-    words = words.concat(quotedWords);
-    return {origkeywords : origkeywords, words : words, excluded : excluded, site : site, time : time};
+    //words = words.concat(quotedWords);
+    return {origkeywords : origkeywords, words: quotedWords, optional : words, excluded : excluded, site : site, time : time};
   };
   
   pub.getFFVersion = function(){

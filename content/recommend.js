@@ -26,7 +26,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       /*for(var j=0;j<specials.length;j++){
         allwords[i]=allwords[i].replace(new RegExp(specials[j],"g"),"");
       }*/
-      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length==1 || allwords[i].match(/[0-9]/)!=null){
+      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
         allwords.splice(i, 1);
         i--;
       }
@@ -74,7 +74,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       pidsWithWord = pidsWithWord.concat(pids);
     }
     pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);*/
-    pidsWithWord = pub.history.searchIdbyAnyKeyword(allwords);
+    pidsWithWord = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
     
     pub.sqltime.searchid = (new Date()).getTime()-pub.tmp;
     pub.tmp = (new Date()).getTime();

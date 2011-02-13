@@ -188,7 +188,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     }
   };
   
-	pub.searchIdbyAnyKeyword = function(words){
+	/*pub.searchIdbyAnyKeyword = function(words){
 		if(!words || words.length==0){
 			return [];
 		}
@@ -202,9 +202,9 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 		}
 		var statement = pub.mDBConn.createStatement(term);
     return pub.queryAll(statement, 32, 0);
-	};
+	};*/
 	
-  pub.searchIdbyKeywords = function(words, excluded, site, time){
+  pub.searchIdbyKeywords = function(words, optional, excluded, site, time){
     //SELECT * FROM moz_places where title LIKE '%sqlite%';
     //NESTED in reverse order, with the assumption that the word in front is more frequently used, thus return more items in each SELECT
     var term = "";
@@ -234,8 +234,26 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
       }
     }
     
-    if(words.length==1){
-      term = "SELECT id FROM (" + excludeTerm + ") WHERE TITLE LIKE '%" + words[0] + "%'";
+		//alert("optional:"+optional);
+		var optionalTerm = "";
+		for(var i=0;i<optional.length;i++){
+			if(i==0){
+				optionalTerm+=" TITLE LIKE '%" + optional[i] + "%'"
+			}else{
+				optionalTerm+=" OR TITLE LIKE '%" + optional[i] + "%'"
+			}
+		}
+		if(optional.length>0)
+			optionalTerm = "SELECT * FROM (" + excludeTerm + ") WHERE" + optionalTerm;
+		else
+		  optionalTerm = excludeTerm;
+		//alert(optionalTerm);
+		
+		if(words.length==0){
+			term = "SELECT id FROM (" + optionalTerm + ")";
+		}
+    else if(words.length==1){
+      term = "SELECT id FROM (" + optionalTerm + ") WHERE TITLE LIKE '%" + words[0] + "%'";
     } else {
 			var titleLike = "";
       for(var i = words.length-1; i>=0; i--){
@@ -260,7 +278,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			//for(var i = 0; i<time.length;i++)
 			//	term = "SELECT place_id FROM moz_historyvisits where place_id in ("+term+") AND visit_date>="+time[i].since*1000+" AND visit_date<" + time[i].till*1000;
 		}
-		//alert(term);
+		alert(term);
     var statement = pub.mDBConn.createStatement(term);
     return pub.queryAll(statement, 32, 0);
   };
