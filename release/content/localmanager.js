@@ -109,7 +109,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     }
   };
   
-  pub.searchNotesbyKeywords = function(words, excluded, site){
+  pub.searchNotesbyKeywords = function(words, optional, excluded, site){
 		//add site filter
 		var term = pub.RECORDTABLENAME;
 		if(site.length!=0){
@@ -127,6 +127,18 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
         }
       }
     }
+    
+    var optionalTerm = "";
+		for(var i=0;i<optional.length;i++){
+			if(i==0){
+				optionalTerm+=" content LIKE '%" + optional[i] + "%'"
+			}else{
+				optionalTerm+=" OR content LIKE '%" + optional[i] + "%'"
+			}
+		}
+    if(optional.length>0)
+      term = "SELECT content FROM (" + term + ") WHERE" + optionalTerm;
+    
     //alert(term);
     var statement = pub.localRecord.createStatement(term);
     var nodes = [];
@@ -138,8 +150,9 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
         var maybeNotes = pub.nativeJSON.decode(str);
         nodes = nodes.concat(maybeNotes);//(pub.walkAll(maybeNotes, words, excluded, site));
       }
+      
       statement.reset();
-      return pub.filterTree(nodes, words, excluded, site);  
+      return pub.filterTree(nodes, words, optional, excluded, site);  
     } 
     catch (e) {
       statement.reset();
@@ -163,17 +176,17 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
 	//walk and search through node, TODO: more generic
 	//RM flag: remove or not
   //TODO: index to speed up
-  pub.walkAll = function(maybes, words, excluded, site){
+  pub.walkAll = function(maybes, words, optional, excluded, site){
 		var matches = [];
     for(var i in maybes){
-      if(pub.walkNode(maybes[i], words, excluded, site).length!=0){
+      if(pub.walkNode(maybes[i], words, optional, excluded, site).length!=0){
         matches.push(maybes[i]);
       }
     }
     return matches;
   };
   
-	pub.matchQuery = function(maybe, label, url, words, excluded, site){
+	pub.matchQuery = function(maybe, label, url, words, optional, excluded, site){
 		for(var s in site){
       if(url.indexOf(site[s])==-1){
         return false;
@@ -186,6 +199,11 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
         return false;
       }
     }
+    for(var o in optional){
+      if(label.indexOf(optional[o])>-1){
+        return true;
+      }
+    }
     for(var e in excluded){
       if(label.indexOf(excluded[e])!=-1){
         return false;
@@ -195,15 +213,15 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
 	};
 	
   //indexOf is case-sensitive!
-  pub.walkNode = function(maybe, words, excluded, site){
+  pub.walkNode = function(maybe, words, optional, excluded, site){
     var label = maybe.label.toLowerCase();
     var url = maybe.url.toLowerCase();
 		//just to check keywords match
-		if(!pub.matchQuery(maybe, label, url, words, excluded, site)){
+		if(!pub.matchQuery(maybe, label, url, words, optional, excluded, site)){
       return pub.walkAll(maybe.children, words, excluded, site);
     }else{
 			maybe.haveKeywords = true;
-			pub.walkAll(maybe.children, words, excluded, site);
+			pub.walkAll(maybe.children, words, optional, excluded, site);
 			return [].push(maybe);
 		}
   };
@@ -242,10 +260,13 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
 		return haveKeywords;
 	};
   
-  pub.filterTree = function(maybeNodes, words, excluded, site){
+  pub.filterTree = function(maybeNodes, words, optional, excluded, site){
     var filtered = [];
     for(var w in words){
 			words[w] = words[w].toLowerCase();
+		}
+    for(var o in optional){
+			optional[o] = optional[o].toLowerCase();
 		}
 		for(var e in excluded){
 			excluded[e] = excluded[e].toLowerCase();
@@ -253,7 +274,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
 		for(var s in site){
 			site[s] = site[s].toLowerCase();
 		}
-		var localNodes = pub.walkAll(maybeNodes, words, excluded, site);
+		var localNodes = pub.walkAll(maybeNodes, words, optional, excluded, site);
 		//UGLY way to filter those within site, TOOPT later~~
 		if(site.length>0){
 			pub.filtered = [];

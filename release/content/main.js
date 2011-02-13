@@ -396,13 +396,16 @@ pub.mainThread.prototype = {
 		return feedback;
 	};
 	
-	pub.buildFeedback = function(words, excluded, site, time){
-		var feedback = "No history found ";
+	pub.buildFeedback = function(words, optional, excluded, site, time){
+		var feedback = "No history found";
 		if(words.length>0){
-			feedback += "with "+words;
+			feedback += " with all of ["+words+"],";
+		}
+		if(optional.length>0){
+			feedback += " with any of ["+optional+"],";
 		}
 		if(excluded.length>0){
-			feedback += " AND without " + excluded;
+			feedback += " without " + excluded;
 		}
 		feedback+=" in title";
 		if(site.length>0){
@@ -419,6 +422,7 @@ pub.mainThread.prototype = {
     this.threadID = threadID;
     this.keywords = query.origkeywords;
     this.words = query.words;
+		this.optional = query.optional;
     this.excluded = query.excluded;
 		this.site = query.site;
 		this.time = query.time;
@@ -430,11 +434,11 @@ pub.mainThread.prototype = {
       try {
 	
         var topNodes = [];
-        if(this.words.length!=0){
+        if(this.words.length!=0 ||  this.optional.length!=0){
           var allpids = [];
           // improve by search id from keywords directly instead of getting urls first
 					//var querytime = (new Date()).getTime();
-					allpids = pub.history.searchIdbyKeywords(this.words, this.excluded, this.site, this.time);
+					allpids = pub.history.searchIdbyKeywords(this.words, this.optional, this.excluded, this.site, this.time);
 					//alert(((new Date()).getTime() - querytime)/100);
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.history.createParentNodesCheckDup(allpids, this.query);
@@ -442,7 +446,7 @@ pub.mainThread.prototype = {
 					//search in local notes, latest first
 					//7 short records 1 long: 7ms; 7 short 11 long: 37ms; if site filter: 75ms
 					//var start = (new Date()).getTime();
-					var filtered = pub.localmanager.searchNotesbyKeywords(this.words, this.excluded, this.site);
+					var filtered = pub.localmanager.searchNotesbyKeywords(this.words, this.optional, this.excluded, this.site);
 					//alert((new Date()).getTime()-start);
 					for(var i in filtered){
 						topNodes.splice(0,0,pub.putNodeToLevel0(filtered[i]));
@@ -451,7 +455,7 @@ pub.mainThread.prototype = {
 				
 				//refresh tree, remove all visibledata and add new ones
         pub.treeView.delSuspensionPoints(-1);
-        if(this.words.length==0){
+        if(this.words.length==0 && this.optional.length==0){
           alert("no keywords input");
           //cancel "searching..." after "OK", and redisplay the former result      
           pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
@@ -460,7 +464,7 @@ pub.mainThread.prototype = {
         //when allPpids = null/[], show "no result with xxx", to distinguish with normal nothing found
 				if(topNodes.length==0){
           var nodes = [];
-          nodes.push(pub.history.ReferedHistoryNode(-1, -1, pub.buildFeedback(this.words, this.excluded, this.site, this.time), null, false, false, [], 1));
+          nodes.push(pub.history.ReferedHistoryNode(-1, -1, pub.buildFeedback(this.words, this.optional, this.excluded, this.site, this.time), null, false, false, [], 1));
           pub.treeView.visibleData = nodes;
         }else{
           pub.treeView.visibleData = topNodes;

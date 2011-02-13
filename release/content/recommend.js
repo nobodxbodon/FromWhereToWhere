@@ -9,6 +9,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .getInterface(Components.interfaces.nsIDOMWindow);
  
   pub.DEBUG = false;
+  pub.INPAGE = false;
   pub.DEBUGINFO = "";
   pub.TOOFEWWORDS = 4
   pub.MULTILINE_LIMIT = 3;
@@ -25,7 +26,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       /*for(var j=0;j<specials.length;j++){
         allwords[i]=allwords[i].replace(new RegExp(specials[j],"g"),"");
       }*/
-      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length==1 || allwords[i].match(/[0-9]/)!=null){
+      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
         allwords.splice(i, 1);
         i--;
       }
@@ -37,6 +38,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(title==null){
       return [];
     }
+    //TODO: some language requires more complex segmentation, like CHN
     var allwords = title.split(" ");//(" ");/\W/
     return pub.filter(allwords, stopwords, specials);
   };
@@ -72,7 +74,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       pidsWithWord = pidsWithWord.concat(pids);
     }
     pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);*/
-    pidsWithWord = pub.history.searchIdbyAnyKeyword(allwords);
+    pidsWithWord = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
     
     pub.sqltime.searchid = (new Date()).getTime()-pub.tmp;
     pub.tmp = (new Date()).getTime();
@@ -134,6 +136,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       relFreq[allRelated[i]]=(pub.history.getNumofPidWithWord(allRelated[i])+0.0)/allPids;
     }*/
     //first get all "context" word, can be anormous...let's see
+    //recLinks have object which format is: {link:xx,overallFreq:0.xx,kw:somewords}
     var recLinks = [];
     var recTitles = [];
     for(var i=0;i<allLinks.length;i++){
@@ -231,11 +234,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   pub.output = function(recLinks, allLinks){
     var outputText = "";
-    outputText += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s        \n";
-    outputText += "Ratio: "+(recLinks.length+0.0)/allLinks.length+"\n";
-    for(var i=0;i<recLinks.length;i++){
+    outputText += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s      ";
+    outputText += "Ratio(Num. of suggested/Num. of all links): "+(0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10+"%\n";
+    /*for(var i=0;i<recLinks.length;i++){
       var title = pub.utils.trimString(recLinks[i].link.text)
-      var title = pub.utils.removeEmptyLine(title);
+      title = pub.utils.removeEmptyLine(title);
       //remove those titles > 3 lines, can be functions...
       //if(title.split("\n").length<=pub.MULTILINE_LIMIT){
         outputText+=title;
@@ -245,11 +248,36 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //}else{
         //alert("multiline>3:\n"+title);
       //}
-    }
+    }*/
     return outputText;
   };
-    
-  pub.popUp = function(outputLinks, recLinks){
+  
+  pub.addToPage = function(outputText, recLinks){
+    //add the recLinks to top of body
+    var body = gBrowser.selectedBrowser.contentDocument.body;//getElementsByTagName("body")[0];
+    if(body){
+      //alert(recLinks[0].link.localName);
+      var div=document.createElement("div");
+      var info = document.createElement("p");
+      info.appendChild(document.createTextNode(outputText));
+      div.appendChild(info);
+      
+      var p=document.createElement("p");
+      p = pub.setAttrDOMElement(p,{"style":"height: 100px;overflow:auto"})
+      //var a=document.createElement("a");
+      //a=pub.setAttrDOMElement(a,{"text":recLinks[0].link});
+      for(var i=0;i<recLinks.length;i++){
+        recLinks[i].link.appendChild(document.createElement("br"));
+        p.appendChild(recLinks[i].link);
+      }
+      div.appendChild(p);
+      body.insertBefore(div,body.firstChild);//appendChild(div);//recLinks[0]);
+    }else{
+      alert("body is null: "+body.tagName);
+    }
+  };
+  
+  pub.popUp = function(outputText, recLinks){
     //pub.rec = recLinks;
     /*if(recLinks.length>0){
     //for(var i=0;i<recLinks.length;i++){
@@ -265,45 +293,77 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(version>=4 && savePanel!=null){
       //alert("there's panel!");
       vbox = savePanel.firstChild;
-      desc = vbox.firstChild;
-      if(pub.DEBUG)
-        debugtext = desc.nextSibling;
+      //desc = vbox.firstChild;
+      //if(pub.DEBUG)
+      //  debugtext = desc.nextSibling;
     }else{
       //alert("creating new panel");
       var panelAttr = null;
       //close, label, titlebar only for ff 4
       if(version>=4)
-        panelAttr = {"id":"fwtwRelPanel","label":"Seemingly Related or Interesting Link Titles","titlebar":"normal","noautohide":"true","close":"true","maxheight":"100"};
+        panelAttr = {"id":"fwtwRelPanel","label":"Seemingly Related or Interesting Link Titles","titlebar":"normal","noautohide":"true","close":"true","height":"100"};
       else{
         //alert("create panel for ff3");
         panelAttr = {"id":"fwtwRelPanel"};//"fade":"fast",
       }
       savePanel = document.createElement("panel");
       savePanel = pub.setAttrDOMElement(savePanel, panelAttr);
+
       vbox = document.createElement("vbox");
+      vbox = pub.setAttrDOMElement(vbox, {"flex":"1","style":"overflow:auto","width":"500","height":"100"});
+      //alert("vbox created");
       //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
       //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
-      desc = document.createElement("textbox");
-      desc = pub.setAttrDOMElement(desc, {"readonly":"true", "multiline":"true", "rows":"8", "cols":"70"})  
-      vbox.appendChild(desc);
+      //add label instead
+      
+      //alert("all label added");
+      //add textbox
+      /*desc = document.createElement("textbox");
+      desc = pub.setAttrDOMElement(desc, {"readonly":"true", "multiline":"true", "rows":"8", "cols":"70"})
+      desc.setAttribute("value",outputText);
+      vbox.appendChild(desc);*/
       //create another textbox for just debug info
-      if(pub.DEBUG){
-        debugtext = document.createElement("textbox");
-        debugtext = pub.setAttrDOMElement(debugtext, {"readonly":"true", "multiline":"true", "rows":"10", "cols":"70"})
-        vbox.appendChild(debugtext);
-      }
       //linkBox = document.createElement("vbox");
       //linkBox = pub.setAttrDOMElement(linkBox, {"flex":"1", "style":"overflow:auto", "height":"40"});
       //savePanel.appendChild(linkBox);
       savePanel.appendChild(vbox);
+      var resizer = document.createElement("resizer");
+      resizer = pub.setAttrDOMElement(resizer, {"dir":"bottomright", "element":"fwtwRelPanel"});//, "right":"0", "bottom":"0", "width":"0", "height":"0"});
+      savePanel.appendChild(resizer);
+      //alert("vbox added");
       //this put the panel on the menu bar
       //menus.parentNode.appendChild(savePanel);
       //menus.parentNode.parentNode.appendChild(savePanel);
       document.documentElement.appendChild(savePanel);
     }
-    desc.setAttribute("value",outputLinks);
-    if(pub.DEBUG)
+    while(vbox.hasChildNodes()){
+      vbox.removeChild(vbox.firstChild);
+    }
+    var l = document.createElement("textbox");
+    l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "multiline":"true", "rows":1, "value":outputText, "style":"background-color:#FFFFFF"});
+    vbox.appendChild(l);
+    for(var i=0;i<recLinks.length;i++){
+        var l = document.createElement("textbox");
+        var title = pub.utils.trimString(recLinks[i].link.text);
+        title = pub.utils.removeEmptyLine(title);
+        var numLine = pub.utils.countChar("\n",title);
+        if(numLine>0){
+          l=pub.setAttrDOMElement(l, {"multiline":"true", "rows":new Number(numLine).toString()});
+        }
+        if(i%2==0)
+          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#EEEEEE"});
+        else
+          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#FFFFFF"});
+        vbox.appendChild(l);
+      }
+    if(pub.DEBUG){
+      debugtext = document.createElement("textbox");
+      debugtext = pub.setAttrDOMElement(debugtext, {"readonly":"true", "multiline":"true", "rows":"10", "cols":"70"})
+      vbox.appendChild(debugtext);
       debugtext.setAttribute("value",pub.DEBUGINFO);
+    }
+    if(pub.INPAGE)
+      pub.addToPage(outputText, recLinks);
     /*document.documentElement.appendChild(recLinks[0].link);
     var testLink = document.createElement("a");
     alert("text:"+recLinks[0].link.text+" link:"+recLinks[0].link.href);
