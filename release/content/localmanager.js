@@ -199,11 +199,14 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
         return false;
       }
     }
-    for(var o in optional){
-      if(label.indexOf(optional[o])>-1){
+    var i=0;
+    for(;i<optional.length;i++){
+      if(label.indexOf(optional[i])>-1){
         return true;
       }
     }
+    if(i==optional.length && i!=0)
+      return false;
     for(var e in excluded){
       if(label.indexOf(excluded[e])!=-1){
         return false;
@@ -218,7 +221,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     var url = maybe.url.toLowerCase();
 		//just to check keywords match
 		if(!pub.matchQuery(maybe, label, url, words, optional, excluded, site)){
-      return pub.walkAll(maybe.children, words, excluded, site);
+      return pub.walkAll(maybe.children, words, optional, excluded, site);
     }else{
 			maybe.haveKeywords = true;
 			pub.walkAll(maybe.children, words, optional, excluded, site);
