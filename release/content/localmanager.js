@@ -120,20 +120,22 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
 
     if(words.length!=0){
       for(var i = words.length-1; i>=0; i--){
+        var partTerm = pub.utils.getRightQuote(words[i]);
         if(i==words.length-1){
-          term = "SELECT content FROM " + term + " WHERE content LIKE '%" + words[i] + "%'";
+          term = "SELECT content FROM " + term + " WHERE content LIKE "+partTerm;//'%" + words[i] + "%'";
         } else if(i!=0){
-          term = "SELECT content FROM (" + term + ") WHERE content LIKE '%" + words[i] + "%'";
+          term = "SELECT content FROM (" + term + ") WHERE content LIKE "+partTerm;//'%" + words[i] + "%'";
         }
       }
     }
     
     var optionalTerm = "";
 		for(var i=0;i<optional.length;i++){
+      var partTerm = pub.utils.getRightQuote(optional[i]);
 			if(i==0){
-				optionalTerm+=" content LIKE '%" + optional[i] + "%'"
+				optionalTerm+=" content LIKE "+partTerm;//'%" + optional[i] + "%'"
 			}else{
-				optionalTerm+=" OR content LIKE '%" + optional[i] + "%'"
+				optionalTerm+=" OR content LIKE "+partTerm;//'%" + optional[i] + "%'"
 			}
 		}
     if(optional.length>0)
@@ -294,6 +296,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
   
   //built-in rowid, can't guarantee same order as savedate, if renaming is allowed
   pub.init = function(){
+    pub.utils = com.wuxuan.fromwheretowhere.utils;
     pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
     //TODO: add pre-processing to check table from former version if format changes
     var statement = pub.localRecord.createStatement("CREATE TABLE IF NOT EXISTS " + pub.RECORDTABLENAME + "(type INTEGER, name STRING, url STRING, searchterm STRING, currentURI STRING, content STRING, savedate INTEGER)");

@@ -115,6 +115,18 @@ com.wuxuan.fromwheretowhere.utils = function(){
     else
       return 0;
   };
+  	
+	//!TODO: handle words with both \' AND \"
+	pub.getRightQuote = function(word){
+		//if it has \', replace sql term with \"
+		var partTerm = "";
+		if(word.match(/\'/)){
+			partTerm = "\"%" + word + "%\"";
+		}else{
+			partTerm = "'%" + word + "%'";
+		}
+		return partTerm;
+	};
   
   //TODO: reg expr instead
   pub.splitWithSpaces = function(myString) {

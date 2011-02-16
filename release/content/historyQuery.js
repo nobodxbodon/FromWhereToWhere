@@ -237,10 +237,11 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 		//alert("optional:"+optional);
 		var optionalTerm = "";
 		for(var i=0;i<optional.length;i++){
+			var partTerm = pub.utils.getRightQuote(optional[i]);
 			if(i==0){
-				optionalTerm+=" TITLE LIKE '%" + optional[i] + "%'"
+				optionalTerm+=" TITLE LIKE "+partTerm;//'%" + optional[i] + "%'"
 			}else{
-				optionalTerm+=" OR TITLE LIKE '%" + optional[i] + "%'"
+				optionalTerm+=" OR TITLE LIKE "+partTerm;//'%" + optional[i] + "%'"
 			}
 		}
 		if(optional.length>0)
@@ -253,16 +254,18 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			term = "SELECT id FROM (" + optionalTerm + ")";
 		}
     else if(words.length==1){
-      term = "SELECT id FROM (" + optionalTerm + ") WHERE TITLE LIKE '%" + words[0] + "%'";
+			var partTerm = pub.utils.getRightQuote(words[0]);
+      term = "SELECT id FROM (" + optionalTerm + ") WHERE TITLE LIKE "+partTerm;//'%" + words[0] + "%'";
     } else {
 			var titleLike = "";
       for(var i = words.length-1; i>=0; i--){
+				var partTerm = pub.utils.getRightQuote(words[i]);
 				if(i==words.length-1){
-          term = "SELECT * FROM (" + excludeTerm + ") WHERE TITLE LIKE '%" + words[i] + "%'";
+          term = "SELECT * FROM (" + excludeTerm + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         } else if(i!=0){
-          term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE '%" + words[i] + "%'";
+          term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         } else {
-          term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE '%" + words[i] + "%'";
+          term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         }
 				// no proof to be faster
 				/*if(i!=0){
@@ -481,5 +484,9 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return nodes;
   };
   
+	pub.init = function(){
+		pub.utils = com.wuxuan.fromwheretowhere.utils;	
+	};
+	
   return pub;
 }();
