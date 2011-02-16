@@ -525,6 +525,7 @@ pub.mainThread.prototype = {
 		pub.utils = com.wuxuan.fromwheretowhere.utils;
 		pub.topicTracker = com.wuxuan.fromwheretowhere.topicTracker;
 		pub.history = com.wuxuan.fromwheretowhere.historyQuery;
+		pub.history.init();
 		pub.retrievedId = pub.history.getIdfromUrl(pub.currentURI);
 		if(pub.topicTracker)
 			pub.topicTracker.init();

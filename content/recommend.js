@@ -393,6 +393,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.init = function(){
     pub.utils = com.wuxuan.fromwheretowhere.utils;
     pub.history = com.wuxuan.fromwheretowhere.historyQuery;
+    pub.history.init();
   };
     
   return pub;
