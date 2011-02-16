@@ -26,6 +26,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       /*for(var j=0;j<specials.length;j++){
         allwords[i]=allwords[i].replace(new RegExp(specials[j],"g"),"");
       }*/
+      //if there's \W in the end (hp,) get the first part; (doesn't) leave it as is
+      if(allwords[i].match(/\w+\W$/)){
+        allwords[i]=allwords[i].substring(0,allwords[i].length-1);
+      }
       if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
         allwords.splice(i, 1);
         i--;
@@ -34,12 +38,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return allwords;
   };
   
-  pub.getTopic = function(title, stopwords, specials){
+  pub.getTopic = function(title, sp, stopwords, specials){
     if(title==null){
       return [];
     }
     //TODO: some language requires more complex segmentation, like CHN
-    var allwords = title.split(" ");//(" ");/\W/
+    var allwords = title.split(sp);//(" ");/\W/
     return pub.filter(allwords, stopwords, specials);
   };
   
@@ -58,7 +62,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     var specials = com.wuxuan.fromwheretowhere.corpus.special;
     //TODO: put in topicTracker
-    var allwords = pub.getTopic(title, stopwords, specials);
+    var allwords = pub.getTopic(title, " ", stopwords, specials);
     //without any history tracking
     //TODO: only pick the words related to interest, not every non-stopword
     //TODO: search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
@@ -102,7 +106,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     for(var i=0;i<pidsWithWord.length;i++){
       var t = pub.history.getTitlefromId(pidsWithWord[i]);
-      var relatedWords=pub.getTopic(t, stopwords, specials);
+      var relatedWords=pub.getTopic(t, " ", stopwords, specials);
       allRelated=allRelated.concat(relatedWords);
     }
     pub.sqltime.gettitle = (new Date()).getTime() -pub.tmp;
@@ -347,6 +351,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         var title = pub.utils.trimString(recLinks[i].link.text);
         title = pub.utils.removeEmptyLine(title);
         var numLine = pub.utils.countChar("\n",title);
+        if(pub.DEBUG)
+          title+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
+        
         if(numLine>0){
           l=pub.setAttrDOMElement(l, {"multiline":"true", "rows":new Number(numLine).toString()});
         }
