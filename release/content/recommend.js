@@ -331,9 +331,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //linkBox = pub.setAttrDOMElement(linkBox, {"flex":"1", "style":"overflow:auto", "height":"40"});
       //savePanel.appendChild(linkBox);
       savePanel.appendChild(vbox);
-      var resizer = document.createElement("resizer");
-      resizer = pub.setAttrDOMElement(resizer, {"dir":"bottomright", "element":"fwtwRelPanel"});//, "right":"0", "bottom":"0", "width":"0", "height":"0"});
-      savePanel.appendChild(resizer);
+      if(version>=4){
+        var resizer = document.createElement("resizer");
+        resizer = pub.setAttrDOMElement(resizer, {"dir":"bottomright", "element":"fwtwRelPanel"});//, "right":"0", "bottom":"0", "width":"0", "height":"0"});
+        savePanel.appendChild(resizer);
+      }
       //alert("vbox added");
       //this put the panel on the menu bar
       //menus.parentNode.appendChild(savePanel);
