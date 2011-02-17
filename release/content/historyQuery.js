@@ -261,7 +261,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
       for(var i = words.length-1; i>=0; i--){
 				var partTerm = pub.utils.getRightQuote(words[i]);
 				if(i==words.length-1){
-          term = "SELECT * FROM (" + excludeTerm + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
+          term = "SELECT * FROM (" + optionalTerm + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         } else if(i!=0){
           term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         } else {
