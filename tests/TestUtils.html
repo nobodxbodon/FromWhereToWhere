@@ -25,6 +25,8 @@
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("\"-\" on \"add\"").words, ["-","add"], "getIncludeExcluded words 12");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("doesn\"t \"add\" owner\"s ").words, ["add"], "getIncludeExcluded words 13");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("doesn't \"add\" owner's ").words, ["add"], "getIncludeExcluded words 14");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("doesn't \"add\" owner's \"-\"").words, ["add","-"], "getIncludeExcluded words 15");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("\"-\" doesn't \"add\" owner's").words, ["-","add"], "getIncludeExcluded words 16");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox").optional, ["sqlite","firefox"], "getIncludeExcluded optional 0");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("- s").optional, ["-", "s"], "getIncludeExcluded optional 1");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").optional, ["sqlite"], "getIncludeExcluded optional 2");
@@ -37,6 +39,7 @@
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("doesn't owner's").optional, ["doesn't","owner's"], "getIncludeExcluded optional 9");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("doesn\"t owner\"s").optional, ["doesn\"t","owner\"s"], "getIncludeExcluded optional 10");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("doesn\"t \"add\" owner\"s ").optional, ["doesn\"t","owner\"s"], "getIncludeExcluded optional 11");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("\"-\" \"add\" on").optional, ["on"], "getIncludeExcluded optional 12");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").excluded, [], "getIncludeExcluded excluded 0");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -firefox").excluded, ["firefox"], "getIncludeExcluded excluded 1");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite -\"google\"").excluded, ["google"], "getIncludeExcluded excluded 2");
@@ -48,6 +51,8 @@
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("-\"\"").excluded, [""], "getIncludeExcluded excluded 8");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("-\" \"").excluded, [" "], "getIncludeExcluded excluded 9");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("\"-\" on \"add\"").excluded, [], "getIncludeExcluded excluded 10");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("\"-\" on -\"g1 \" -g2 \"add\"").excluded, ["g1 ","g2"], "getIncludeExcluded excluded 11");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("-g1 \"-\" on \"add\"").excluded, ["g1"], "getIncludeExcluded excluded 12");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox site:test.com").site, ["test.com"], "getIncludeExcluded site 0");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("site:onlysite").site, ["onlysite"], "getIncludeExcluded site 1");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("site:ab site:.com").site, ["ab",".com"], "getIncludeExcluded site 2");
@@ -55,10 +60,10 @@
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010-02/03/2011").time, [{since: new Date("02/02/2010").getTime(), till: new Date("02/03/2011").getTime()}], "getIncludeExcluded time 1");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:-02/02/2010").time, [{since: -1, till:new Date("02/02/2010").getTime()}], "getIncludeExcluded time 2");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("doesn\"t \"add\" time:02/02/2010-02/03/2011 owner\"s").time, [{since: new Date("02/02/2010").getTime(), till:new Date("02/03/2011").getTime()}], "getIncludeExcluded time 3");
-	//isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010-fsa").time, [{since: new Date("02/02/2010").getTime(), till:Number.MAX_VALUE}], "getIncludeExcluded time 3");
-	//isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:--").time, [], "getIncludeExcluded time -1");
-	//isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010").time, [], "getIncludeExcluded time -2");
-	//isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010=09/02/2010").time, [], "getIncludeExcluded time -3");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010-fsa").time, [{since: new Date("02/02/2010").getTime(), till:Number.MAX_VALUE}], "getIncludeExcluded time 3");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:--").time, [], "getIncludeExcluded time -1");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010").time, [], "getIncludeExcluded time -2");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox time:02/02/2010=09/02/2010").time, [], "getIncludeExcluded time -3");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.removeHaveSubstring({arr:["job","jobs"],freq:function(){var a=[];a["job"]=0.06;a["jobs"]=0.05;return a;}()}), {arr:["job"],freq:function(){var a=[];a["job"]=0.11;return a;}()}, "removeHaveSubstring 0");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.removeHaveSubstring({arr:["job","jobs","home","homeowner"],freq:function(){var a=[];a["job"]=0.06;a["jobs"]=0.05;a["home"]=0.03;a["homeowner"]=0.005;return a;}()}), {arr:["job","home"],freq:function(){var a=[];a["job"]=0.11;a["home"]=0.03+0.005;return a;}()}, "removeHaveSubstring 1");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.uniqueArray(["job","job","jobs","home","home","homeowner"]),["job","jobs","home","homeowner"], "uniqueArray 0");
