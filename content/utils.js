@@ -166,31 +166,35 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return t;
   };
   
+  //get the longest str between two \"
+  /*pub.getBetweenQuote = function(str){
+    var firstQ = str.indexOf("\"");
+    var lastQ = str.lastIndexOf("\"");
+    var substr = str.substring(firstQ+1, lastQ);
+    return substr;
+  };*/
+  
   // PRINCIPLE: conjunction for all
   pub.getIncludeExcluded = function(keywords){
     var origkeywords = keywords;
     //this is for excluded, make sure there's one non-\" before -
     keywords=" "+keywords;
-    var excludePreciseReg = /[^\"]-\"[^\"]*\"?/g;
+    var excludePreciseReg = /[^\"]-\"([^\"]*)\"?/g;
     var excludeQuotes = keywords.match(excludePreciseReg);
     var quotedWords = [];
     var excluded = [];
     //get all the excluded and quoted keywords, remove them
     for(var i in excludeQuotes){
-      var str = excludeQuotes[i];
-      var firstQ = str.indexOf("\"");
-      var lastQ = str.lastIndexOf("\"");
-      var substr = str.substring(firstQ+1, lastQ);
-      excluded.push(substr);
+      excluded.push(excludeQuotes[i].replace(excludePreciseReg, "$1"));
     }
     if(excludeQuotes){
       keywords = keywords.replace(excludePreciseReg, "");
     }
     //get all quoted phrases, put them in words and remove them from 'keywords'
-    var quoteReg = /\"[^\"]*\"?/g;
+    var quoteReg = /\s\"([^\"]*)\"?/g;
     var quotes = keywords.match(quoteReg);
     for(var i in quotes){
-      quotedWords.push(quotes[i].substring(1,quotes[i].length-1));
+      quotedWords.push(quotes[i].replace(quoteReg, "$1"));
     }
     
     var words = [];
