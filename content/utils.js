@@ -169,23 +169,30 @@ com.wuxuan.fromwheretowhere.utils = function(){
   // PRINCIPLE: conjunction for all
   pub.getIncludeExcluded = function(keywords){
     var origkeywords = keywords;
-    var excludePreciseReg = /-\"([\s|\w|\W]*)\"/g;
+    //this is for excluded, make sure there's one non-\" before -
+    keywords=" "+keywords;
+    var excludePreciseReg = /[^\"]-\"[^\"]*\"?/g;
     var excludeQuotes = keywords.match(excludePreciseReg);
     var quotedWords = [];
     var excluded = [];
     //get all the excluded and quoted keywords, remove them
     for(var i in excludeQuotes){
-      excluded.push(excludeQuotes[i].substring(2,excludeQuotes[i].length-1));
+      var str = excludeQuotes[i];
+      var firstQ = str.indexOf("\"");
+      var lastQ = str.lastIndexOf("\"");
+      var substr = str.substring(firstQ+1, lastQ);
+      excluded.push(substr);
     }
     if(excludeQuotes){
       keywords = keywords.replace(excludePreciseReg, "");
     }
     //get all quoted phrases, put them in words and remove them from 'keywords'
-    var quoteReg = /\"([\s|\w|\W]*)\"/g;
+    var quoteReg = /\"[^\"]*\"?/g;
     var quotes = keywords.match(quoteReg);
     for(var i in quotes){
       quotedWords.push(quotes[i].substring(1,quotes[i].length-1));
     }
+    
     var words = [];
     if(!quotes){
       words = pub.splitWithSpaces(keywords);
