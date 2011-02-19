@@ -8,13 +8,24 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIDOMWindow);
  
-  pub.DEBUG = false;
+  pub.DEBUG = true;
   pub.INPAGE = false;
   pub.DEBUGINFO = "";
   pub.TOOFEWWORDS = 4
   pub.MULTILINE_LIMIT = 3;
   pub.starttime = 0;
   pub.sqltime = {};
+  
+  pub.getOrig = function(word){  
+    var orig = pub.mapOrigVerb[word];
+    //need to check type because array have function like "match, map"
+    if((typeof orig)=="string" && orig){
+      //alert(word+"->"+orig);
+      return orig;
+    }
+    else
+      return word;
+  };
   
   //also remove all numbers, as they don't seem to carry much "theme" info
   //remove word.length==1
@@ -33,6 +44,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
         allwords.splice(i, 1);
         i--;
+      }else{
+        allwords[i] = pub.getOrig(allwords[i]);
       }
     }
     return allwords;
@@ -152,7 +165,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }else{
         recTitles.push(t);
       }
-      var text = t.split(" ");
+      //var text = t.split(" ");
+      var text=pub.getTopic(t, " ", stopwords, specials);
       //remove dup word in the title, for freq mult
       text = pub.utils.uniqueArray(text, false);
       //if there's too few words (<3 for now), either catalog or tag, or very obvious already
@@ -394,6 +408,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   pub.init = function(){
     pub.utils = com.wuxuan.fromwheretowhere.utils;
+    pub.mapOrigVerb = com.wuxuan.fromwheretowhere.corpus.mapOrigVerb();
     pub.history = com.wuxuan.fromwheretowhere.historyQuery;
     pub.history.init();
   };
