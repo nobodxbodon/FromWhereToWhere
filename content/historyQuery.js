@@ -209,7 +209,6 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 	};
 	
 	pub.sqlStOptionalFilter = function(term, optional){
-		//alert("optional:"+optional);
 		var optionalTerm = "";
 		for(var i=0;i<optional.length;i++){
 			var partTerm = pub.utils.getRightQuote(optional[i]);
@@ -223,7 +222,6 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			optionalTerm = "SELECT * FROM (" + term + ") WHERE" + optionalTerm;
 		else
 		  optionalTerm = term;
-		//alert(optionalTerm);
 		return optionalTerm;
 	};
 	
