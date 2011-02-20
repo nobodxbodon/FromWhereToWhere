@@ -196,7 +196,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       if(pub.DEBUG){
         o="removed "+removed+" from "+len+"\n"+o;
       }
-      pub.popUp(o, recLinks);
+      pub.popUp(title, o, recLinks);
     }else{
       if(pub.DEBUG){
         alert("alllinks:\n"+allLinks);
@@ -294,7 +294,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
   };
   
-  pub.popUp = function(outputText, recLinks){
+  pub.popUp = function(origTitle, outputText, recLinks){
     //pub.rec = recLinks;
     /*if(recLinks.length>0){
     //for(var i=0;i<recLinks.length;i++){
@@ -318,7 +318,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var panelAttr = null;
       //close, label, titlebar only for ff 4
       if(version>=4)
-        panelAttr = {"id":"fwtwRelPanel","label":"Seemingly Related or Interesting Link Titles","titlebar":"normal","noautohide":"true","close":"true","height":"100"};
+        panelAttr = {"id":"fwtwRelPanel","titlebar":"normal","noautohide":"true","close":"true","height":"100"};
       else{
         //alert("create panel for ff3");
         panelAttr = {"id":"fwtwRelPanel"};//"fade":"fast",
@@ -399,6 +399,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //can't anchor as in 4. WHY?
       savePanel.openPopup(null, "start_end", 60, 80, false, false);
     }else{
+      //alert("set title: "+ origTitle);
+      savePanel.setAttribute("label","Seemingly Related or Interesting Link Titles"+" - "+origTitle);
       savePanel.openPopup(document.documentElement, "start_end", 60, 80, false, false);
     }
     //get all the links on current page, and their texts shown on page
