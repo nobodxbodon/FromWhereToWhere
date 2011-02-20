@@ -129,7 +129,17 @@ com.wuxuan.fromwheretowhere.corpus = function(){
 "just",
 "don",
 "should",
-"now"];
+"now",
+"one",
+"two",
+"three",
+"four",
+"five",
+"six",
+"seven",
+"eight",
+"nine",
+"zero"];
   
   pub.infinitive=[
     "arise","awake","be","bear","beat","become","befall","begin","behold","bend","beseech","beset","bet","bid","bind","bite","bleed","blow","break","breed","bring","build","burn","burst","buy","can","cast","catch","choose","cling","come","cost","creep","cut","deal","dig","do","draw","dream","drink","drive","dwell","eat","fall","feed","feel","fight","find","flee","fling","fly","forbid","forecast","forego","foresee","foretell","forget","forgive","forsake","freeze","get","give","go","grind","grow","hang","have","hear","hide","hit","hold","hurt","keep","kneel","know","lay","lead","lean","leap","leave","lend","let","lie","light","lose","make","may","mean","meet","mow","pay","put","quit","read","rend","rid","ride","ring","rise","run","saw","say","see","seek","sell","send","set","shake","shall","shear","shed","shine","shoot","show","shrink","shut","sing","sink","sit","slay","sleep","slide","sling","smell","sow","speak","speed","spell","spend","spill","spin","spit","split","spoil","spread","spring","stand","steal","stick","sting","stink","stride","strike","swear","sweep","swell","swim","swing","take","teach","tear","tell","think","throw","thrust","tread","wake","waylay","wear","weave","wed","weep","will","win","wind","withdraw","withhold","withstand","wring","write"

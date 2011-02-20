@@ -41,11 +41,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       if(allwords[i].match(/\w+\W$/)){
         allwords[i]=allwords[i].substring(0,allwords[i].length-1);
       }
+      allwords[i] = pub.getOrig(allwords[i]);
       if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
         allwords.splice(i, 1);
         i--;
-      }else{
-        allwords[i] = pub.getOrig(allwords[i]);
       }
     }
     return allwords;
