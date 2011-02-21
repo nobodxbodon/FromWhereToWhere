@@ -37,10 +37,21 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       /*for(var j=0;j<specials.length;j++){
         allwords[i]=allwords[i].replace(new RegExp(specials[j],"g"),"");
       }*/
-      //if there's \W in the end (hp,) get the first part; (doesn't) leave it as is
-      if(allwords[i].match(/\w+\W$/)){
+      //if there's \W in the end or start(hp,\ (the) get the first part; (doesn't) leave it as is
+      /*if(allwords[i].match(/\w+\W$/)){
         allwords[i]=allwords[i].substring(0,allwords[i].length-1);
-      }
+      } else if(allwords[i].match(/^\W\w+/)){
+        var orig = allwords[i];
+        allwords[i]=allwords[i].substring(1,allwords[i].length);
+        alert(orig+"->"+allwords[i]);
+      }*/
+      var orig = allwords[i];
+      //only get the first part here
+      allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
+      /*if(pub.DEBUG){
+        if(orig!=allwords[i])
+          alert(orig+"->"+allwords[i]);
+      }*/
       allwords[i] = pub.getOrig(allwords[i]);
       if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
         allwords.splice(i, 1);
@@ -363,7 +374,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     vbox.appendChild(l);
     for(var i=0;i<recLinks.length;i++){
         var l = document.createElement("textbox");
-        var title = pub.utils.trimString(recLinks[i].link.text);
+        var t = recLinks[i].link.text;
+        //only add if it's a string
+        //if((typeof t)!="string")
+        //  continue;
+        var title = pub.utils.trimString(t);
         title = pub.utils.removeEmptyLine(title);
         var numLine = pub.utils.countChar("\n",title);
         if(pub.DEBUG)
