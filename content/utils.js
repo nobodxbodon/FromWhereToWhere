@@ -41,25 +41,23 @@ com.wuxuan.fromwheretowhere.utils = function(){
     //only work for string type
     var origLen = a.length;
     var allfreq = [];
-    for(var i=0; i<a.length; ++i) {
+    for(var i=1; i<a.length; ++i) {
       if(freq){
-          allfreq[a[i]]=1;
+        if(!allfreq[a[i-1]]||isNaN(allfreq[a[i-1]]))
+          allfreq[a[i-1]]=1;
       }
-      for(var j=i+1; j<a.length; ++j) {
-        if(a[i] === a[j]){
-          a.splice(j, 1);
-          //HAVE to go back one
-          j--;
-          if(freq){
-            allfreq[a[i]]+=1;
-          }
-        }//ONLY work for sorted arr. If length isn't the same, str[i] has no dup afterwards
-        else if(a[i].length!=a[j].length){
-          break;
+      if(a[i] === a[i-1]){
+        if(freq){
+          allfreq[a[i]]+=1;
         }
-      }
+        //HAVE to go back one
+        a.splice(i--, 1);
+        }
     }
     if(freq){
+      //if the last isn't add to freq list, add it now
+      if(!allfreq[a[a.length-1]]||isNaN(allfreq[a[a.length-1]]))
+        allfreq[a[a.length-1]]=1;
       //allfreq.length always 0, can only get through word index
       for(var i in allfreq){
         allfreq[i]=(allfreq[i]+0.0)/origLen;

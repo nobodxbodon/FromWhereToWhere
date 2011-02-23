@@ -72,6 +72,11 @@
 	isDeeply(com.wuxuan.fromwheretowhere.utils.removeHaveSubstring({arr:["job","jobs"],freq:function(){var a=[];a["job"]=0.06;a["jobs"]=0.05;return a;}()}), {arr:["job"],freq:function(){var a=[];a["job"]=0.11;return a;}()}, "removeHaveSubstring 0");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.removeHaveSubstring({arr:["job","jobs","home","homeowner"],freq:function(){var a=[];a["job"]=0.06;a["jobs"]=0.05;a["home"]=0.03;a["homeowner"]=0.005;return a;}()}), {arr:["job","home"],freq:function(){var a=[];a["job"]=0.11;a["home"]=0.03+0.005;return a;}()}, "removeHaveSubstring 1");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.uniqueArray(["job","job","jobs","home","home","homeowner"]),["job","jobs","home","homeowner"], "uniqueArray 0");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.uniqueArray(["job","job","jobs","home","home","homeowner"], true),{arr:["job","jobs","home","homeowner"],freq:[]}, "uniqueArray 1");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.uniqueArray(["job","job","jobs","home","home","homeowner"], true).freq["job"],(2+0.0)/6, "uniqueArray 1.1");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.uniqueArray(["job","job","jobs","home","home","homeowner"], true).freq["jobs"],(1+0.0)/6, "uniqueArray 1.2");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.uniqueArray(["job","job","jobs","home","home","homeowner"], true).freq["home"],(2+0.0)/6, "uniqueArray 1.3");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.uniqueArray(["job","job","jobs","home","home","homeowner"], true).freq["homeowner"],(1+0.0)/6, "uniqueArray 1.4");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.removeEmptyLine("s\n\nt\n\n\na"),"s\nt\na", "removeEmptyLine 0");
         //isDeeply([1,2].concat([3,4]), [1,2,3,4], "concat");
       </script>
