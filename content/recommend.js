@@ -9,6 +9,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .getInterface(Components.interfaces.nsIDOMWindow);
  
   pub.DEBUG = true;
+  pub.ANCHOR = false;
   pub.INPAGE = false;
   pub.DEBUGINFO = "";
   pub.TOOFEWWORDS = 4
@@ -79,7 +80,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
   };
   
-  pub.recommend = function(title, allLinks){
+  pub.recommend = function(pageDoc, title, allLinks){
+    pub.pageDoc = pageDoc;
     pub.DEBUGINFO = "";
     pub.starttime = (new Date()).getTime();
     var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
@@ -136,17 +138,20 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     var origLen = allRelated.length;
     //sort the string array by string length, can speed up later processing
-    allRelated.sort(function(a,b){return a.length-b.length});
+    allRelated.sort(function(a,b){return a>b});
+    var len = allRelated.length;
+    //alert(allRelated);
     var a = pub.utils.uniqueArray(allRelated, true);
+    //alert(a.arr);
     //get frequency of word (number of titles that contains it/number of all titles)
-    var len = a.arr.length;
-
     /*a = pub.utils.removeHaveSubstring(a);*/
-    var removed = a.arr.length-len;
+    var removed = len-a.arr.length;
     allRelated = a.arr;
     if(pub.DEBUG){
       var allover = 0;
       for(var i=0;i<a.arr.length;i++){
+        if(!a.freq[a.arr[i]])
+          alert("NO FREQ!: "+a.arr[i]);
         pub.DEBUGINFO+=a.arr[i]+ " " +a.freq[a.arr[i]]+"\n";
         allover+=a.freq[a.arr[i]];
       }
@@ -307,16 +312,29 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   pub.popUp = function(origTitle, outputText, recLinks){
     //pub.rec = recLinks;
-    /*if(recLinks.length>0){
-    //for(var i=0;i<recLinks.length;i++){
-      //var testLink = pub.createElement(document, "label", {"value":recLinks[i].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+recLinks[i].link.href+"\')"});
-      var testLink = pub.createElement(document, "label", {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testFocus("+0+")"});
-      savePanel.appendChild(testLink);
-    }*/
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
     var vbox,desc,debugtext,linkBox;
+    if(pub.ANCHOR){
+    if(recLinks.length>0){
+    //for(var i=0;i<recLinks.length;i++){
+      var testLink = document.createElement("label");
+      testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+"#location"+"\')"});//recLinks[i].link.href+"\')"});
+      var anch = document.createElement("a");
+      var anchURL = pub.mainWindow.getBrowser().selectedBrowser.contentWindow.location.href+"#location";
+      alert(anchURL);
+      anch = pub.setAttrDOMElement(anch, {"href":anchURL});
+      //var currentDoc = document.commandDispatcher.focusedWindow.document;
+      alert("try insert before: "+recLinks[0].link.text);
+      alert(pub.pageDoc.getElementsByTagNameNS("*", "a").length);
+      pub.pageDoc.insertBefore(anch, recLinks[0].link);
+      alert("insert done");
+      //var testLink = pub.createElement(document, "label", {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testFocus("+0+")"});
+      savePanel.appendChild(testLink);
+      alert("llink append");
+    }
+    }
     //only reuse the panel for ff 4
     if(version>=4 && savePanel!=null){
       //alert("there's panel!");
