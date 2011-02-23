@@ -28,15 +28,17 @@ com.wuxuan.fromwheretowhere.events = function(){
             if(currentDoc.title!=lasttitle){
               lasttitle=currentDoc.title;
               //alert(currentDoc.title);
-              var links = document.commandDispatcher.focusedWindow.document.getElementsByTagNameNS("*", "a")
+              var pageDoc = document.commandDispatcher.focusedWindow.document;
+              var links = pageDoc.getElementsByTagNameNS("*", "a");
               var len = links.length;
+              alert(len);
               var alllinks = [];
               for(var i=0;i<len;i++){
                 if(links[i]){
                   alllinks.push(links[i]);//links[i].href;
                 }
               }
-              recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(lasttitle, alllinks);
+              recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(pageDoc, lasttitle, alllinks);
             }
           }
         }
