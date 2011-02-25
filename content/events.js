@@ -29,9 +29,9 @@ com.wuxuan.fromwheretowhere.events = function(){
               lasttitle=currentDoc.title;
               //alert(currentDoc.title);
               var pageDoc = document.commandDispatcher.focusedWindow.document;
-              var links = pageDoc.getElementsByTagNameNS("*", "a");
+              var links = pageDoc.links;//.getElementsByTagNameNS("*", "a");
               var len = links.length;
-              alert(len);
+              //alert(len);
               var alllinks = [];
               for(var i=0;i<len;i++){
                 if(links[i]){

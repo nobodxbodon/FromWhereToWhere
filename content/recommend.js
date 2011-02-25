@@ -71,8 +71,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return pub.filter(allwords, stopwords, specials);
   };
   
-  pub.tooSimple = function(allwords){
-    var rmSpecials = pub.filter(allwords, [], com.wuxuan.fromwheretowhere.corpus.special);
+  pub.tooSimple = function(allwords, specials){
+    var rmSpecials = pub.filter(allwords, [], specials);
     if(rmSpecials.length<pub.TOOFEWWORDS){
       return true;
     }else{
@@ -171,6 +171,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //recLinks have object which format is: {link:xx,overallFreq:0.xx,kw:somewords}
     var recLinks = [];
     var recTitles = [];
+    //alert("try on");
     for(var i=0;i<allLinks.length;i++){
       var trimed = pub.utils.trimString(allLinks[i].text);
       var t = trimed.toLowerCase();
@@ -185,7 +186,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //remove dup word in the title, for freq mult
       text = pub.utils.uniqueArray(text, false);
       //if there's too few words (<3 for now), either catalog or tag, or very obvious already
-      if(pub.tooSimple(text)){
+      if(pub.tooSimple(text, specials)){
         continue;
       }
       //get the mul of keyword freq in all titles to be sorted
@@ -207,16 +208,33 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //sort by overallFreq
     recLinks.sort(function(a,b){return a.overallFreq-b.overallFreq});
     //don't pop up if there's no related links
+    
+    if(recLinks.length==0){
+      alert("just from current title");
+      for(var i=0;i<allLinks.length;i++){
+        var trimed = pub.utils.trimString(allLinks[i].text);
+        var t = trimed.toLowerCase();
+        //remove the duplicate links (titles)
+        if(recTitles.indexOf(t)>-1){
+          continue;
+        }else{
+          recTitles.push(t);
+        }
+        for(var w in allwords){
+          if(t.indexOf(allwords[w])>-1){
+            recLinks.push({link:allLinks[i],overallFreq:0,kw:allwords[w]});
+          }
+        }
+      }
+    }
     if(recLinks.length>0){
       var o = pub.output(recLinks,allLinks);
       if(pub.DEBUG){
         o="removed "+removed+" from "+len+"\n"+o;
       }
       pub.popUp(title, o, recLinks);
-    }else{
-      if(pub.DEBUG){
+    }else if(pub.DEBUG){
         alert("alllinks:\n"+allLinks);
-      }
     }
     return recLinks;
   };
@@ -231,7 +249,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.testOpen = function(link){
     alert("opend "+link);
     //window.open(link);
-    gBrowser.addTab(link);
+    //gBrowser.addTab(link);
+    window.location = window.location + link;
   };
   
   pub.testFocus = function(idx){
@@ -299,7 +318,17 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       p = pub.setAttrDOMElement(p,{"style":"height: 100px;overflow:auto"})
       //var a=document.createElement("a");
       //a=pub.setAttrDOMElement(a,{"text":recLinks[0].link});
+      
+      /*var testLink = document.createElement('a');
+      var anchURL = "http://slickdeals.net";//#location";
+      testLink.setAttribute('href',anchURL);//recLinks[i].link.href+"\')"});
+      testLink.appendChild(document.createTextNode(anchURL));
+      //testLink.appendChild(document.createElement("br"));
+      p.appendChild(testLink);*/
+      
       for(var i=0;i<recLinks.length;i++){
+        if(i==0)
+          recLinks[i].link.setAttribute('href', "#location");
         recLinks[i].link.appendChild(document.createElement("br"));
         p.appendChild(recLinks[i].link);
       }
@@ -315,24 +344,21 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
-    var vbox,desc,debugtext,linkBox;
+    var vbox,desc,debugtext,linkBox, testLink;
     if(pub.ANCHOR){
     if(recLinks.length>0){
     //for(var i=0;i<recLinks.length;i++){
-      var testLink = document.createElement("label");
-      testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+"#location"+"\')"});//recLinks[i].link.href+"\')"});
+      testLink = document.createElement("label");
+      var anchURL = "#location";
+      testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+anchURL+"\')"});//recLinks[i].link.href+"\')"});
       var anch = document.createElement("a");
-      var anchURL = pub.mainWindow.getBrowser().selectedBrowser.contentWindow.location.href+"#location";
-      alert(anchURL);
-      anch = pub.setAttrDOMElement(anch, {"href":anchURL});
+      anch = pub.setAttrDOMElement(anch, {"NAME":"#location"});
       //var currentDoc = document.commandDispatcher.focusedWindow.document;
       alert("try insert before: "+recLinks[0].link.text);
-      alert(pub.pageDoc.getElementsByTagNameNS("*", "a").length);
-      pub.pageDoc.insertBefore(anch, recLinks[0].link);
+      alert(pub.pageDoc.links.length);
+      recLinks[0].link.parentNode.insertBefore(anch, recLinks[0].link);
       alert("insert done");
       //var testLink = pub.createElement(document, "label", {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testFocus("+0+")"});
-      savePanel.appendChild(testLink);
-      alert("llink append");
     }
     }
     //only reuse the panel for ff 4
@@ -384,6 +410,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //menus.parentNode.parentNode.appendChild(savePanel);
       document.documentElement.appendChild(savePanel);
     }
+    if(pub.ANCHOR){
+      savePanel.insertBefore(testLink, vbox);
+      alert("llink append");
+    }
     while(vbox.hasChildNodes()){
       vbox.removeChild(vbox.firstChild);
     }
@@ -405,7 +435,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         if(numLine>0){
           l=pub.setAttrDOMElement(l, {"multiline":"true", "rows":new Number(numLine).toString()});
         }
-        if(i%2==0)
+        if(i & 1)
           l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#EEEEEE"});
         else
           l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#FFFFFF"});
