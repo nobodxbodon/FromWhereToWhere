@@ -76,13 +76,14 @@ com.wuxuan.fromwheretowhere.utils = function(){
   //don't think it can be infinite loop, but just be cautious, set max loop 40
   pub.removeEmptyLine = function(str){
     var rs = "";
-    for(var i=0;i<40;i++){
+    rs = str.replace(/\s+\n/g, "\n");
+    /*for(var i=0;i<40;i++){
       rs = str.replace(/\n\n/g, "\n");
       if(rs==str)
         break;
       else
         str = rs;
-    }
+    }*/
     return rs;
   };
   
