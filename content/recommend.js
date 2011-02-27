@@ -8,7 +8,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIDOMWindow);
  
-  pub.DEBUG = true;
+  pub.DEBUG = false;
   pub.ANCHOR = false;
   pub.INPAGE = false;
   pub.DEBUGINFO = "";
@@ -134,12 +134,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       return [];
     }
     pub.tmp = (new Date()).getTime();
-    /*for(var i=0;i<allwords.length;i++){
-      var pids = pub.history.searchIdbyKeywords([allwords[i]], [], [], []);
-      //if too many pids with one single word, may mean sth...
-      pidsWithWord = pidsWithWord.concat(pids);
-    }
-    pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);*/
+    
     pidsWithWord = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
     
     pub.sqltime.searchid = (new Date()).getTime()-pub.tmp;
@@ -159,6 +154,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //stupid, somehow there's some code piece of unique in the array??!!WTF??
     for(var i=0;i<pidsWithWord.length;i++){
       if(!(pidsWithWord[i]>0)){
+        if(pub.DEBUG)
+          alert(pidsWithWord[i]);
         pidsWithWord.splice(i,1);
         i--;
       }
@@ -215,7 +212,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var recLinks = [];
     var recTitles = [];
     //alert("try on");
-    for(var i=0;i<allLinks.length;i++){
+    var linkNumber = allLinks.length;
+    for(var i=0;i<linkNumber;i++){
       var trimed = pub.utils.trimString(allLinks[i].text);
       var t = trimed.toLowerCase();
       //remove the duplicate links (titles)
@@ -224,9 +222,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }else{
         recTitles.push(t);
       }
-      //var text = t.split(" ");
       var text=pub.getTopic(t, " ", stopwords, specials);
       //remove dup word in the title, for freq mult
+      //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
       text = pub.utils.uniqueArray(text, false);
       //if there's too few words (<3 for now), either catalog or tag, or very obvious already
       if(pub.tooSimple(text, specials)){
@@ -293,7 +291,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     alert("opend "+link);
     //window.open(link);
     //gBrowser.addTab(link);
-    window.location = window.location + link;
+    window.location.hash="location";
+    //window.location = window.location + link;
   };
   
   pub.testFocus = function(idx){
@@ -331,19 +330,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var outputText = "";
     outputText += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s      ";
     outputText += "Ratio(Num. of suggested/Num. of all links): "+(0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10+"%\n";
-    /*for(var i=0;i<recLinks.length;i++){
-      var title = pub.utils.trimString(recLinks[i].link.text)
-      title = pub.utils.removeEmptyLine(title);
-      //remove those titles > 3 lines, can be functions...
-      //if(title.split("\n").length<=pub.MULTILINE_LIMIT){
-        outputText+=title;
-        if(pub.DEBUG)
-          outputText+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
-        outputText+="\n";
-      //}else{
-        //alert("multiline>3:\n"+title);
-      //}
-    }*/
     return outputText;
   };
   
@@ -359,19 +345,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       
       var p=document.createElement("p");
       p = pub.setAttrDOMElement(p,{"style":"height: 100px;overflow:auto"})
-      //var a=document.createElement("a");
-      //a=pub.setAttrDOMElement(a,{"text":recLinks[0].link});
-      
-      /*var testLink = document.createElement('a');
-      var anchURL = "http://slickdeals.net";//#location";
-      testLink.setAttribute('href',anchURL);//recLinks[i].link.href+"\')"});
-      testLink.appendChild(document.createTextNode(anchURL));
-      //testLink.appendChild(document.createElement("br"));
-      p.appendChild(testLink);*/
       
       for(var i=0;i<recLinks.length;i++){
-        if(i==0)
-          recLinks[i].link.setAttribute('href', "#location");
+        //if anchor is added
+        if(pub.ANCHOR){
+          if(i==0)
+            recLinks[i].link.setAttribute('href', "#location");
+        }
         recLinks[i].link.appendChild(document.createElement("br"));
         p.appendChild(recLinks[i].link);
       }
@@ -387,7 +367,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
-    var vbox,desc,debugtext,linkBox, testLink;
+    var vbox,debugtext,linkBox, testLink;
     if(pub.ANCHOR){
     if(recLinks.length>0){
     //for(var i=0;i<recLinks.length;i++){
@@ -395,7 +375,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var anchURL = "#location";
       testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+anchURL+"\')"});//recLinks[i].link.href+"\')"});
       var anch = document.createElement("a");
-      anch = pub.setAttrDOMElement(anch, {"NAME":"#location"});
+      anch = pub.setAttrDOMElement(anch, {"name":"location"});
       //var currentDoc = document.commandDispatcher.focusedWindow.document;
       alert("try insert before: "+recLinks[0].link.text);
       alert(pub.pageDoc.links.length);
@@ -408,9 +388,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(version>=4 && savePanel!=null){
       //alert("there's panel!");
       vbox = savePanel.firstChild;
-      //desc = vbox.firstChild;
-      //if(pub.DEBUG)
-      //  debugtext = desc.nextSibling;
     }else{
       //alert("creating new panel");
       var panelAttr = null;
@@ -418,7 +395,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       if(version>=4)
         panelAttr = {"id":"fwtwRelPanel","titlebar":"normal","noautohide":"true","close":"true","height":"100"};
       else{
-        //alert("create panel for ff3");
         panelAttr = {"id":"fwtwRelPanel"};//"fade":"fast",
       }
       savePanel = document.createElement("panel");
@@ -429,25 +405,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //alert("vbox created");
       //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
       //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
-      //add label instead
-      
-      //alert("all label added");
-      //add textbox
-      /*desc = document.createElement("textbox");
-      desc = pub.setAttrDOMElement(desc, {"readonly":"true", "multiline":"true", "rows":"8", "cols":"70"})
-      desc.setAttribute("value",outputText);
-      vbox.appendChild(desc);*/
-      //create another textbox for just debug info
-      //linkBox = document.createElement("vbox");
-      //linkBox = pub.setAttrDOMElement(linkBox, {"flex":"1", "style":"overflow:auto", "height":"40"});
-      //savePanel.appendChild(linkBox);
+
       savePanel.appendChild(vbox);
       if(version>=4){
         var resizer = document.createElement("resizer");
         resizer = pub.setAttrDOMElement(resizer, {"dir":"bottomright", "element":"fwtwRelPanel"});//, "right":"0", "bottom":"0", "width":"0", "height":"0"});
         savePanel.appendChild(resizer);
       }
-      //alert("vbox added");
       //this put the panel on the menu bar
       //menus.parentNode.appendChild(savePanel);
       //menus.parentNode.parentNode.appendChild(savePanel);
@@ -455,7 +419,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     if(pub.ANCHOR){
       savePanel.insertBefore(testLink, vbox);
-      alert("llink append");
+      alert("testlink append");
     }
     while(vbox.hasChildNodes()){
       vbox.removeChild(vbox.firstChild);
@@ -478,10 +442,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         if(numLine>0){
           l=pub.setAttrDOMElement(l, {"multiline":"true", "rows":new Number(numLine).toString()});
         }
-        if(i & 1)
-          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#EEEEEE"});
-        else
-          l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title, "style":"background-color:#FFFFFF"});
+        l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title});
+        l.setAttribute("style", (i&1)?"background-color:#FFFFFF":"background-color:#EEEEEE");
         vbox.appendChild(l);
       }
     if(pub.DEBUG){
@@ -492,11 +454,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     if(pub.INPAGE)
       pub.addToPage(outputText, recLinks);
-    /*document.documentElement.appendChild(recLinks[0].link);
-    var testLink = document.createElement("a");
-    alert("text:"+recLinks[0].link.text+" link:"+recLinks[0].link.href);
-    testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text,"href":recLinks[0].link.href});
-    document.documentElement.appendChild(testLink);*/
     //document.parentNode.appendChild(savePanel); ->document.parentNode is null
     //document.appendChild(savePanel); -> node can't be inserted
     //pub.mainWindow.document.appendChild(savePanel);
@@ -505,7 +462,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //can't anchor as in 4. WHY?
       savePanel.openPopup(null, "start_end", 60, 80, false, false);
     }else{
-      //alert("set title: "+ origTitle);
       savePanel.setAttribute("label","Seemingly Related or Interesting Link Titles"+" - "+origTitle);
       savePanel.openPopup(document.documentElement, "start_end", 60, 80, false, false);
     }
