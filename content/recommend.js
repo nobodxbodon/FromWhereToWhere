@@ -80,6 +80,43 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
   };
   
+  /* get titles from all the nodes in the note */
+  pub.getAllTitles = function(note, titles){
+    if(!titles){
+      alert(note.label);
+    }
+    titles.push(note.label);
+    for(var i in note.children){
+      titles=titles.concat(pub.getAllTitles(note.children[i],titles));
+    }
+    return titles;
+  };
+  
+  /* get all the words from the notes that have the keywords, this is abused...need more topic discovery */
+  pub.getLocal = function(allwords, stopwords, specials){
+    var locals = pub.localmanager.searchNotesbyKeywords([], allwords, [],[]);
+    var alltitles = [];
+    var allRelated = [];
+    for(var i in locals){
+      alltitles=alltitles.concat(pub.getAllTitles(locals[i],[]));
+    }
+    var titleset = [];
+    for(var j in alltitles){
+      //no repeat titles!
+      if(titleset.indexOf(alltitles[j])>-1){
+        continue;
+      }else{
+        titleset.push(alltitles[j]);
+      }
+      var relatedWords=pub.getTopic(alltitles[j], " ", stopwords, specials);
+      allRelated=allRelated.concat(relatedWords);
+    }
+    if(pub.DEBUG){
+      //alert("locals:\n"+allRelated);
+    }
+    return allRelated;
+  };
+  
   pub.recommend = function(pageDoc, title, allLinks){
     pub.pageDoc = pageDoc;
     pub.DEBUGINFO = "";
@@ -135,6 +172,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       allRelated=allRelated.concat(relatedWords);
     }
     pub.sqltime.gettitle = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
+    var relatedFromLocalNotes = pub.getLocal(allwords, stopwords, specials);
+    allRelated=allRelated.concat(relatedFromLocalNotes);
+    
+    pub.sqltime.getlocal = (new Date()).getTime() -pub.tmp;
     
     var origLen = allRelated.length;
     //sort the string array by string length, can speed up later processing
@@ -157,6 +199,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
       pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
       pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild + " gettitle: "+pub.sqltime.gettitle+"\n"+pub.DEBUGINFO;
+      pub.DEBUGINFO="local notes: "+relatedFromLocalNotes +"\nlocal time: "+pub.sqltime.getlocal+"\n"+pub.DEBUGINFO;
     }
     //alert(allRelated);
     var freq = a.freq;
@@ -475,6 +518,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.mapOrigVerb = com.wuxuan.fromwheretowhere.corpus.mapOrigVerb();
     pub.history = com.wuxuan.fromwheretowhere.historyQuery;
     pub.history.init();
+    pub.localmanager = com.wuxuan.fromwheretowhere.localmanager;
+    pub.localmanager.init();
   };
     
   return pub;
