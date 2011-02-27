@@ -251,7 +251,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //don't pop up if there's no related links
     
     if(recLinks.length==0){
-      alert("just from current title");
+      if(pub.DEBUG)
+        alert("just from current title");
       for(var i=0;i<allLinks.length;i++){
         var trimed = pub.utils.trimString(allLinks[i].text);
         var t = trimed.toLowerCase();
