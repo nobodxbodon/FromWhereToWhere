@@ -241,6 +241,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     //TODO: remove this, pass as parameter
     main.treeView = pub.treeView;
     document.getElementById("elementList").view = pub.treeView;
+    document.getElementById("keywords").focus();
   };
   
   return pub;
