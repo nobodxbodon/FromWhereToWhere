@@ -253,10 +253,9 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     //SELECT * FROM moz_places where title LIKE '%sqlite%';
     //NESTED in reverse order, with the assumption that the word in front is more frequently used, thus return more items in each SELECT
     var term = "moz_places";
-		
+		//alert("words: "+words+"\noptional: "+optional+"\nexcluded: "+excluded+"\nsite: "+site+"\ntime: "+time);
 		//add site filter
-		//var siteTerm = "moz_places";
-
+		
 		term = pub.sqlStSiteFilter(term, site);
 		
 		term = pub.sqlStExcludeFilter(term, excluded);
