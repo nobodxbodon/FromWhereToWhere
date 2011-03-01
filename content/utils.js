@@ -24,17 +24,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
     var formated = myDate.toLocaleString();
     return formated;
   };
-  
-  pub.containInArray = function(arr, ele){
-    for(var i in arr){
-      //not sure the difference between ==
-      if(arr[i]===ele){
-        return true;
-      }
-    }
-    return false;
-  }
-  
+
   //remove all duplicate element from an array
   pub.uniqueArray = function(arr, freq) {
     var a = arr.concat();
@@ -77,13 +67,6 @@ com.wuxuan.fromwheretowhere.utils = function(){
   pub.removeEmptyLine = function(str){
     var rs = "";
     rs = str.replace(/\s+\n/g, "\n");
-    /*for(var i=0;i<40;i++){
-      rs = str.replace(/\n\n/g, "\n");
-      if(rs==str)
-        break;
-      else
-        str = rs;
-    }*/
     return rs;
   };
   
@@ -165,14 +148,6 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return t;
   };
   
-  //get the longest str between two \"
-  /*pub.getBetweenQuote = function(str){
-    var firstQ = str.indexOf("\"");
-    var lastQ = str.lastIndexOf("\"");
-    var substr = str.substring(firstQ+1, lastQ);
-    return substr;
-  };*/
-  
   // PRINCIPLE: conjunction for all
   pub.getIncludeExcluded = function(keywords){
     var origkeywords = keywords;
@@ -237,7 +212,6 @@ com.wuxuan.fromwheretowhere.utils = function(){
         i--;
       }
     }
-    //words = words.concat(quotedWords);
     return {origkeywords : origkeywords, words: quotedWords, optional : words, excluded : excluded, site : site, time : time};
   };
   
