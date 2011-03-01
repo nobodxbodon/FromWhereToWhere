@@ -24,42 +24,30 @@ com.wuxuan.fromwheretowhere.utils = function(){
     var formated = myDate.toLocaleString();
     return formated;
   };
-  
-  pub.containInArray = function(arr, ele){
-    for(var i in arr){
-      //not sure the difference between ==
-      if(arr[i]===ele){
-        return true;
-      }
-    }
-    return false;
-  }
-  
+
   //remove all duplicate element from an array
   pub.uniqueArray = function(arr, freq) {
     var a = arr.concat();
     //only work for string type
     var origLen = a.length;
     var allfreq = [];
-    for(var i=0; i<a.length; ++i) {
+    for(var i=1; i<a.length; ++i) {
       if(freq){
-          allfreq[a[i]]=1;
+        if(!allfreq[a[i-1]]||isNaN(allfreq[a[i-1]]))
+          allfreq[a[i-1]]=1;
       }
-      for(var j=i+1; j<a.length; ++j) {
-        if(a[i] === a[j]){
-          a.splice(j, 1);
-          //HAVE to go back one
-          j--;
-          if(freq){
-            allfreq[a[i]]+=1;
-          }
-        }//ONLY work for sorted arr. If length isn't the same, str[i] has no dup afterwards
-        else if(a[i].length!=a[j].length){
-          break;
+      if(a[i] === a[i-1]){
+        if(freq){
+          allfreq[a[i]]+=1;
         }
-      }
+        //HAVE to go back one
+        a.splice(i--, 1);
+        }
     }
     if(freq){
+      //if the last isn't add to freq list, add it now
+      if(!allfreq[a[a.length-1]]||isNaN(allfreq[a[a.length-1]]))
+        allfreq[a[a.length-1]]=1;
       //allfreq.length always 0, can only get through word index
       for(var i in allfreq){
         allfreq[i]=(allfreq[i]+0.0)/origLen;
@@ -78,13 +66,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
   //don't think it can be infinite loop, but just be cautious, set max loop 40
   pub.removeEmptyLine = function(str){
     var rs = "";
-    for(var i=0;i<40;i++){
-      rs = str.replace(/\n\n/g, "\n");
-      if(rs==str)
-        break;
-      else
-        str = rs;
-    }
+    rs = str.replace(/\s+\n/g, "\n");
     return rs;
   };
   
@@ -166,14 +148,6 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return t;
   };
   
-  //get the longest str between two \"
-  /*pub.getBetweenQuote = function(str){
-    var firstQ = str.indexOf("\"");
-    var lastQ = str.lastIndexOf("\"");
-    var substr = str.substring(firstQ+1, lastQ);
-    return substr;
-  };*/
-  
   // PRINCIPLE: conjunction for all
   pub.getIncludeExcluded = function(keywords){
     var origkeywords = keywords;
@@ -238,7 +212,6 @@ com.wuxuan.fromwheretowhere.utils = function(){
         i--;
       }
     }
-    //words = words.concat(quotedWords);
     return {origkeywords : origkeywords, words: quotedWords, optional : words, excluded : excluded, site : site, time : time};
   };
   

@@ -17,6 +17,7 @@ com.wuxuan.fromwheretowhere.events = function(){
         if (this.doc.nodeName == "#document") {
         //if (doc instanceof HTMLDocument) {
           // is this an inner frame?
+          //TODO: defaultView can be null!
           if (this.doc.defaultView.frameElement) {
             // Frame within a tab was loaded.
             // Find the root document:
@@ -27,15 +28,17 @@ com.wuxuan.fromwheretowhere.events = function(){
             if(currentDoc.title!=lasttitle){
               lasttitle=currentDoc.title;
               //alert(currentDoc.title);
-              var links = document.commandDispatcher.focusedWindow.document.getElementsByTagNameNS("*", "a")
+              var pageDoc = document.commandDispatcher.focusedWindow.document;
+              var links = pageDoc.links;//.getElementsByTagNameNS("*", "a");
               var len = links.length;
+              //alert(len);
               var alllinks = [];
               for(var i=0;i<len;i++){
                 if(links[i]){
                   alllinks.push(links[i]);//links[i].href;
                 }
               }
-              recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(lasttitle, alllinks);
+              recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(pageDoc, lasttitle, alllinks);
             }
           }
         }
@@ -83,6 +86,15 @@ com.wuxuan.fromwheretowhere.events = function(){
     //alert("toggle exit");
   };
   
+  pub.closePanel = function(event){
+    var savePanel = document.getElementById("fwtwRelPanel");
+    if(savePanel!=null){
+      savePanel.hidePopup();
+    } else{
+      alert("no panel detected!");
+    }
+  };
+  
   pub.init = function(){
     //TODO: document.? gbrowser.? difference?
     pub.mainWindow.addEventListener("DOMContentLoaded", pub.onPageLoad, false);
@@ -95,6 +107,8 @@ com.wuxuan.fromwheretowhere.events = function(){
       },
       false
     );*/
+    //TODO: when current document is closed, the current suggestion should be closed too
+    //pub.mainWindow.addEventListener("close", pub.closePanel, false);
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     com.wuxuan.fromwheretowhere.recommendation.init();
     //alert("init recommend");

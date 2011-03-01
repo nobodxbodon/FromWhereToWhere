@@ -187,24 +187,99 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
       return null;
     }
   };
-  
-	/*pub.searchIdbyAnyKeyword = function(words){
-		if(!words || words.length==0){
-			return [];
-		}
-		var term = "SELECT id FROM moz_places WHERE";
-		for(var i=0;i<words.length;i++){
+	
+	pub.sqlStSiteFilter = function(term, site){
+		if(site.length!=0){
+      for(var i = site.length-1; i>=0; i--){
+        term = "SELECT * FROM (" + term + ") WHERE URL LIKE '%" + site[i] + "%'";
+      }
+    }
+		return term;
+	};
+	
+	pub.sqlStExcludeFilter = function(term, excluded){
+		//TODO: seems dup condition, to simplify
+    if(excluded.length!=0){
+      for(var i = excluded.length-1; i>=0; i--){
+				// no proof to be faster to use conjunction (AND)
+        term = "SELECT * FROM (" + term + ") WHERE TITLE NOT LIKE '%" + excluded[i] + "%'";
+      }
+    }
+		return term;
+	};
+	
+	pub.sqlStOptionalFilter = function(term, optional){
+		var optionalTerm = "";
+		for(var i=0;i<optional.length;i++){
+			var partTerm = pub.utils.getRightQuote(optional[i]);
 			if(i==0){
-				term+=" TITLE LIKE '%" + words[i] + "%'"
+				optionalTerm+=" TITLE LIKE "+partTerm;//'%" + optional[i] + "%'"
 			}else{
-				term+=" OR TITLE LIKE '%" + words[i] + "%'"
+				optionalTerm+=" OR TITLE LIKE "+partTerm;//'%" + optional[i] + "%'"
 			}
 		}
-		var statement = pub.mDBConn.createStatement(term);
-    return pub.queryAll(statement, 32, 0);
-	};*/
+		if(optional.length>0)
+			optionalTerm = "SELECT * FROM (" + term + ") WHERE" + optionalTerm;
+		else
+		  optionalTerm = term;
+		return optionalTerm;
+	};
+	
+	pub.sqlStMustFilter = function(term, words){
+		if(words.length==0){
+			term = "SELECT id FROM (" + term + ")";
+		}
+    else if(words.length==1){
+			var partTerm = pub.utils.getRightQuote(words[0]);
+      term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[0] + "%'";
+    } else {
+			var titleLike = "";
+      for(var i = words.length-1; i>=0; i--){
+				var partTerm = pub.utils.getRightQuote(words[i]);
+				if(i==words.length-1){
+          term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
+        } else if(i!=0){
+          term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
+        } else {
+          term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
+        }
+				// no proof to be faster to use conjunction (AND)
+      }
+    }
+		return term;
+	};
 	
   pub.searchIdbyKeywords = function(words, optional, excluded, site, time){
+    //SELECT * FROM moz_places where title LIKE '%sqlite%';
+    //NESTED in reverse order, with the assumption that the word in front is more frequently used, thus return more items in each SELECT
+    var term = "moz_places";
+		//alert("words: "+words+"\noptional: "+optional+"\nexcluded: "+excluded+"\nsite: "+site+"\ntime: "+time);
+		//add site filter
+		
+		term = pub.sqlStSiteFilter(term, site);
+		
+		term = pub.sqlStExcludeFilter(term, excluded);
+    
+		term = pub.sqlStOptionalFilter(term, optional);
+		
+		term = pub.sqlStMustFilter(term, words);
+		
+		if(time.length>0){
+			term = pub.sqlStTimeFilter(term, time, false);
+			//for(var i = 0; i<time.length;i++)
+			//	term = "SELECT place_id FROM moz_historyvisits where place_id in ("+term+") AND visit_date>="+time[i].since*1000+" AND visit_date<" + time[i].till*1000;
+		}
+		
+		var oldTerm = pub.oldsearchIdbyKeywords(words, optional, excluded, site, time);
+		if(term!=oldTerm){
+			alert("new:\n"+term+"\n\n\nold:\n"+ oldTerm);
+		}
+		//alert(term);
+    var statement = pub.mDBConn.createStatement(term);
+    return pub.queryAll(statement, 32, 0);
+  };
+	
+	pub.oldsearchIdbyKeywords = function(words, optional, excluded, site, time){
     //SELECT * FROM moz_places where title LIKE '%sqlite%';
     //NESTED in reverse order, with the assumption that the word in front is more frequently used, thus return more items in each SELECT
     var term = "";
@@ -281,33 +356,29 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			//for(var i = 0; i<time.length;i++)
 			//	term = "SELECT place_id FROM moz_historyvisits where place_id in ("+term+") AND visit_date>="+time[i].since*1000+" AND visit_date<" + time[i].till*1000;
 		}
-		//alert(term);
-    var statement = pub.mDBConn.createStatement(term);
-    return pub.queryAll(statement, 32, 0);
+		return term;
   };
+	
   //sqlite operations finish
 	
 	//add url filter for id, TODO: more general than id - moz_places
 	//singular_table: true-singular, false-table
 	pub.sqlStUrlFilter = function(term, sites, singular_table){
 		var fterm = "";
-		var idx = sites.length-1;
+		//var idx = sites.length-1;
 		for(var i in sites){
-			if(i==idx){
-				if(true)
-					return "SELECT id FROM moz_places WHERE id=("+term+") AND url LIKE '%"+sites[i]+"%'" + fterm;
-				else
-					return "SELECT id FROM moz_places WHERE id in ("+term+") AND url LIKE '%"+sites[i]+"%'" + fterm;
-			}else{
-				fterm = fterm + " AND url LIKE '%"+sites[i]+"%'";
+			fterm = fterm + " AND url LIKE '%"+sites[i]+"%'";
 			}
-		}
+		if(singular_table)
+			return "SELECT id FROM moz_places WHERE id=("+term+") AND url LIKE '%"+sites[i]+"%'" + fterm;
+		else
+			return "SELECT id FROM moz_places WHERE id in ("+term+") AND url LIKE '%"+sites[i]+"%'" + fterm;
 	};
 
 	//singular_table: true-singular, false-table
 	pub.sqlStTimeFilter = function(term, times, singular_table){
 		var fterm = "";
-		var idx = times.length-1;
+		//var idx = times.length-1;
 		for(var i in times){
 			var t = "";
 			var fix = " AND visit_date";
@@ -321,15 +392,16 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			if(t==""){
 				return term;
 			}
-			if(i==idx){
-				if(singular_table)
-					return "SELECT place_id FROM moz_historyvisits WHERE place_id=("+term+ ")" + t + fterm + " GROUP BY place_id";
-				else
-					return "SELECT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm + " GROUP BY place_id";
-			}else{
-				fterm = fterm + t;
-			}
+		//	if(i==idx){
+		//		}else{
+			fterm = fterm + t;
+		//	}
 		}
+		if(singular_table)
+			return "SELECT place_id FROM moz_historyvisits WHERE place_id=("+term+ ")" + t + fterm + " GROUP BY place_id";
+		else
+			return "SELECT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm + " GROUP BY place_id";
+			
 	};
 	
 	// add query restrictions to parents, time and site

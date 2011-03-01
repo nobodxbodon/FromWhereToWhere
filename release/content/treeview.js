@@ -167,7 +167,11 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     }  
     else {
       com.wuxuan.fromwheretowhere.sb.urlInit();
-      main.main.dispatch(new main.mainThread(1, item, idx, main.query), main.DISPATCH_NORMAL);
+      //FIX: Warning: reference to undefined property main.main.query
+      if(main.query)
+        main.main.dispatch(new main.mainThread(1, item, idx, main.query), main.main.DISPATCH_NORMAL);
+      else
+        main.main.dispatch(new main.mainThread(1, item, idx, null), main.main.DISPATCH_NORMAL);
       this.addSuspensionPoints(item.level, idx);
       
     }  
@@ -237,6 +241,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     //TODO: remove this, pass as parameter
     main.treeView = pub.treeView;
     document.getElementById("elementList").view = pub.treeView;
+    document.getElementById("keywords").focus();
   };
   
   return pub;
