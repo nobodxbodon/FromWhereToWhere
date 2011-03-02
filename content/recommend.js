@@ -293,7 +293,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     alert("opend "+link);
     //window.open(link);
     //gBrowser.addTab(link);
-    window.location.hash="location";
+    //window.location.hash="location";
+    getBrowser().selectedBrowser.contentWindow.find(link, false, false, false);
     //window.location = window.location + link;
   };
   
@@ -426,9 +427,20 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     while(vbox.hasChildNodes()){
       vbox.removeChild(vbox.firstChild);
     }
-    var l = document.createElement("textbox");
+    /*var l = document.createElement("textbox");
     l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "multiline":"true", "rows":1, "value":outputText, "style":"background-color:#FFFFFF"});
-    vbox.appendChild(l);
+    vbox.appendChild(l);*/
+    var butn = document.createElement("button");
+    butn.setAttribute("style", "white-space: pre-wrap");//; text-align: center;");
+    butn.setAttribute("style", "border: 0px !important");
+    //button.plain{ border: 0px !important; };
+    butn.textContent=outputText;//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
+    vbox.appendChild(butn);
+    
+    /*testLink = document.createElement("label");
+    testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+recLinks[0].link.text.trim()+"\')"});
+    vbox.appendChild(testLink);*/
+    
     for(var i=0;i<recLinks.length;i++){
         var l = document.createElement("textbox");
         var t = recLinks[i].link.text;
@@ -441,12 +453,18 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         if(pub.DEBUG)
           title+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
         
-        if(numLine>0){
+        /*if(numLine>0){
           l=pub.setAttrDOMElement(l, {"multiline":"true", "rows":new Number(numLine).toString()});
         }
         l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title});
         l.setAttribute("style", (i&1)?"background-color:#FFFFFF":"background-color:#EEEEEE");
-        vbox.appendChild(l);
+        vbox.appendChild(l);*/
+        
+        var butn = document.createElement("button");
+        butn.setAttribute("style", "white-space: pre-wrap");//; text-align: center;");
+        butn.setAttribute("class", "borderless");
+        butn.textContent=title;//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
+        vbox.appendChild(butn);
       }
     if(pub.DEBUG){
       debugtext = document.createElement("textbox");
