@@ -30,6 +30,8 @@ com.wuxuan.fromwheretowhere.events = function(){
               //alert(currentDoc.title);
               var pageDoc = document.commandDispatcher.focusedWindow.document;
               var links = pageDoc.links;//.getElementsByTagNameNS("*", "a");
+              if(!links)
+                return;
               var len = links.length;
               //alert(len);
               var alllinks = [];
