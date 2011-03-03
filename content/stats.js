@@ -87,9 +87,94 @@ com.wuxuan.fromwheretowhere.stats = function(){
     }
   };
 
+  pub.getOrig = function(word){  
+    var orig = pub.mapOrigVerb[word];
+    //need to check type because array have function like "match, map"
+    if((typeof orig)=="string" && orig){
+      //alert(word+"->"+orig);
+      return orig;
+    }
+    else
+      return word;
+  };
+	
+	pub.filter = function(allwords, stopwords, specials){
+    for(var i=0; i<allwords.length; i++){
+      allwords[i] = allwords[i].toLowerCase();
+      var orig = allwords[i];
+      //only get the first part here
+      allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
+      allwords[i] = pub.getOrig(allwords[i]);
+      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
+        allwords.splice(i, 1);
+        i--;
+      }
+    }
+    return allwords;
+  };
+	
+	pub.getTopic = function(title, sp, stopwords, specials){
+    if(title==null){
+      return [];
+    }
+    //TODO: some language requires more complex segmentation, like CHN
+    var allwords = title.split(sp);//(" ");/\W/
+    return pub.filter(allwords, stopwords, specials);
+  };
+	
+	pub.getPattern = function(pTitle, cTitles){
+		var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
+    var specials = com.wuxuan.fromwheretowhere.corpus.special;
+    var keywords = pub.getTopic(pTitle, " ", stopwords, specials);
+		for(var t in cTitles){
+			for(var i in keywords){
+				//var p = cTitles[i].replace(/w+)
+			}
+		}
+	};
+	
+	pub.patternThread = function(threadID) {
+    this.threadID = threadID;
+	};
+	
+	pub.patternThread.prototype = {
+    run: function() {
+      try {
+        pub.history = com.wuxuan.fromwheretowhere.historyQuery;
+				pub.mapOrigVerb = com.wuxuan.fromwheretowhere.corpus.mapOrigVerb();
+				pub.history.init();
+				var allPid = pub.history.searchIdbyKeywords("", [],[],[],[]);
+				var pats = [];
+				for(var i in allPid){
+					var pTitle = pub.history.getTitlefromId(allPid[i]);
+					var allChild = pub.history.getAllChildrenfromPlaceId(allPid[i], null);
+					var cTitles = [];
+					for(var j in allChild){
+						cTitles.push(pub.history.getTitlefromId(allChild[j]));
+					}
+					pats = pats.concat(pub.getPattern(pTitle, cTitles));
+				}
+        //alert(output);
+        var params = {inn:{property:pats}, out:null};       
+        window.openDialog("chrome://FromWhereToWhere/content/propdialog.xul", "",
+            "chrome, centerscreen, dialog, resizable=yes", params).focus();
+      } catch(err) {
+        Components.utils.reportError(err);
+      }
+    },
+  
+    QueryInterface: function(iid) {
+      if (iid.equals(Components.interfaces.nsIRunnable) ||
+          iid.equals(Components.interfaces.nsISupports)) {
+              return this;
+      }
+      throw Components.results.NS_ERROR_NO_INTERFACE;
+    }
+  };
+	
   pub.all = function() {
     pub.main.dispatch(new pub.searchThread(1), pub.main.DISPATCH_NORMAL);
-      
+    //pub.main.dispatch(new pub.patternThread(1), pub.main.DISPATCH_NORMAL);
   };
   
   pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
