@@ -87,7 +87,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     titles.push(note.label);
     for(var i in note.children){
-      titles=titles.concat(pub.getAllTitles(note.children[i],titles));
+      titles=titles.concat(pub.getAllTitles(note.children[i],[]));
     }
     return titles;
   };
@@ -100,6 +100,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     for(var i in locals){
       alltitles=alltitles.concat(pub.getAllTitles(locals[i],[]));
     }
+    //alert(alltitles);
     var titleset = [];
     for(var j in alltitles){
       //no repeat titles!
