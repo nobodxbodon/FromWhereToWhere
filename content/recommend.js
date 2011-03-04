@@ -289,20 +289,42 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return ele;
   };
 
-  pub.testOpen = function(link){
-    alert("opend "+link);
+  pub.getFirstLine = function(str){
+    var firstReturn = str.indexOf('\r');
+    if(firstReturn==-1){
+      firstReturn = str.indexOf('\n');
+    }
+    if(firstReturn!=-1){
+      return str.substring(0, firstReturn);
+    }else
+      return str;
+  };
+  
+  pub.testOpen = function(){
+    //alert(this.textContent);
+    var link = this.textContent;
+    //alert(link);
     //window.open(link);
-    //gBrowser.addTab(link);
+    link = pub.getFirstLine(link);
+    //alert(link);
+    //alert(getBrowser().selectedBrowser.currentURI.spec);
     //window.location.hash="location";
-    getBrowser().selectedBrowser.contentWindow.find(link, false, false, false);
+    //get the first non-empty line of the link and search for it, but can mis-locate
+    var found = getBrowser().selectedBrowser.contentWindow.find(link, false, false);
+    if(!found)
+      found = getBrowser().selectedBrowser.contentWindow.find(link, false, true);
+    if(!found)
+      gBrowser.addTab(this.getAttribute("href"));
     //window.location = window.location + link;
   };
   
   pub.testFocus = function(idx){
     alert(idx);
-    var amount = 4;
+    //var amount = 4;
     //var range = document.createRange();
     var el = pub.rec[idx];
+    var w = getBrowser().selectedBrowser.contentWindow;
+    var d = w.document;
     /*var oRange = d.createTextRange();
     oRange.moveStart("character", 0);
     oRange.moveEnd("character", amount - d.value.length);
@@ -312,15 +334,15 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     range.setStart(focus, 0);
     range.setEnd(focus, amount);*/
     //range.selectNode(focus);
-    var body = document.body, range, sel;
+    var body = d.body, range, sel;
     if (body && body.createTextRange) {
         range = body.createTextRange();
         range.moveToElementText(el);
         range.select();
-    } else if (document.createRange && window.getSelection) {
-        range = document.createRange();
+    } else if (d.createRange && w.getSelection) {
+        range = d.createRange();
         range.selectNodeContents(el);
-        sel = window.getSelection();
+        sel = w.getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
     }
@@ -366,7 +388,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.popUp = function(origTitle, outputText, recLinks){
-    //pub.rec = recLinks;
+    pub.rec = recLinks;
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
@@ -430,17 +452,14 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     /*var l = document.createElement("textbox");
     l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "multiline":"true", "rows":1, "value":outputText, "style":"background-color:#FFFFFF"});
     vbox.appendChild(l);*/
-    var butn = document.createElement("button");
-    butn.setAttribute("style", "white-space: pre-wrap");//; text-align: center;");
-    butn.setAttribute("style", "border: 0px !important");
-    //button.plain{ border: 0px !important; };
-    butn.textContent=outputText;//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
+    var butn = document.createElement("label");
+    butn.setAttribute("value", outputText);//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
     vbox.appendChild(butn);
     
     /*testLink = document.createElement("label");
     testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+recLinks[0].link.text.trim()+"\')"});
     vbox.appendChild(testLink);*/
-    
+    var thisWindow = getBrowser().selectedBrowser.contentWindow;
     for(var i=0;i<recLinks.length;i++){
         var l = document.createElement("textbox");
         var t = recLinks[i].link.text;
@@ -459,10 +478,16 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title});
         l.setAttribute("style", (i&1)?"background-color:#FFFFFF":"background-color:#EEEEEE");
         vbox.appendChild(l);*/
-        
+
         var butn = document.createElement("button");
         butn.setAttribute("style", "white-space: pre-wrap");//; text-align: center;");
         butn.setAttribute("class", "borderless");
+        butn.onclick = pub.testOpen;
+        //butn.setAttribute("onclick","com.wuxuan.fromwheretowhere.recommendation.testFocus("+i+")");
+        //some links can not be found...invisble, and find doesn't work sometimes...disappointed
+        //if(thisWindow.find(title, false, false, true)==false)
+        //  butn.setAttribute("disabled", "true");
+        butn.setAttribute("href", recLinks[i].link.href);
         butn.textContent=title;//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
         vbox.appendChild(butn);
       }
