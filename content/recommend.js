@@ -121,11 +121,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         alllinks.push(links[i]);
       }
     }
-    pub.recommend(pageDoc, pageDoc.title, alllinks);
+    pub.recommend(pageDoc, alllinks);
   };
   
-  pub.recommend = function(pageDoc, title, allLinks){
+  pub.recommend = function(pageDoc, allLinks){
+    pub.currLoc = pageDoc.location.href;
     pub.pageDoc = pageDoc;
+    var title = pageDoc.title;
     pub.DEBUGINFO = "";
     pub.starttime = (new Date()).getTime();
     //TODO: put in topicTracker
@@ -302,8 +304,48 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       return str;
   };
   
+  //return true if found a tab, false if not
   pub.switchToTab = function(doc){
-    var num = gBrowser.browsers.length;
+    var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                     .getService(Components.interfaces.nsIWindowMediator);
+    var browserEnumerator = wm.getEnumerator("navigator:browser");
+
+    // Check each browser instance for our URL
+    // TODO: as the panel is bound to one browser instance, it's not necessary to search all
+    var found = false;
+    while (!found && browserEnumerator.hasMoreElements()) {
+      var browserWin = browserEnumerator.getNext();
+      var tabbrowser = browserWin.gBrowser;
+  
+      // Check each tab of this browser instance
+      var numTabs = tabbrowser.browsers.length;
+      for (var index = 0; index < numTabs; index++) {
+        var currentBrowser = tabbrowser.getBrowserAtIndex(index);
+        if (doc == currentBrowser.contentDocument) {
+          // The URL is already opened. Select this tab.
+          tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
+          // Focus *this* browser-window
+          browserWin.focus();
+          found = true;
+          break;
+        }
+      }
+    }
+  
+    if (!found) {
+      // Our tab isn't open. Open it now.
+      var browserEnumerator = wm.getEnumerator("navigator:browser");
+      var tabbrowser = browserEnumerator.getNext().gBrowser;
+    
+      // Create tab
+      var newTab = tabbrowser.addTab(pub.currLoc);
+      // Focus tab
+      tabbrowser.selectedTab = newTab;
+      // Focus *this* browser window in case another one is currently focused
+      tabbrowser.ownerDocument.defaultView.focus();
+    }
+    return found;
+    /*var num = gBrowser.browsers.length;
     for (var i = 0; i < num; i++) {
       gBrowser.tabContainer.advanceSelectedTab(1, true);
   	  //var b = gBrowser.getBrowserAtIndex(i);
@@ -312,12 +354,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   	    if(doc==getBrowser().selectedBrowser.contentDocument){
           //alert("got the tab!");
           //gBrowser.selectedTab = b;
-          break;
+          return true;
         }
   	  } catch(e) {
   	    Components.utils.reportError(e);
   	  }
   	}
+    return false;*/
   };
   
   //TODO: if the page was closed, open it first
@@ -325,7 +368,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //get the tab that's the suggestions derive from
     if(pub.pageDoc!=getBrowser().selectedBrowser.contentDocument){
       //alert("need to switch tab");
-      pub.switchToTab(pub.pageDoc);
+      var found = pub.switchToTab(pub.pageDoc);
+      if(!found){
+        //alert("open: "+pub.currLoc);
+        //gBrowser.selectedTab = gBrowser.addTab(pub.currLoc);
+        return;
+      }
     }
     var link = this.textContent;
     link = pub.getFirstLine(link);
