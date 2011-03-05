@@ -39,20 +39,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         allwords[i]=allwords[i].replace(new RegExp(specials[j],"g"),"");
       }*/
       //if there's \W in the end or start(hp,\ (the) get the first part; (doesn't) leave it as is
-      /*if(allwords[i].match(/\w+\W$/)){
-        allwords[i]=allwords[i].substring(0,allwords[i].length-1);
-      } else if(allwords[i].match(/^\W\w+/)){
-        var orig = allwords[i];
-        allwords[i]=allwords[i].substring(1,allwords[i].length);
-        alert(orig+"->"+allwords[i]);
-      }*/
       var orig = allwords[i];
       //only get the first part here
       allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
-      /*if(pub.DEBUG){
-        if(orig!=allwords[i])
-          alert(orig+"->"+allwords[i]);
-      }*/
       allwords[i] = pub.getOrig(allwords[i]);
       if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
         allwords.splice(i, 1);
@@ -195,9 +184,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //sort the string array by string length, can speed up later processing
     allRelated.sort(function(a,b){return a>b});
     var len = allRelated.length;
-    //alert(allRelated);
     var a = pub.utils.uniqueArray(allRelated, true);
-    //alert(a.arr);
     //get frequency of word (number of titles that contains it/number of all titles)
     /*a = pub.utils.removeHaveSubstring(a);*/
     var removed = len-a.arr.length;
@@ -214,7 +201,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild + " gettitle: "+pub.sqltime.gettitle+"\n"+pub.DEBUGINFO;
       pub.DEBUGINFO="local notes: "+relatedFromLocalNotes +"\nlocal time: "+pub.sqltime.getlocal+"\n"+pub.DEBUGINFO;
     }
-    //alert(allRelated);
     var freq = a.freq;
     //LATER: getNumofPidWithWord might be more precise, but much more time consuming.
     //       for now just use the wf in "relatedWords"
@@ -289,7 +275,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //var o = pub.output(recLinks,allLinks);
       var o="";
       if(pub.DEBUG){
-        o="removed "+removed+" from "+len+"\n";
+        o="removed "+removed+" from "+len+"\r\n";
       }
       pub.popUp(title, o, recLinks, allLinks);
     }else if(pub.DEBUG){
@@ -317,21 +303,15 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.testOpen = function(){
-    //alert(this.textContent);
     var link = this.textContent;
-    //alert(link);
-    //window.open(link);
     link = pub.getFirstLine(link);
-    //alert(link);
-    //alert(getBrowser().selectedBrowser.currentURI.spec);
-    //window.location.hash="location";
     //get the first non-empty line of the link and search for it, but can mis-locate
     var found = getBrowser().selectedBrowser.contentWindow.find(link, false, false);
     if(!found)
       found = getBrowser().selectedBrowser.contentWindow.find(link, false, true);
+    //some links can not be found...invisble, then just open it
     if(!found)
       gBrowser.addTab(this.getAttribute("href"));
-    //window.location = window.location + link;
   };
   
   pub.testFocus = function(idx){
@@ -409,8 +389,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
     var topbar, statsInfoLabel, vbox,debugtext,linkBox, testLink;
-    if(pub.ANCHOR){
-    if(recLinks.length>0){
+    if(pub.ANCHOR && recLinks.length>0){
     //for(var i=0;i<recLinks.length;i++){
       testLink = document.createElement("label");
       var anchURL = "#location";
@@ -423,7 +402,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       recLinks[0].link.parentNode.insertBefore(anch, recLinks[0].link);
       alert("insert done");
       //var testLink = pub.createElement(document, "label", {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testFocus("+0+")"});
-    }
     }
     //only reuse the panel for ff 4
     if(version>=4 && savePanel!=null){
@@ -482,23 +460,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     while(vbox.hasChildNodes()){
       vbox.removeChild(vbox.firstChild);
     }
-    /*var l = document.createElement("textbox");
-    l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "multiline":"true", "rows":1, "value":outputText, "style":"background-color:#FFFFFF"});
-    vbox.appendChild(l);
-    var butn = document.createElement("label");
-    butn.setAttribute("value", outputText);//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
-    vbox.appendChild(butn);*/
     
-    /*testLink = document.createElement("label");
-    testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+recLinks[0].link.text.trim()+"\')"});
-    vbox.appendChild(testLink);*/
     var thisWindow = getBrowser().selectedBrowser.contentWindow;
     for(var i=0;i<recLinks.length;i++){
         var l = document.createElement("textbox");
         var t = recLinks[i].link.text;
-        //only add if it's a string
-        //if((typeof t)!="string")
-        //  continue;
         var title = pub.utils.trimString(t);
         title = pub.utils.removeEmptyLine(title);
         var numLine = pub.utils.countChar("\n",title);
@@ -516,10 +482,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         butn.setAttribute("style", "white-space: pre-wrap");//; text-align: center;");
         butn.setAttribute("class", "borderless");
         butn.onclick = pub.testOpen;
-        //butn.setAttribute("onclick","com.wuxuan.fromwheretowhere.recommendation.testFocus("+i+")");
-        //some links can not be found...invisble, and find doesn't work sometimes...disappointed
-        //if(thisWindow.find(title, false, false, true)==false)
-        //  butn.setAttribute("disabled", "true");
         butn.setAttribute("href", recLinks[i].link.href);
         butn.textContent=title;//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
         vbox.appendChild(butn);
