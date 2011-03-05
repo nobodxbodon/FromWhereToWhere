@@ -320,6 +320,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   	}
   };
   
+  //TODO: if the page was closed, open it first
   pub.testOpen = function(){
     //get the tab that's the suggestions derive from
     if(pub.pageDoc!=getBrowser().selectedBrowser.contentDocument){
@@ -445,7 +446,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       savePanel = pub.setAttrDOMElement(savePanel, panelAttr);
       //add the topbar
       topbar = document.createElement("hbox");
-      topbar = pub.setAttrDOMElement(topbar, {"flex":"1"});
+      //topbar = pub.setAttrDOMElement(topbar, {"flex":"1"});
       //refresh button add on top, only available for ff4, as it's reused, and the panel will be there as far as
       if(version>=4){
         var refreshButn = document.createElement("button");
