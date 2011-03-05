@@ -302,7 +302,30 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       return str;
   };
   
+  pub.switchToTab = function(doc){
+    var num = gBrowser.browsers.length;
+    for (var i = 0; i < num; i++) {
+      gBrowser.tabContainer.advanceSelectedTab(1, true);
+  	  //var b = gBrowser.getBrowserAtIndex(i);
+  	  try {
+        //gbrowser.getBrowserForDocument(doc);
+  	    if(doc==getBrowser().selectedBrowser.contentDocument){
+          //alert("got the tab!");
+          //gBrowser.selectedTab = b;
+          break;
+        }
+  	  } catch(e) {
+  	    Components.utils.reportError(e);
+  	  }
+  	}
+  };
+  
   pub.testOpen = function(){
+    //get the tab that's the suggestions derive from
+    if(pub.pageDoc!=getBrowser().selectedBrowser.contentDocument){
+      //alert("need to switch tab");
+      pub.switchToTab(pub.pageDoc);
+    }
     var link = this.textContent;
     link = pub.getFirstLine(link);
     //get the first non-empty line of the link and search for it, but can mis-locate
