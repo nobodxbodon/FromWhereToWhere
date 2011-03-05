@@ -118,14 +118,29 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return allRelated;
   };
   
+  //recommend based on current page
+  pub.recommendCurrent = function(){
+    var alllinks = [];
+    var pageDoc = gBrowser.selectedBrowser.contentDocument;
+    var links = pageDoc.links;
+    if(!links)
+      return;
+    var len = links.length;
+    var alllinks = [];
+    for(var i=0;i<len;i++){
+      if(links[i]){
+        alllinks.push(links[i]);
+      }
+    }
+    pub.recommend(pageDoc, pageDoc.title, alllinks);
+  };
+  
   pub.recommend = function(pageDoc, title, allLinks){
     pub.pageDoc = pageDoc;
     pub.DEBUGINFO = "";
     pub.starttime = (new Date()).getTime();
-    var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
-    var specials = com.wuxuan.fromwheretowhere.corpus.special;
     //TODO: put in topicTracker
-    var allwords = pub.getTopic(title, " ", stopwords, specials);
+    var allwords = pub.getTopic(title, " ", pub.stopwords, pub.specials);
     //without any history tracking
     //TODO: only pick the words related to interest, not every non-stopword
     //TODO: search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
@@ -166,12 +181,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     for(var i=0;i<pidsWithWord.length;i++){
       var t = pub.history.getTitlefromId(pidsWithWord[i]);
-      var relatedWords=pub.getTopic(t, " ", stopwords, specials);
+      var relatedWords=pub.getTopic(t, " ", pub.stopwords, pub.specials);
       allRelated=allRelated.concat(relatedWords);
     }
     pub.sqltime.gettitle = (new Date()).getTime() -pub.tmp;
     pub.tmp = (new Date()).getTime();
-    var relatedFromLocalNotes = pub.getLocal(allwords, stopwords, specials);
+    var relatedFromLocalNotes = pub.getLocal(allwords, pub.stopwords, pub.specials);
     allRelated=allRelated.concat(relatedFromLocalNotes);
     
     pub.sqltime.getlocal = (new Date()).getTime() -pub.tmp;
@@ -223,12 +238,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }else{
         recTitles.push(t);
       }
-      var text=pub.getTopic(t, " ", stopwords, specials);
+      var text=pub.getTopic(t, " ", pub.stopwords, pub.specials);
       //remove dup word in the title, for freq mult
       //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
       text = pub.utils.uniqueArray(text, false);
       //if there's too few words (<3 for now), either catalog or tag, or very obvious already
-      if(pub.tooSimple(text, specials)){
+      if(pub.tooSimple(text, pub.specials)){
         continue;
       }
       //get the mul of keyword freq in all titles to be sorted
@@ -271,11 +286,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
     }
     if(recLinks.length>0){
-      var o = pub.output(recLinks,allLinks);
+      //var o = pub.output(recLinks,allLinks);
+      var o="";
       if(pub.DEBUG){
-        o="removed "+removed+" from "+len+"\n"+o;
+        o="removed "+removed+" from "+len+"\n";
       }
-      pub.popUp(title, o, recLinks);
+      pub.popUp(title, o, recLinks, allLinks);
     }else if(pub.DEBUG){
         alert("alllinks:\n"+allLinks);
     }
@@ -387,12 +403,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
   };
   
-  pub.popUp = function(origTitle, outputText, recLinks){
+  pub.popUp = function(origTitle, outputText, recLinks, allLinks){
     pub.rec = recLinks;
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
-    var vbox,debugtext,linkBox, testLink;
+    var topbar, statsInfoLabel, vbox,debugtext,linkBox, testLink;
     if(pub.ANCHOR){
     if(recLinks.length>0){
     //for(var i=0;i<recLinks.length;i++){
@@ -412,19 +428,35 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //only reuse the panel for ff 4
     if(version>=4 && savePanel!=null){
       //alert("there's panel!");
-      vbox = savePanel.firstChild;
+      topbar = savePanel.firstChild;
+      statsInfoLabel = topbar.firstChild.nextSibling;
+      vbox = savePanel.firstChild.nextSibling;
     }else{
       //alert("creating new panel");
       var panelAttr = null;
       //close, label, titlebar only for ff 4
       if(version>=4)
-        panelAttr = {"id":"fwtwRelPanel","titlebar":"normal","noautohide":"true","close":"true","height":"100"};
+        panelAttr = {"id":"fwtwRelPanel","titlebar":"normal","noautohide":"true","close":"true","height":"200"};
       else{
         panelAttr = {"id":"fwtwRelPanel"};//"fade":"fast",
       }
       savePanel = document.createElement("panel");
       savePanel = pub.setAttrDOMElement(savePanel, panelAttr);
-
+      //add the topbar
+      topbar = document.createElement("hbox");
+      topbar = pub.setAttrDOMElement(topbar, {"flex":"1"});
+      //refresh button add on top, only available for ff4, as it's reused, and the panel will be there as far as
+      if(version>=4){
+        var refreshButn = document.createElement("button");
+        refreshButn.textContent="Refresh";
+        refreshButn.onclick = pub.recommendCurrent;
+        topbar.appendChild(refreshButn);
+      }
+      //stats info
+      statsInfoLabel = document.createElement("label");
+      topbar.appendChild(statsInfoLabel);
+      savePanel.appendChild(topbar);
+      
       vbox = document.createElement("vbox");
       vbox = pub.setAttrDOMElement(vbox, {"flex":"1","style":"overflow:auto","width":"500","height":"100"});
       //alert("vbox created");
@@ -446,15 +478,16 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       savePanel.insertBefore(testLink, vbox);
       alert("testlink append");
     }
+    statsInfoLabel.setAttribute("value", outputText+pub.output(recLinks,allLinks));//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
     while(vbox.hasChildNodes()){
       vbox.removeChild(vbox.firstChild);
     }
     /*var l = document.createElement("textbox");
     l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "multiline":"true", "rows":1, "value":outputText, "style":"background-color:#FFFFFF"});
-    vbox.appendChild(l);*/
+    vbox.appendChild(l);
     var butn = document.createElement("label");
     butn.setAttribute("value", outputText);//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
-    vbox.appendChild(butn);
+    vbox.appendChild(butn);*/
     
     /*testLink = document.createElement("label");
     testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+recLinks[0].link.text.trim()+"\')"});
@@ -517,6 +550,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.init = function(){
     pub.utils = com.wuxuan.fromwheretowhere.utils;
     pub.mapOrigVerb = com.wuxuan.fromwheretowhere.corpus.mapOrigVerb();
+    pub.stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
+    pub.specials = com.wuxuan.fromwheretowhere.corpus.special;
     pub.history = com.wuxuan.fromwheretowhere.historyQuery;
     pub.history.init();
     pub.localmanager = com.wuxuan.fromwheretowhere.localmanager;
