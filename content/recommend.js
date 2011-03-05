@@ -121,7 +121,35 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         alllinks.push(links[i]);
       }
     }
-    pub.recommend(pageDoc, alllinks);
+    pub.recommendInThread(pageDoc, alllinks);
+  };
+  
+  pub.recommendInThread = function(pageDoc, alllinks){
+    pub.main.dispatch(new pub.recommendThread(1, pageDoc, alllinks), pub.main.DISPATCH_NORMAL);
+  };
+  
+  pub.recommendThread = function(threadID, pageDoc, alllinks) {
+    this.threadID = threadID;
+    this.pageDoc = pageDoc;
+    this.alllinks = alllinks;
+  };
+  
+  pub.recommendThread.prototype = {
+    run: function() {
+      try {
+        pub.recommend(this.pageDoc, this.alllinks);
+      } catch(err) {
+        Components.utils.reportError(err);
+      }
+    },
+  
+    QueryInterface: function(iid) {
+      if (iid.equals(Components.interfaces.nsIRunnable) ||
+          iid.equals(Components.interfaces.nsISupports)) {
+              return this;
+      }
+      throw Components.results.NS_ERROR_NO_INTERFACE;
+    }
   };
   
   pub.recommend = function(pageDoc, allLinks){
@@ -583,6 +611,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   pub.init = function(){
     pub.utils = com.wuxuan.fromwheretowhere.utils;
+    pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     pub.mapOrigVerb = com.wuxuan.fromwheretowhere.corpus.mapOrigVerb();
     pub.stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     pub.specials = com.wuxuan.fromwheretowhere.corpus.special;

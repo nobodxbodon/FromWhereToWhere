@@ -40,7 +40,7 @@ com.wuxuan.fromwheretowhere.events = function(){
                   alllinks.push(links[i]);//links[i].href;
                 }
               }
-              recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(pageDoc, alllinks);
+              recLinks = com.wuxuan.fromwheretowhere.recommendation.recommendInThread(pageDoc, alllinks);
             }
           }
         }
