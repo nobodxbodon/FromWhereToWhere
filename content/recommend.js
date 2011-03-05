@@ -349,7 +349,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var numTabs = tabbrowser.browsers.length;
       for (var index = 0; index < numTabs; index++) {
         var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-        if (doc == currentBrowser.contentDocument) {
+        if (doc == currentBrowser.contentDocument || doc.location.href==currentBrowser.currentURI.spec) {
           // The URL is already opened. Select this tab.
           tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
           // Focus *this* browser-window
@@ -361,6 +361,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
   
     if (!found) {
+      //alert(doc.location.href);
       // Our tab isn't open. Open it now.
       var browserEnumerator = wm.getEnumerator("navigator:browser");
       var tabbrowser = browserEnumerator.getNext().gBrowser;
@@ -394,7 +395,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   //TODO: if the page was closed, open it first
   pub.testOpen = function(){
     //get the tab that's the suggestions derive from
-    if(pub.pageDoc!=getBrowser().selectedBrowser.contentDocument){
+    var currDoc = getBrowser().selectedBrowser.contentDocument;
+    if(pub.pageDoc!= currDoc && pub.currLoc!=currDoc.location.href){
       //alert("need to switch tab");
       var found = pub.switchToTab(pub.pageDoc);
       if(!found){
