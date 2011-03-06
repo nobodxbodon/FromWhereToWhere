@@ -349,7 +349,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var numTabs = tabbrowser.browsers.length;
       for (var index = 0; index < numTabs; index++) {
         var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-        if (doc == currentBrowser.contentDocument || doc.location.href==currentBrowser.currentURI.spec) {
+        if (doc == currentBrowser.contentDocument || pub.currLoc==currentBrowser.currentURI.spec) {
           // The URL is already opened. Select this tab.
           tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
           // Focus *this* browser-window
