@@ -412,8 +412,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(!found)
       found = getBrowser().selectedBrowser.contentWindow.find(link, false, true);
     //some links can not be found...invisble, then just open it
-    if(!found)
-      gBrowser.addTab(this.getAttribute("href"));
+    if(!found){
+      if(link!=pub.lastSearchTitle)
+        gBrowser.addTab(this.getAttribute("href"));
+    }else{
+      pub.lastSearchTitle=link;
+    }
   };
   
   pub.testFocus = function(idx){
