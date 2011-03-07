@@ -15,7 +15,7 @@ com.wuxuan.fromwheretowhere.events = function(){
         var recLinks=[];
         //TODO: this.doc seems unnecessary??
         if (this.doc.nodeName == "#document") {
-        //if (doc instanceof HTMLDocument) {
+        //if (this.doc instanceof HTMLDocument) {
           // is this an inner frame?
           //TODO: defaultView can be null!
           if (this.doc.defaultView.frameElement) {
@@ -27,9 +27,10 @@ com.wuxuan.fromwheretowhere.events = function(){
             var currentDoc = gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
             if(currentDoc.title!=lasttitle){
               lasttitle=currentDoc.title;
-              //alert(currentDoc.title);
               var pageDoc = document.commandDispatcher.focusedWindow.document;
               var links = pageDoc.links;//.getElementsByTagNameNS("*", "a");
+              if(!links)
+                return;
               var len = links.length;
               //alert(len);
               var alllinks = [];
@@ -38,7 +39,7 @@ com.wuxuan.fromwheretowhere.events = function(){
                   alllinks.push(links[i]);//links[i].href;
                 }
               }
-              recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(pageDoc, lasttitle, alllinks);
+              recLinks = com.wuxuan.fromwheretowhere.recommendation.recommendInThread(pageDoc, alllinks);
             }
           }
         }
