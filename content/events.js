@@ -15,7 +15,7 @@ com.wuxuan.fromwheretowhere.events = function(){
         var recLinks=[];
         //TODO: this.doc seems unnecessary??
         if (this.doc.nodeName == "#document") {
-        //if (doc instanceof HTMLDocument) {
+        //if (this.doc instanceof HTMLDocument) {
           // is this an inner frame?
           //TODO: defaultView can be null!
           if (this.doc.defaultView.frameElement) {
@@ -24,9 +24,9 @@ com.wuxuan.fromwheretowhere.events = function(){
             while (this.doc.defaultView.frameElement) {
               this.doc = this.doc.defaultView.frameElement.ownerDocument;
             }
-            var currentDoc = gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
-            if(currentDoc.title!=lasttitle){
-              lasttitle=currentDoc.title;
+            //var currentDoc = gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
+            if(this.doc.title!=lasttitle){
+              lasttitle=this.doc.title;
               //alert(currentDoc.title);
               var pageDoc = document.commandDispatcher.focusedWindow.document;
               var links = pageDoc.links;//.getElementsByTagNameNS("*", "a");
