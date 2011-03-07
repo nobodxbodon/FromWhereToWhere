@@ -24,10 +24,9 @@ com.wuxuan.fromwheretowhere.events = function(){
             while (this.doc.defaultView.frameElement) {
               this.doc = this.doc.defaultView.frameElement.ownerDocument;
             }
-            //var currentDoc = gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
-            if(this.doc.title!=lasttitle){
-              lasttitle=this.doc.title;
-              //alert(currentDoc.title);
+            var currentDoc = gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
+            if(currentDoc.title!=lasttitle){
+              lasttitle=currentDoc.title;
               var pageDoc = document.commandDispatcher.focusedWindow.document;
               var links = pageDoc.links;//.getElementsByTagNameNS("*", "a");
               if(!links)
