@@ -301,20 +301,20 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         }
       }
     }
-    if(recLinks.length>0){
-      var recUri = [pub.currLoc];
-      //get rid of duplicate links
-      for(var i=0;i<recLinks.length;i++){
-        var uri = recLinks[i].link.href;
-        if(recUri.indexOf(uri)>-1){
-          if(pub.DEBUG)
-            alert(recLinks[i].link.text+"\n"+uri);
-          recLinks.splice(i,1);
-          i--;
-        }else{
-          recUri.push(uri);
-        }
+    var recUri = [pub.currLoc];
+    //get rid of duplicate links
+    for(var i=0;i<recLinks.length;i++){
+      var uri = recLinks[i].link.href;
+      if(recUri.indexOf(uri)>-1){
+        if(pub.DEBUG)
+          alert(recLinks[i].link.text+"\n"+uri);
+        recLinks.splice(i,1);
+        i--;
+      }else{
+        recUri.push(uri);
       }
+    }    
+    if(recLinks.length>0){ 
       var o="";
       if(pub.DEBUG){
         o="removed "+removed+" from "+len+"\r\n";
