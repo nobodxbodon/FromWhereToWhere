@@ -302,7 +302,19 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
     }
     if(recLinks.length>0){
-      //var o = pub.output(recLinks,allLinks);
+      var recUri = [pub.currLoc];
+      //get rid of duplicate links
+      for(var i=0;i<recLinks.length;i++){
+        var uri = recLinks[i].link.href;
+        if(recUri.indexOf(uri)>-1){
+          if(pub.DEBUG)
+            alert(recLinks[i].link.text+"\n"+uri);
+          recLinks.splice(i,1);
+          i--;
+        }else{
+          recUri.push(uri);
+        }
+      }
       var o="";
       if(pub.DEBUG){
         o="removed "+removed+" from "+len+"\r\n";
@@ -405,7 +417,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         return;
       }
     }
-    var link = this.textContent;
+    var link = this.getAttribute("fwtw-title");
     link = pub.getFirstLine(link);
     //get the first non-empty line of the link and search for it, but can mis-locate
     var found = getBrowser().selectedBrowser.contentWindow.find(link, false, false);
@@ -520,7 +532,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var panelAttr = null;
       //close, label, titlebar only for ff 4
       if(version>=4)
-        panelAttr = {"id":"fwtwRelPanel","titlebar":"normal","noautohide":"true","close":"true","height":"200"};
+        panelAttr = {"id":"fwtwRelPanel","titlebar":"normal","noautofocus":"true","noautohide":"true","close":"true","height":"200"};
       else{
         panelAttr = {"id":"fwtwRelPanel"};//"fade":"fast",
       }
@@ -568,12 +580,14 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     
     var thisWindow = getBrowser().selectedBrowser.contentWindow;
+          
     for(var i=0;i<recLinks.length;i++){
         var l = document.createElement("textbox");
         var t = recLinks[i].link.text;
         var title = pub.utils.trimString(t);
         title = pub.utils.removeEmptyLine(title);
         var numLine = pub.utils.countChar("\n",title);
+        var titleForSearch = title;
         if(pub.DEBUG)
           title+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
         
@@ -589,6 +603,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         butn.setAttribute("class", "borderless");
         butn.onclick = pub.testOpen;
         butn.setAttribute("href", recLinks[i].link.href);
+        butn.setAttribute("fwtw-title",titleForSearch);
         butn.textContent=title;//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
         vbox.appendChild(butn);
       }
@@ -609,7 +624,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       savePanel.openPopup(null, "start_end", 60, 80, false, false);
     }else{
       savePanel.setAttribute("label","Seemingly Related or Interesting Link Titles"+" - "+origTitle);
-      savePanel.openPopup(document.documentElement, "start_end", 60, 80, false, false);
+      savePanel.openPopup(null, "start_end", 60, 80, false, false);//document.documentElement
     }
     //get all the links on current page, and their texts shown on page
     //can't get from overlay, still wondering
