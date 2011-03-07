@@ -418,11 +418,19 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
     }
     var link = this.getAttribute("fwtw-title");
-    link = pub.getFirstLine(link);
+    //TODO: this is to search for any line found first, can be inprecise
+    var lines = link.split("\n");
+    //alert(lines);
+    //link = pub.getFirstLine(link);
     //get the first non-empty line of the link and search for it, but can mis-locate
-    var found = getBrowser().selectedBrowser.contentWindow.find(link, false, false);
-    if(!found)
-      found = getBrowser().selectedBrowser.contentWindow.find(link, false, true);
+    var found = false;
+    for(var i in lines){
+      found = getBrowser().selectedBrowser.contentWindow.find(lines[i], false, false);
+      if(!found)
+        found = getBrowser().selectedBrowser.contentWindow.find(lines[i], false, true);
+      if(found)
+        break;
+    }
     //some links can not be found...invisble, then just open it
     if(!found){
       if(link!=pub.lastSearchTitle)
