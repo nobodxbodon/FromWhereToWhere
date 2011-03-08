@@ -475,8 +475,14 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   pub.output = function(recLinks, allLinks){
     var outputText = "";
-    outputText += "Time: "+(0.0+((new Date()).getTime()-pub.starttime))/1000+"s      ";
-    outputText += "Ratio(Num. of suggested/Num. of all links): "+(0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10+"%\n";
+    var spendtime = 0;
+    var ratio = 0;
+    if(allLinks.length!=0){
+      spendtime = (0.0+((new Date()).getTime()-pub.starttime))/1000;
+      ratio = (0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10;
+    }
+    outputText += "Time: "+spendtime+"s      ";
+    outputText += "Ratio(Num. of suggested/Num. of all links): "+ratio+"%\n";
     return outputText;
   };
   

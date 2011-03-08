@@ -99,26 +99,15 @@ com.wuxuan.fromwheretowhere.events = function(){
   pub.init = function(){
     //TODO: document.? gbrowser.? difference?
     pub.mainWindow.addEventListener("DOMContentLoaded", pub.onPageLoad, false);
-    //window.addEventListener("DOMTitleChanged", pub.onPageLoad, false);
-    /*pub.mainWindow.addEventListener(
-      "load",
-      function(event) {
-        pub.savenote = document.getElementById("current_title");
-        pub.panel=document.getElementById("currentTitle");
-      },
-      false
-    );*/
     //TODO: when current document is closed, the current suggestion should be closed too
     //pub.mainWindow.addEventListener("close", pub.closePanel, false);
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     com.wuxuan.fromwheretowhere.recommendation.init();
-    //alert("init recommend");
+    com.wuxuan.fromwheretowhere.recommendation.popUp("","",[],[]);
   };
   
   pub.down = function(){
     pub.mainWindow.removeEventListener("DOMContentLoaded", pub.onPageLoad, false);
-    //window.addEventListener("DOMTitleChanged", pub.onPageLoad, false);
-    //alert("rm recommend");
   };
     
   return pub;
