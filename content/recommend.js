@@ -148,8 +148,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.recommend = function(pageDoc, allLinks){
-    pub.currLoc = pageDoc.location.href;
-    pub.pageDoc = pageDoc;
+    var currLoc = pageDoc.location.href;
     var title = pageDoc.title;
     pub.DEBUGINFO = "";
     pub.starttime = (new Date()).getTime();
@@ -286,7 +285,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         }
       }
     }
-    var recUri = [pub.currLoc];
+    var recUri = [currLoc];
     //TODO: remove those that are visited already, or at least display differently
     //get rid of duplicate links
     for(var i=0;i<recLinks.length;i++){
@@ -305,6 +304,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       if(pub.DEBUG){
         o="removed "+removed+" from "+len+"\r\n";
       }
+      //ONLY refresh current page when the panel is changed
+      pub.currLoc = currLoc;
+      pub.pageDoc = pageDoc;
       pub.popUp(title, o, recLinks, allLinks);
     }else if(pub.DEBUG){
         alert("alllinks:\n"+allLinks);
