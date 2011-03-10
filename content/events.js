@@ -24,10 +24,11 @@ com.wuxuan.fromwheretowhere.events = function(){
             while (this.doc.defaultView.frameElement) {
               this.doc = this.doc.defaultView.frameElement.ownerDocument;
             }
-            var currentDoc = gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
-            if(currentDoc.title!=lasttitle){
+            var currentDoc = this.doc;//gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
+            //only recommond for current page, and when it's loaded
+            if(currentDoc == gBrowser.selectedBrowser.contentDocument && currentDoc.title!=lasttitle){
               lasttitle=currentDoc.title;
-              var pageDoc = document.commandDispatcher.focusedWindow.document;
+              var pageDoc = currentDoc;//document.commandDispatcher.focusedWindow.document;
               var links = pageDoc.links;//.getElementsByTagNameNS("*", "a");
               if(!links)
                 return;
@@ -39,6 +40,7 @@ com.wuxuan.fromwheretowhere.events = function(){
                   alllinks.push(links[i]);//links[i].href;
                 }
               }
+              alert(lasttitle);
               recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(pageDoc, alllinks);
             }
           }
