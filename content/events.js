@@ -24,26 +24,23 @@ com.wuxuan.fromwheretowhere.events = function(){
             while (this.doc.defaultView.frameElement) {
               this.doc = this.doc.defaultView.frameElement.ownerDocument;
             }
-            var currentDoc = this.doc;//gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
-            //only recommond for current page, and when it's loaded
-            if(currentDoc == gBrowser.selectedBrowser.contentDocument && currentDoc.title!=lasttitle){
-              lasttitle=currentDoc.title;
-              var pageDoc = currentDoc;//document.commandDispatcher.focusedWindow.document;
-              var links = pageDoc.links;//.getElementsByTagNameNS("*", "a");
-              if(!links)
-                return;
-              var len = links.length;
-              //alert(len);
-              var alllinks = [];
-              for(var i=0;i<len;i++){
-                if(links[i]){
-                  alllinks.push(links[i]);//links[i].href;
-                }
-              }
-              alert(lasttitle);
-              recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(pageDoc, alllinks);
+          }
+        }
+        var currentDoc = this.doc;//gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
+        //only recommond for current page, and when it's loaded
+        if(currentDoc == gBrowser.selectedBrowser.contentDocument && currentDoc.title!=lasttitle){
+          lasttitle=currentDoc.title;
+          var links = currentDoc.links;//.getElementsByTagNameNS("*", "a");
+          if(!links)
+            return;
+          var len = links.length;
+          var alllinks = [];
+          for(var i=0;i<len;i++){
+            if(links[i]){
+              alllinks.push(links[i]);
             }
           }
+          recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(currentDoc, alllinks);
         }
       } catch(err) {
         Components.utils.reportError(err);
