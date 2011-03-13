@@ -444,14 +444,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       savePanel = pub.setAttrDOMElement(savePanel, panelAttr);
       //add the topbar
       topbar = document.createElement("hbox");
-      //topbar = pub.setAttrDOMElement(topbar, {"flex":"1"});
-      //refresh button add on top, only available for ff4, as it's reused, and the panel will be there as far as
-      if(version>=4){
-        var refreshButn = document.createElement("button");
-        refreshButn.textContent="Refresh";
-        refreshButn.onclick = pub.recommendCurrent;
-        topbar.appendChild(refreshButn);
-      }
+      //refresh button add on top
+      var refreshButn = document.createElement("button");
+      refreshButn.textContent="Refresh";
+      refreshButn.onclick = pub.recommendCurrent;
+      topbar.appendChild(refreshButn);
       //stats info
       statsInfoLabel = document.createElement("label");
       topbar.appendChild(statsInfoLabel);
