@@ -24,24 +24,23 @@ com.wuxuan.fromwheretowhere.events = function(){
             while (this.doc.defaultView.frameElement) {
               this.doc = this.doc.defaultView.frameElement.ownerDocument;
             }
-            var currentDoc = gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
-            if(currentDoc.title!=lasttitle){
-              lasttitle=currentDoc.title;
-              var pageDoc = document.commandDispatcher.focusedWindow.document;
-              var links = pageDoc.links;//.getElementsByTagNameNS("*", "a");
-              if(!links)
-                return;
-              var len = links.length;
-              //alert(len);
-              var alllinks = [];
-              for(var i=0;i<len;i++){
-                if(links[i]){
-                  alllinks.push(links[i]);//links[i].href;
-                }
-              }
-              recLinks = com.wuxuan.fromwheretowhere.recommendation.recommendInThread(pageDoc, alllinks);
+          }
+        }
+        var currentDoc = this.doc;//gBrowser.selectedBrowser.contentDocument;//pub.mainWindow.document;
+        //only recommond for current page, and when it's loaded
+        if(currentDoc == gBrowser.selectedBrowser.contentDocument && currentDoc.title!=lasttitle){
+          lasttitle=currentDoc.title;
+          var links = currentDoc.links;//.getElementsByTagNameNS("*", "a");
+          if(!links)
+            return;
+          var len = links.length;
+          var alllinks = [];
+          for(var i=0;i<len;i++){
+            if(links[i]){
+              alllinks.push(links[i]);
             }
           }
+          recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(currentDoc, alllinks);
         }
       } catch(err) {
         Components.utils.reportError(err);
@@ -99,26 +98,15 @@ com.wuxuan.fromwheretowhere.events = function(){
   pub.init = function(){
     //TODO: document.? gbrowser.? difference?
     pub.mainWindow.addEventListener("DOMContentLoaded", pub.onPageLoad, false);
-    //window.addEventListener("DOMTitleChanged", pub.onPageLoad, false);
-    /*pub.mainWindow.addEventListener(
-      "load",
-      function(event) {
-        pub.savenote = document.getElementById("current_title");
-        pub.panel=document.getElementById("currentTitle");
-      },
-      false
-    );*/
     //TODO: when current document is closed, the current suggestion should be closed too
     //pub.mainWindow.addEventListener("close", pub.closePanel, false);
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     com.wuxuan.fromwheretowhere.recommendation.init();
-    //alert("init recommend");
+    com.wuxuan.fromwheretowhere.recommendation.popUp("","",[],[]);
   };
   
   pub.down = function(){
     pub.mainWindow.removeEventListener("DOMContentLoaded", pub.onPageLoad, false);
-    //window.addEventListener("DOMTitleChanged", pub.onPageLoad, false);
-    //alert("rm recommend");
   };
     
   return pub;
