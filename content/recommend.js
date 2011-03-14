@@ -29,7 +29,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   //also remove all numbers, as they don't seem to carry much "theme" info
   //remove word.length==1
-  pub.filter = function(allwords, stopwords, specials){
+  pub.filter = function(aw, stopwords, specials){
+    var allwords = aw;
     for(var i=0; i<allwords.length; i++){
       allwords[i] = allwords[i].toLowerCase();
       //stupid way to get rid of special char from the utterance
@@ -40,22 +41,60 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //if there's \W in the end or start(hp,\ (the) get the first part; (doesn't) leave it as is
       var orig = allwords[i];
       //only get the first part here
-      allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
-      allwords[i] = pub.getOrig(allwords[i]);
-      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
+      //allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
+      //get all the parts separated by non-word, for now only consider Eng and Chn
+      var parts = orig.split(/[~|!|@|#|$|%|^|&|*|(|)|\-|_|+|=|¡ª|:|;|\"|\'|<|>|,|.|?|\/|\\|{|}|[|]|£¡|£¤|¡­¡­|£¨|£©|\||¡¢|¡ª¡ª|¡¾|¡¿|¡°|¡±|¡¯|¡®|£º|£»|¡¶|¡·|£¬|¡£|£¿]+/);
+      var nonempty = parts.filter(function notEmpty(str){return str!="";});
+      /*if(pub.DEBUG){
+        alert(allwords + "\n"+allwords[i]);
+        alert(parts+"\n"+nonempty);
+      }*/
+      allwords.splice(i,1);
+      if(nonempty.length!=0){
+        for(var j=0;j<nonempty.length;j++)
+          allwords.splice(j+i,0,nonempty[j]);
+      }else{
+        i--;
+        continue;
+      }
+      /*if(pub.DEBUG){
+        alert("after splice: "+ allwords +"\n"+allwords[i]);
+      }*/
+      var upper = allwords[i].toUpperCase();
+      /*if(pub.DEBUG){
+        alert(allwords + "\n"+upper+"\n"+allwords[i]);
+      }*/
+      //remove all numbers
+      if(allwords[i].match(/[0-9]/)!=null){
         allwords.splice(i, 1);
         i--;
+        continue;
+      }
+      //judge if it's English
+      if(upper!=allwords[i]){
+        //only for English
+        allwords[i] = pub.getOrig(allwords[i]);
+        if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1){
+          allwords.splice(i, 1);
+          i--;
+        }
+      }else{
+        //for Chinese
       }
     }
     return allwords;
   };
   
   pub.getTopic = function(title, sp, stopwords, specials){
+    /*if(pub.DEBUG){
+      alert(title[0]);
+    }*/
     if(title==null){
       return [];
     }
     //TODO: some language requires more complex segmentation, like CHN
     var allwords = title.split(sp);//(" ");/\W/
+    //TODO: if CHN, segment using N-gram, and split the sentence by those same words, to get more words/phrases
     return pub.filter(allwords, stopwords, specials);
   };
   
@@ -161,6 +200,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //if new tab or no title at all, no recommendation
     if(allwords.length==0){
       return [];
+    }else if(pub.DEBUG){
+      alert(allwords);
     }
     pub.tmp = (new Date()).getTime();
     
