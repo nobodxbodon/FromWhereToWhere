@@ -8,7 +8,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIDOMWindow);
  
-  pub.DEBUG = false;
+  pub.DEBUG = true;
   pub.ANCHOR = false;
   pub.DEBUGINFO = "";
   pub.TOOFEWWORDS = 4
@@ -31,6 +31,66 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   //remove word.length==1
   pub.filter = function(aw, stopwords, specials){
     var allwords = aw;
+    var alloccurrence = [];
+    //TODO: for now can't handle mixed languages
+    for(var i=0; i<allwords.length; i++){
+      allwords[i] = allwords[i].toLowerCase();
+      var orig = allwords[i];
+      var upper = orig.toUpperCase();
+      /*if(pub.DEBUG)
+        alert(upper);*/
+      //judge if it's English
+      if(upper!=orig){
+        //only for English
+        //only get the first part here
+        //TODO: should get more words out, split them with the recognized words, expensive though (keep those with special words, and then indexof the recog, split with those, then recurrent)
+        allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
+        //only for English
+        allwords[i] = pub.getOrig(allwords[i]);
+        if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
+          allwords.splice(i, 1);
+          i--;
+        }
+      }else{//for Chinese
+        //get all the parts separated by non-word, for now only consider Eng and Chn
+        var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5]+/);//(/[~|!|@|#|$|%|^|&|*|(|)|\-|_|+|=|¡ª|:|;|\"|\'|<|>|,|.|?|\/|\\|{|}|[|]|£¡|£¤|¡­¡­|£¨|£©|\||¡¢|¡ª¡ª|¡¾|¡¿|¡°|¡±|¡¯|¡®|£º|£»|¡¶|¡·|£¬|¡£|£¿]+/);
+        var nonempty = parts.filter(function notEmpty(str){return str!="";});
+        /*if(pub.DEBUG){
+          //alert(allwords + "\n"+allwords[i]);
+          alert(parts+"\n"+nonempty);
+        }*/
+        allwords.splice(i,1);
+        if(nonempty.length!=0){
+          for(var j=0;j<nonempty.length;j++)
+            allwords.splice(j+i,0,nonempty[j]);
+        }else{
+          i--;
+          continue;
+        }
+        /*if(pub.DEBUG){
+          alert("after splice: "+ allwords +"\n"+allwords[i]);
+        }*/
+        //remove all numbers and 1 char word
+        if(allwords[i].length==1 || allwords[i].match(/[0-9]/)!=null){
+          allwords.splice(i, 1);
+          i--;
+          continue;
+        }
+        /*var words = pub.utils.getGram(2, allwords[i]);
+        if(words.length!=0){
+          allwords.splice(i,1);
+          if(nonempty.length!=0){
+            for(var j=0;j<words.length;j++)
+              allwords.splice(j+i,0,words[j]);
+          }
+        }*/
+      }
+    }
+    return allwords;
+  };
+  
+  pub.oldfilter = function(aw, stopwords, specials){
+    var allwords = aw;
     for(var i=0; i<allwords.length; i++){
       allwords[i] = allwords[i].toLowerCase();
       //stupid way to get rid of special char from the utterance
@@ -41,46 +101,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //if there's \W in the end or start(hp,\ (the) get the first part; (doesn't) leave it as is
       var orig = allwords[i];
       //only get the first part here
-      //allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
-      //get all the parts separated by non-word, for now only consider Eng and Chn
-      var parts = orig.split(/[~|!|@|#|$|%|^|&|*|(|)|\-|_|+|=|¡ª|:|;|\"|\'|<|>|,|.|?|\/|\\|{|}|[|]|£¡|£¤|¡­¡­|£¨|£©|\||¡¢|¡ª¡ª|¡¾|¡¿|¡°|¡±|¡¯|¡®|£º|£»|¡¶|¡·|£¬|¡£|£¿]+/);
-      var nonempty = parts.filter(function notEmpty(str){return str!="";});
-      /*if(pub.DEBUG){
-        alert(allwords + "\n"+allwords[i]);
-        alert(parts+"\n"+nonempty);
-      }*/
-      allwords.splice(i,1);
-      if(nonempty.length!=0){
-        for(var j=0;j<nonempty.length;j++)
-          allwords.splice(j+i,0,nonempty[j]);
-      }else{
-        i--;
-        continue;
-      }
-      /*if(pub.DEBUG){
-        alert("after splice: "+ allwords +"\n"+allwords[i]);
-      }*/
-      var upper = allwords[i].toUpperCase();
-      /*if(pub.DEBUG){
-        alert(allwords + "\n"+upper+"\n"+allwords[i]);
-      }*/
-      //remove all numbers
-      if(allwords[i].match(/[0-9]/)!=null){
-        allwords.splice(i, 1);
-        i--;
-        continue;
-      }
-      //judge if it's English
-      if(upper!=allwords[i]){
+      allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
         //only for English
         allwords[i] = pub.getOrig(allwords[i]);
-        if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1){
+        if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
           allwords.splice(i, 1);
           i--;
         }
-      }else{
-        //for Chinese
-      }
     }
     return allwords;
   };
@@ -95,7 +122,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //TODO: some language requires more complex segmentation, like CHN
     var allwords = title.split(sp);//(" ");/\W/
     //TODO: if CHN, segment using N-gram, and split the sentence by those same words, to get more words/phrases
-    return pub.filter(allwords, stopwords, specials);
+    var ws = pub.filter(allwords, stopwords, specials);
+    //if(pub.DEBUG)
+    //  alert(ws);
+    return ws;
   };
   
   pub.tooSimple = function(allwords, specials){
@@ -200,9 +230,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //if new tab or no title at all, no recommendation
     if(allwords.length==0){
       return [];
-    }else if(pub.DEBUG){
+    }/*else if(pub.DEBUG){
       alert(allwords);
-    }
+    }*/
     pub.tmp = (new Date()).getTime();
     
     pidsWithWord = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
@@ -271,7 +301,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //alert("try on");
     var linkNumber = allLinks.length;
     for(var i=0;i<linkNumber;i++){
-      var trimed = pub.utils.trimString(allLinks[i].text);
+      var trimed = "";
+      if(allLinks[i].text)
+        trimed = pub.utils.trimString(allLinks[i].text);
+      else
+        continue;
       var t = trimed.toLowerCase();
       //remove the duplicate links (titles)
       if(recTitles.indexOf(t)>-1){
@@ -290,13 +324,28 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //get the mul of keyword freq in all titles to be sorted
       var oF = 1;
       var keywords = [];
-      for(var j=0;j<allRelated.length;j++){
-        if(text.indexOf(allRelated[j])>-1){
-          //don't recommend those with only one word, like "msnbc.com"
-          if(text.length==1 && text[0]==allRelated[j])
-            break;
-          keywords.push(allRelated[j]);
-          oF=oF*freq[allRelated[j]];
+      //if there's chinese, go through every part, otherwise compare by word
+      if(/.*[\u4e00-\u9fa5]+.*$/.test(title)){
+        for(var j=0;j<allRelated.length;j++){
+          for(var k=0;k<text.length;k++){
+            if(text[k].indexOf(allRelated[j])>-1){
+              //don't recommend those with only one word, like "msnbc.com"
+              if(text[k].length==1)
+                continue;
+              keywords.push(allRelated[j]);
+              oF=oF*freq[allRelated[j]];
+            }
+          }
+        }
+      }else{
+        for(var j=0;j<allRelated.length;j++){
+          if(text.indexOf(allRelated[j])>-1){
+            //don't recommend those with only one word, like "msnbc.com"
+            if(text.length==1 && text[0]==allRelated[j])
+              break;
+            keywords.push(allRelated[j]);
+            oF=oF*freq[allRelated[j]];
+          }
         }
       }
       if(oF<1){
@@ -332,8 +381,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     for(var i=0;i<recLinks.length;i++){
       var uri = recLinks[i].link.href;
       if(recUri.indexOf(uri)>-1){
-        if(pub.DEBUG)
-          alert(recLinks[i].link.text+"\n"+uri);
+        /*if(pub.DEBUG)
+          alert(recLinks[i].link.text+"\n"+uri);*/
         recLinks.splice(i,1);
         i--;
       }else{
