@@ -398,9 +398,9 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 		//	}
 		}
 		if(singular_table)
-			return "SELECT place_id FROM moz_historyvisits WHERE place_id=("+term+ ")" + t + fterm + " GROUP BY place_id";
+			return "SELECT DISTINCT place_id FROM moz_historyvisits WHERE place_id=("+term+ ")" + t + fterm;
 		else
-			return "SELECT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm + " GROUP BY place_id";
+			return "SELECT DISTINCT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm;
 			
 	};
 	
