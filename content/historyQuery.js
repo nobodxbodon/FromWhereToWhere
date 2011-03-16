@@ -410,7 +410,6 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 		var term = "SELECT place_id FROM moz_historyvisits \
 					    where id IN (SELECT from_visit FROM moz_historyvisits where \
 						place_id==:id)";
-		//alert(term);
     var statement = pub.mDBConn.createStatement(term);
     statement.params.id=pid;
     var pids = pub.queryAll(statement, 32, 0);
@@ -435,7 +434,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 					for(var j=0;j<10;j++){
 						var fterm = "SELECT place_id FROM moz_historyvisits \
 										where id<=:id-:start and id>:id-:end \
-										order by -id limit 1";
+										order by id DESC limit 1";
 						var statement1 = pub.mDBConn.createStatement(fterm);
 						statement1.params.id=placeids[i];
 						statement1.params.start=rangeStart;
@@ -522,6 +521,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 				pub.querytime.tmp = (new Date()).getTime();
       var pParentPids = pub.getParentPlaceidsfromPlaceid(pid, query);
 			if(pub.DEBUG){
+				pub.querytime.getParentTime +=1;
 				pub.querytime.search += ((new Date()).getTime() - pub.querytime.tmp);
 			}
       if(pParentPids.length==0){
@@ -552,7 +552,12 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     var nodes = [];
     var ancPids = [];
     //order by time: latest first by default
+		//var len = ;
     for(var i=pids.length-1; i>=0; i--){
+			//no need to get ancester if pid is in allKnownParentPids
+      if(pub.allKnownParentPids.indexOf(pids[i])>-1){
+				continue;
+			}
       var anc = pub.getAllAncestorsfromPlaceid(pids[i],[],0,query);
 			//alert("create anc nodes: " + pids[i] + "\n" + anc);
       for(var j in anc){
