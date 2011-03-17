@@ -172,12 +172,67 @@ com.wuxuan.fromwheretowhere.stats = function(){
     }
   };
 	
+	pub.getAllChnWords = function(w){
+    var words = w;
+    //var segmented = false;
+    for(var i=0;i<words.length;i++){
+      //don't use single char to seg
+      if(words[i].length<2)
+        continue;
+      for(var j=0;j<words.length;j++){
+        if(j==i||words[j].length<words[i].length)
+          continue;
+        var sp = words[j].split(words[i]);
+        if(sp.length>1){
+					var seg = false;
+          //segmented = true;
+					//if splitted, start checking from here
+          for(var l=0;l<sp.length;l++){
+            if(sp[l].length>1){
+							words.splice(j+l+1,0,sp[l]);
+							//words.splice(i+l+1,0,sp[l]);
+							seg = true;
+						}
+          }
+					if(seg){
+						words.splice(j,1);
+						if(j<i)
+							i=j-1;
+					}
+        }
+      }
+    }
+    return words;
+  };
+	
   pub.all = function() {
-    pub.main.dispatch(new pub.searchThread(1), pub.main.DISPATCH_NORMAL);
+		var allRelated = pub.allwords;
+		var chn = [];
+    var nonChn = [];
+		var start = (new Date()).getTime();
+    for(var i=0;i<allRelated.length;i++){
+      if(/.*[\u4e00-\u9fa5]+.*$/.test(allRelated[i]))
+        chn.push(allRelated[i]);
+      else
+        nonChn.push(allRelated[i]);
+    }
+    var chnwords = pub.getAllChnWords(chn);
+    //if(pub.DEBUG){
+    var newwords = chnwords.filter(function isOld(str){return chn.indexOf(str);});
+    //}
+    allRelated = nonChn.concat(chnwords);
+    var segtime = (new Date()).getTime() -start;
+		var output="";
+		for(var l=0;l<newwords.length;l++){
+			output+=newwords[l]+"\n";
+		}
+		alert(segtime+"\n"+output);
+    //pub.main.dispatch(new pub.searchThread(1), pub.main.DISPATCH_NORMAL);
     //pub.main.dispatch(new pub.patternThread(1), pub.main.DISPATCH_NORMAL);
   };
   
   pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
   
+	pub.allwords = [];
   return pub;
 }();
