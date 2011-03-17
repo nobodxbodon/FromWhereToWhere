@@ -174,8 +174,9 @@ com.wuxuan.fromwheretowhere.stats = function(){
 	
 	pub.getAllChnWords = function(w){
     var words = w;
+		var newwords = words;
     //var segmented = false;
-    for(var i=0;i<words.length;i++){
+    /*for(var i=0;i<words.length;i++){
       //don't use single char to seg
       if(words[i].length<2)
         continue;
@@ -187,20 +188,61 @@ com.wuxuan.fromwheretowhere.stats = function(){
 					var seg = false;
           //segmented = true;
 					//if splitted, start checking from here
+					var num=0;
           for(var l=0;l<sp.length;l++){
+						num+=1;
             if(sp[l].length>1){
-							words.splice(j+l+1,0,sp[l]);
+							words.splice(j+num,0,sp[l]);
+							newwords.push(sp[l]);
 							//words.splice(i+l+1,0,sp[l]);
 							seg = true;
 						}
           }
 					if(seg){
 						words.splice(j,1);
-						if(j<i)
-							i=j-1;
+						j--;
+						//if(j<i)
+						//	i=j-1;
 					}
         }
       }
+		}*/
+			
+		for(;;){
+			if(newwords.length==0)
+				return words;
+			var news = [];
+			for(var i=0;i<newwords.length;i++){
+				for(var j=0;j<words.length;j++){
+					if(words[j]==newwords[i] || words[j].length<newwords[i].length)
+						continue;
+					var sp = words[j].split(newwords[i]);
+					if(sp.length>1){
+						var seg = false;
+						//segmented = true;
+						//if splitted, start checking from here
+						var num=0;
+						for(var l=0;l<sp.length;l++){
+							num+=1;
+							if(sp[l].length>1){
+								if(words.indexOf(sp[l])==-1){
+									words.splice(j+num,0,sp[l]);
+									news.push(sp[l]);
+									//words.splice(i+l+1,0,sp[l]);
+								}
+								seg = true;
+							}
+						}
+						if(seg){
+							words.splice(j,1);
+							j--;
+							//if(j<i)
+							//	i=j-1;
+						}
+					}
+				}
+			}
+			newwords = news;
     }
     return words;
   };
