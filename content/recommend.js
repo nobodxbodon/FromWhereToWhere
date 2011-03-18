@@ -11,6 +11,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.DEBUG = true;
   pub.ANCHOR = false;
   pub.DEBUGINFO = "";
+  pub.debuginfo = {};
   pub.TOOFEWWORDS = 4
   pub.MULTILINE_LIMIT = 3;
   pub.starttime = 0;
@@ -76,14 +77,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           i--;
           continue;
         }
-        /*var words = pub.utils.getGram(2, allwords[i]);
-        if(words.length!=0){
-          allwords.splice(i,1);
-          if(nonempty.length!=0){
-            for(var j=0;j<words.length;j++)
-              allwords.splice(j+i,0,words[j]);
-          }
-        }*/
       }
     }
     return allwords;
@@ -254,13 +247,62 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var allRelated=[];
     pub.tmp = (new Date()).getTime();
     
+    //remove dup titles for now
+    var titles = [];
     for(var i=0;i<pidsWithWord.length;i++){
       var t = pub.history.getTitlefromId(pidsWithWord[i]);
+      if(titles.indexOf(t)==-1){
+        titles.push(t);
+      }else{
+        continue;
+      }
       var relatedWords=pub.getTopic(t, " ", pub.stopwords, pub.specials);
       allRelated=allRelated.concat(relatedWords);
     }
     pub.sqltime.gettitle = (new Date()).getTime() -pub.tmp;
     pub.tmp = (new Date()).getTime();
+    //get as many chinese words as possible
+    /*var chn = [];
+    var nonChn = [];
+    for(var i=0;i<allRelated.length;i++){
+      if(/.*[\u4e00-\u9fa5]+.*$/.test(allRelated[i]))
+        chn.push(allRelated[i]);
+      else
+        nonChn.push(allRelated[i]);
+    }
+    var chnwords = pub.utils.getAllChnWords(chn);
+    if(pub.DEBUG){
+      pub.debuginfo.newwords = chnwords.filter(function isOld(str){return chn.indexOf(str);});
+    }
+    allRelated = nonChn.concat(chnwords);
+    pub.sqltime.segment = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
+   */
+    var chn = [];
+    var nonChn = [];
+		var start = (new Date()).getTime();
+    for(var i=0;i<allRelated.length;i++){
+      if(/.*[\u4e00-\u9fa5]+.*$/.test(allRelated[i]))
+        chn.push(allRelated[i]);
+      else
+        nonChn.push(allRelated[i]);
+    }
+		//alert(chn.length);;
+    var chnwords = pub.utils.getAllChnWords(chn,chn);
+		var findMaxGramHead = pub.utils.getAllCommonHead(chnwords);
+		var newfinds = pub.utils.getAllChnWords(findMaxGramHead,findMaxGramHead);
+    //alert(newfinds);
+		chnwords = chnwords.concat(newfinds);
+    //alert(chnwords);
+		chnwords = pub.utils.getAllChnWords(newfinds,chnwords);
+		//alert(chn.length);
+    //if(pub.DEBUG){
+    //var newwords = chnwords.filter(function isNew(str){return orig.indexOf(str)==-1;});
+    //}
+    allRelated = nonChn.concat(chnwords);
+    pub.sqltime.segment = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
+
     var relatedFromLocalNotes = pub.getLocal(allwords, pub.stopwords, pub.specials);
     allRelated=allRelated.concat(relatedFromLocalNotes);
     
@@ -284,7 +326,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         allover+=a.freq[a.arr[i]];
       }
       pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
-      pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild + " gettitle: "+pub.sqltime.gettitle+"\n"+pub.DEBUGINFO;
+      pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild + " gettitle: "+pub.sqltime.gettitle+" segment: "+pub.sqltime.segment+"\n"+pub.DEBUGINFO;//+" segment: "+pub.sqltime.segment+"\n found new chn words: "+pub.debuginfo.newwords.length+"\n"+pub.debuginfo.newwords+
       pub.DEBUGINFO="local notes: "+relatedFromLocalNotes +"\nlocal time: "+pub.sqltime.getlocal+"\n"+pub.DEBUGINFO;
     }
     var freq = a.freq;
@@ -318,16 +360,20 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
       text = pub.utils.uniqueArray(text, false);
       //if there's too few words (<3 for now), either catalog or tag, or very obvious already
-      if(pub.tooSimple(text, pub.specials)){
+      if(pub.tooSimple(text, pub.specials) && !/.*[\u4e00-\u9fa5]+.*$/.test(t)){
         continue;
       }
       //get the mul of keyword freq in all titles to be sorted
       var oF = 1;
       var keywords = [];
       //if there's chinese, go through every part, otherwise compare by word
-      if(/.*[\u4e00-\u9fa5]+.*$/.test(title)){
+      if(/.*[\u4e00-\u9fa5]+.*$/.test(t)){
         for(var j=0;j<allRelated.length;j++){
-          for(var k=0;k<text.length;k++){
+            if(t.indexOf(allRelated[j])>-1){
+              keywords.push(allRelated[j]);
+              oF=oF*freq[allRelated[j]];
+            }
+          /*for(var k=0;k<text.length;k++){
             if(text[k].indexOf(allRelated[j])>-1){
               //don't recommend those with only one word, like "msnbc.com"
               if(text[k].length==1)
@@ -335,7 +381,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
               keywords.push(allRelated[j]);
               oF=oF*freq[allRelated[j]];
             }
-          }
+          }*/
         }
       }else{
         for(var j=0;j<allRelated.length;j++){

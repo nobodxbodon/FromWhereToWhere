@@ -62,6 +62,79 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return str.replace(/^\s*/, "").replace(/\s*$/, "");
   };
   
+  //get n gram of the string
+  pub.getGram = function(num, str){
+    var all = [];
+    var end = str.length-1;
+    for(var i=0;i<end;i++){
+      all.push(str.substring(i,i+2));
+    }
+    //alert(all);
+    return all;
+  };
+  	
+	pub.getAllCommonHead = function(words){
+		words.sort(function(a,b){return a>b;});
+		var newwords = [];
+		var len = words.length-1;
+		for(var i=0;i<len;i++){
+			var w1 = words[i];
+			var w2 = words[i+1];
+			var maxLen = (w1.length>w2.length)?w1.length:w2.length;
+			for(var j=0;j<maxLen;j++){
+				if(w1[j]!=w2[j]){
+					if(j>1){
+						var w = w1.substring(0,j);
+						if(newwords.indexOf(w)==-1){
+							//alert(w);
+							newwords.push(w);
+							//alert(newwords);
+						}
+					}
+					break;
+				}
+			}
+			
+		}
+		return newwords;
+	};
+	
+	pub.getAllChnWords = function(newwords, words){
+    //var words = w;
+		//var newwords = words;
+		while(newwords.length!=0){
+			var news = [];
+			for(var i=0;i<newwords.length;i++){
+				for(var j=0;j<words.length;j++){
+					if(words[j]==newwords[i] || words[j].length<newwords[i].length)
+						continue;
+					var sp = words[j].split(newwords[i]);
+					if(sp.length>1){
+						var seg = false;
+						//if splitted, start checking from here
+						var origIdx = j;
+						for(var l=0;l<sp.length;l++){
+							if(sp[l].length>1){
+								if(words.indexOf(sp[l])==-1){
+									j+=1;
+									words.splice(j,0,sp[l]);
+									news.push(sp[l]);
+								}
+								seg = true;
+							}
+						}
+						if(seg){
+							words.splice(origIdx,1);
+							j--;
+						}
+					}
+				}
+			}
+			newwords = news;
+    }
+    return words;
+  };
+  
   //remove all empty lines in between (there's no empty lines at front/end in input)
   //don't think it can be infinite loop, but just be cautious, set max loop 40
   pub.removeEmptyLine = function(str){
