@@ -172,45 +172,36 @@ com.wuxuan.fromwheretowhere.stats = function(){
     }
   };
 	
-	pub.getAllChnWords = function(w){
-    var words = w;
-		var newwords = words;
-    //var segmented = false;
-    /*for(var i=0;i<words.length;i++){
-      //don't use single char to seg
-      if(words[i].length<2)
-        continue;
-      for(var j=0;j<words.length;j++){
-        if(j==i||words[j].length<words[i].length)
-          continue;
-        var sp = words[j].split(words[i]);
-        if(sp.length>1){
-					var seg = false;
-          //segmented = true;
-					//if splitted, start checking from here
-					var num=0;
-          for(var l=0;l<sp.length;l++){
-						num+=1;
-            if(sp[l].length>1){
-							words.splice(j+num,0,sp[l]);
-							newwords.push(sp[l]);
-							//words.splice(i+l+1,0,sp[l]);
-							seg = true;
+	pub.getAllCommonHead = function(words){
+		words.sort(function(a,b){return a>b;});
+		var newwords = [];
+		var len = words.length-1;
+		for(var i=0;i<len;i++){
+			var w1 = words[i];
+			var w2 = words[i+1];
+			var maxLen = (w1.length>w2.length)?w1.length:w2.length;
+			for(var j=0;j<maxLen;j++){
+				if(w1[j]!=w2[j]){
+					if(j>1){
+						var w = w1.substring(0,j);
+						if(newwords.indexOf(w)==-1){
+							//alert(w);
+							newwords.push(w);
+							//alert(newwords);
 						}
-          }
-					if(seg){
-						words.splice(j,1);
-						j--;
-						//if(j<i)
-						//	i=j-1;
 					}
-        }
-      }
-		}*/
+					break;
+				}
+			}
 			
-		for(;;){
-			if(newwords.length==0)
-				return words;
+		}
+		return newwords;
+	};
+	
+	pub.getAllChnWords = function(newwords, words){
+    //var words = w;
+		//var newwords = words;
+		while(newwords.length!=0){
 			var news = [];
 			for(var i=0;i<newwords.length;i++){
 				for(var j=0;j<words.length;j++){
@@ -219,25 +210,21 @@ com.wuxuan.fromwheretowhere.stats = function(){
 					var sp = words[j].split(newwords[i]);
 					if(sp.length>1){
 						var seg = false;
-						//segmented = true;
 						//if splitted, start checking from here
-						var num=0;
+						var origIdx = j;
 						for(var l=0;l<sp.length;l++){
-							num+=1;
 							if(sp[l].length>1){
 								if(words.indexOf(sp[l])==-1){
-									words.splice(j+num,0,sp[l]);
+									j+=1;
+									words.splice(j,0,sp[l]);
 									news.push(sp[l]);
-									//words.splice(i+l+1,0,sp[l]);
 								}
 								seg = true;
 							}
 						}
 						if(seg){
-							words.splice(j,1);
+							words.splice(origIdx,1);
 							j--;
-							//if(j<i)
-							//	i=j-1;
 						}
 					}
 				}
@@ -258,17 +245,25 @@ com.wuxuan.fromwheretowhere.stats = function(){
       else
         nonChn.push(allRelated[i]);
     }
-    var chnwords = pub.getAllChnWords(chn);
+		//alert(chn.length);;
+    var chnwords = pub.getAllChnWords(chn,chn);
+		var findMaxGramHead = pub.getAllCommonHead(chnwords);
+		var newfinds = pub.getAllChnWords(findMaxGramHead,findMaxGramHead);
+		chnwords = chnwords.concat(newfinds);
+		//alert(findMaxGramHead);
+		chnwords = pub.getAllChnWords(newfinds,chnwords);
+		//alert(chn.length);
     //if(pub.DEBUG){
-    var newwords = chnwords.filter(function isOld(str){return chn.indexOf(str);});
+    //var newwords = chnwords.filter(function isNew(str){return orig.indexOf(str)==-1;});
     //}
     allRelated = nonChn.concat(chnwords);
     var segtime = (new Date()).getTime() -start;
 		var output="";
-		for(var l=0;l<newwords.length;l++){
-			output+=newwords[l]+"\n";
+		var shorts = chnwords;//chnwords.filter(function lessthen(str){return str.length<4;});
+		for(var l=0;l<shorts.length;l++){
+			output+=shorts[l]+"\n";
 		}
-		alert(segtime+"\n"+output);
+		alert(segtime+"\n"+findMaxGramHead.length+"\n"+output);
     //pub.main.dispatch(new pub.searchThread(1), pub.main.DISPATCH_NORMAL);
     //pub.main.dispatch(new pub.patternThread(1), pub.main.DISPATCH_NORMAL);
   };
