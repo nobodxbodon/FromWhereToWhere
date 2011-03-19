@@ -506,8 +506,68 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   pub.DEBUG = true;
 	pub.querytime = {};
 	
+	//return all the top ancesters of a placeid, and add to allKnownParents
+  pub.getAllAncestorsfromPlaceid = function(allpid, query){
+    var tops = [];
+		//var allpid = [{pid:pid0,knownParentPids:[]}];
+		var parentNumber = 0;
+		//deal with the first element first, replace the original pid with its parents, and move one to tops if there's no parent, judge by allpid is empty (move out all)
+		while(allpid.length!=0){
+			var pid = allpid[0];
+			//no need to get ancester if pid is in allKnownParentPids
+			pub.querytime.tmp = (new Date()).getTime();
+			var known = pub.allKnownParentPids.indexOf(pid.pid);
+			pub.querytime.indextime +=1;
+			pub.querytime.indexof  += ((new Date()).getTime() - pub.querytime.tmp);
+			if(known!=-1){
+				allpid.splice(0,1);
+				continue;
+			}else{
+				pub.allKnownParentPids.push(pid.pid);
+				//if it's its own ancester, still display it
+				pub.querytime.tmp = (new Date()).getTime();
+				var bknown = pid.knownParentPids.indexOf(pid.pid);
+				pub.querytime.bindextime +=1;
+				pub.querytime.bindexof  += ((new Date()).getTime() - pub.querytime.tmp);
+				if(bknown!=-1){
+					//if there's only one parent, the link circle is closed from pid
+					if(parentNumber==1){
+						tops=pub.addInArrayNoDup(pid.pid,tops);
+					}
+				}else{
+					pid.knownParentPids.push(pid.pid);
+					if(pub.DEBUG)
+						pub.querytime.tmp = (new Date()).getTime();
+					var pParentPids = pub.getParentPlaceidsfromPlaceid(pid.pid, query);
+					if(pub.DEBUG){
+						pub.querytime.getParentTime +=1;
+						pub.querytime.search += ((new Date()).getTime() - pub.querytime.tmp);
+					}
+					if(pParentPids.length==0){
+						/*if(pub.allKnownParentPids.indexOf(pid.pid)==-1){
+							pub.allKnownParentPids.push(pid.pid);
+						}*/
+						tops.push(pid.pid);
+					} else {
+						//if multiple ancestors, latest first
+						parentNum = pParentPids.length;
+						for(var j=0;j<parentNum;j++){
+							//shouldn't need this to get results, but just take too much time if not
+							//if(pub.allKnownParentPids.indexOf(pParentPids[j])==-1){
+							//	pub.allKnownParentPids.push(pParentPids[j]);
+								allpid.splice(1,0,{pid:pParentPids[j], knownParentPids: pid.knownParentPids});
+							//}
+						}
+					}
+				}
+				allpid.splice(0,1);
+			}
+		}
+    return tops;
+  };
+	
   //return all the top ancesters of a placeid, and add to allKnownParents
-  pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids, parentNumber, query){
+  pub.oldgetAllAncestorsfromPlaceid = function(pid, knownParentPids, parentNumber, query){
     var tops = [];
     //if it's its own ancester, still display it
     if(knownParentPids.indexOf(pid)!=-1){
@@ -535,7 +595,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
         for(var j=parentNum-1;j>=0;j--){
           if(pub.allKnownParentPids.indexOf(pParentPids[j])==-1){
             pub.allKnownParentPids.push(pParentPids[j]);
-            var anc=pub.getAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum, query);
+            var anc=pub.oldgetAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum, query);
             for(var k in anc){
               tops=pub.addInArrayNoDup(anc[k],tops);
             }
@@ -553,17 +613,13 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     var ancPids = [];
     //order by time: latest first by default
 		//var len = ;
+		var allpid = [];
     for(var i=pids.length-1; i>=0; i--){
-			//no need to get ancester if pid is in allKnownParentPids
-      if(pub.allKnownParentPids.indexOf(pids[i])>-1){
-				continue;
-			}
-      var anc = pub.getAllAncestorsfromPlaceid(pids[i],[],0,query);
-			//alert("create anc nodes: " + pids[i] + "\n" + anc);
-      for(var j in anc){
-        ancPids = pub.addInArrayNoDup(anc[j],ancPids);
-      }
+			allpid.push({pid:pids[i], knownParentPids:[]});
+			
+      //var anc = pub.getAllAncestorsfromPlaceid(pids[i],[],0,query);
     }
+		ancPids = pub.getAllAncestorsfromPlaceid(allpid,query);
     for(var i in ancPids){
       nodes.push(pub.nodefromPlaceid(ancPids[i], query));
     }
