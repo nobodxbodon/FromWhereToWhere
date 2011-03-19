@@ -188,8 +188,8 @@ com.wuxuan.fromwheretowhere.stats = function(){
 		var findMaxGramHead = pub.utils.getAllCommonHead(chnwords);
 		var newfinds = pub.utils.getAllChnWords(findMaxGramHead,findMaxGramHead);
 		chnwords = chnwords.concat(newfinds);
-		//alert(findMaxGramHead);
 		chnwords = pub.utils.getAllChnWords(newfinds,chnwords);
+		//alert(chnwords);
 		//alert(chn.length);
     //if(pub.DEBUG){
     //var newwords = chnwords.filter(function isNew(str){return orig.indexOf(str)==-1;});
@@ -209,6 +209,6 @@ com.wuxuan.fromwheretowhere.stats = function(){
   pub.utils = com.wuxuan.fromwheretowhere.utils;
   pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
   
-	pub.allwords = [];
+	pub.allwords = ["欠钱塞拉炯","没还","欠钱"];
   return pub;
 }();
