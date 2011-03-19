@@ -9,7 +9,7 @@
   <body>
     <pre id="test">
       <script type="text/javascript">
-      	plan({ tests: 14 });
+      	plan({ tests: 80 });
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("  ").words, [], "getIncludeExcluded words 0");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").words, [], "getIncludeExcluded words 1");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox").words, [], "getIncludeExcluded words 2");
@@ -79,6 +79,14 @@
 	isDeeply(com.wuxuan.fromwheretowhere.utils.uniqueArray(["job","job","jobs","home","home","homeowner"], true).freq["homeowner"],(1+0.0)/6, "uniqueArray 1.4");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.removeEmptyLine("s\n\nt\n\n\na"),"s\nt\na", "removeEmptyLine 0");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getAllChnWords(["Ç·Ç®ÈûÀ­¾¼","Ã»»¹","Ç·Ç®"]), ["Ç·Ç®","ÈûÀ­¾¼","Ã»»¹","Ç·Ç®"], "getAllChnWords 0");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.divInsert(6,[1,2,4,5]),{exist:false,arr:[1,2,4,5,6]},"divInsert non-exist in len4");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.divInsert(0,[1,2,4,5]),{exist:false,arr:[0,1,2,4,5]},"divInsert non-exist small in len4");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.divInsert(3,[1,2,4,5]),{exist:false,arr:[1,2,3,4,5]},"divInsert non-exist mid in len4");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.divInsert(2,[1,2,4,5]),{exist:true,arr:[1,2,4,5]},"divInsert exist in len4");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.divInsert(4,[1,2,4]),{exist:true,arr:[1,2,4]},"divInsert exist in len3");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.divInsert(3,[1,2,4]),{exist:false,arr:[1,2,3,4]},"divInsert non-exist in len3");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.divInsert(0,[1,2,4]),{exist:false,arr:[0,1,2,4]},"divInsert non-exist small in len3");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.divInsert(5,[1,2,4]),{exist:false,arr:[1,2,4,5]},"divInsert non-exist large in len3");
         //isDeeply([1,2].concat([3,4]), [1,2,3,4], "concat");
       </script>
     </pre>

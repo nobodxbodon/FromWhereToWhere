@@ -74,6 +74,28 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return all;
   };
   
+  pub.divInsert = function(ele, ar){
+    var left = 0;
+    var right = ar.length;
+    var center = 0;
+    while(left<=right){
+      center = (left+right)>>1;
+      if(ar[center]==ele){
+        return {exist:true,arr:ar};
+      }else if(ele<ar[center]){
+        right = center-1;
+      }else{
+        left = center+1;
+      }
+    }
+    if(center>right){
+      ar.splice(center, 0, ele);
+    }else if(left>center){
+      ar.splice(center+1, 0, ele);
+    }
+    return {exist:false,arr:ar};
+  };
+
   pub.segmentChn = function(allRelated){
     /*var chn_output = "";
     for(var c=0;c<allRelated.length;c++){
