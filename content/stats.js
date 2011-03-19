@@ -172,68 +172,6 @@ com.wuxuan.fromwheretowhere.stats = function(){
     }
   };
 	
-	pub.getAllCommonHead = function(words){
-		words.sort(function(a,b){return a>b;});
-		var newwords = [];
-		var len = words.length-1;
-		for(var i=0;i<len;i++){
-			var w1 = words[i];
-			var w2 = words[i+1];
-			var maxLen = (w1.length>w2.length)?w1.length:w2.length;
-			for(var j=0;j<maxLen;j++){
-				if(w1[j]!=w2[j]){
-					if(j>1){
-						var w = w1.substring(0,j);
-						if(newwords.indexOf(w)==-1){
-							//alert(w);
-							newwords.push(w);
-							//alert(newwords);
-						}
-					}
-					break;
-				}
-			}
-			
-		}
-		return newwords;
-	};
-	
-	pub.getAllChnWords = function(newwords, words){
-    //var words = w;
-		//var newwords = words;
-		while(newwords.length!=0){
-			var news = [];
-			for(var i=0;i<newwords.length;i++){
-				for(var j=0;j<words.length;j++){
-					if(words[j]==newwords[i] || words[j].length<newwords[i].length)
-						continue;
-					var sp = words[j].split(newwords[i]);
-					if(sp.length>1){
-						var seg = false;
-						//if splitted, start checking from here
-						var origIdx = j;
-						for(var l=0;l<sp.length;l++){
-							if(sp[l].length>1){
-								if(words.indexOf(sp[l])==-1){
-									j+=1;
-									words.splice(j,0,sp[l]);
-									news.push(sp[l]);
-								}
-								seg = true;
-							}
-						}
-						if(seg){
-							words.splice(origIdx,1);
-							j--;
-						}
-					}
-				}
-			}
-			newwords = news;
-    }
-    return words;
-  };
-	
   pub.all = function() {
 		var allRelated = pub.allwords;
 		var chn = [];
@@ -246,12 +184,12 @@ com.wuxuan.fromwheretowhere.stats = function(){
         nonChn.push(allRelated[i]);
     }
 		//alert(chn.length);;
-    var chnwords = pub.getAllChnWords(chn,chn);
-		var findMaxGramHead = pub.getAllCommonHead(chnwords);
-		var newfinds = pub.getAllChnWords(findMaxGramHead,findMaxGramHead);
+    var chnwords = pub.utils.getAllChnWords(chn,chn);
+		var findMaxGramHead = pub.utils.getAllCommonHead(chnwords);
+		var newfinds = pub.utils.getAllChnWords(findMaxGramHead,findMaxGramHead);
 		chnwords = chnwords.concat(newfinds);
 		//alert(findMaxGramHead);
-		chnwords = pub.getAllChnWords(newfinds,chnwords);
+		chnwords = pub.utils.getAllChnWords(newfinds,chnwords);
 		//alert(chn.length);
     //if(pub.DEBUG){
     //var newwords = chnwords.filter(function isNew(str){return orig.indexOf(str)==-1;});
@@ -268,6 +206,7 @@ com.wuxuan.fromwheretowhere.stats = function(){
     //pub.main.dispatch(new pub.patternThread(1), pub.main.DISPATCH_NORMAL);
   };
   
+  pub.utils = com.wuxuan.fromwheretowhere.utils;
   pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
   
 	pub.allwords = [];
