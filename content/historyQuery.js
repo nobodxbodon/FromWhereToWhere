@@ -525,10 +525,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			}else{
 				pub.allKnownParentPids.push(pid.pid);
 				//if it's its own ancester, still display it
-				pub.querytime.tmp = (new Date()).getTime();
 				var bknown = pid.knownParentPids.indexOf(pid.pid);
-				pub.querytime.bindextime +=1;
-				pub.querytime.bindexof  += ((new Date()).getTime() - pub.querytime.tmp);
 				if(bknown!=-1){
 					//if there's only one parent, the link circle is closed from pid
 					if(parentNumber==1){
@@ -620,9 +617,12 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
       //var anc = pub.getAllAncestorsfromPlaceid(pids[i],[],0,query);
     }
 		ancPids = pub.getAllAncestorsfromPlaceid(allpid,query);
+		pub.querytime.tmp = (new Date()).getTime();
     for(var i in ancPids){
       nodes.push(pub.nodefromPlaceid(ancPids[i], query));
     }
+		pub.querytime.bindextime +=1;
+		pub.querytime.bindexof  += ((new Date()).getTime() - pub.querytime.tmp);
     return nodes;
   };
   
