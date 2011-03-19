@@ -521,14 +521,14 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			var pid = allpid[0];
 			//no need to get ancester if pid is in allKnownParentPids
 			pub.querytime.tmp = (new Date()).getTime();
-			var known = pub.allKnownParentPids.indexOf(pid.pid);
+			var known = pub.utils.divInsert(pid.pid, pub.allKnownParentPids);//pub.allKnownParentPids.indexOf(pid.pid);
 			pub.querytime.indextime +=1;
 			pub.querytime.indexof  += ((new Date()).getTime() - pub.querytime.tmp);
-			if(known!=-1){
+			if(known.exist){
 				allpid.splice(0,1);
 				continue;
 			}else{
-				pub.allKnownParentPids.push(pid.pid);
+				pub.allKnownParentPids = known.arr;//.push(pid.pid);
 				//if it's its own ancester, still display it
 				var bknown = pid.knownParentPids.indexOf(pid.pid);
 				if(bknown!=-1){
