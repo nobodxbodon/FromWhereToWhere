@@ -261,53 +261,52 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     pub.sqltime.gettitle = (new Date()).getTime() -pub.tmp;
     pub.tmp = (new Date()).getTime();
-    //get as many chinese words as possible
-    /*var chn = [];
-    var nonChn = [];
-    for(var i=0;i<allRelated.length;i++){
-      if(/.*[\u4e00-\u9fa5]+.*$/.test(allRelated[i]))
-        chn.push(allRelated[i]);
-      else
-        nonChn.push(allRelated[i]);
-    }
-    var chnwords = pub.utils.getAllChnWords(chn);
-    if(pub.DEBUG){
-      pub.debuginfo.newwords = chnwords.filter(function isOld(str){return chn.indexOf(str);});
-    }
-    allRelated = nonChn.concat(chnwords);
-    pub.sqltime.segment = (new Date()).getTime() -pub.tmp;
+    
+    var relatedFromLocalNotes = pub.getLocal(allwords, pub.stopwords, pub.specials);
+    allRelated=allRelated.concat(relatedFromLocalNotes);
+    pub.sqltime.getlocal = (new Date()).getTime() -pub.tmp;
     pub.tmp = (new Date()).getTime();
-   */
+    
+    /*var chn_output = "";
+    for(var c=0;c<allRelated.length;c++){
+      chn_output+="\""+allRelated[c]+"\",";
+    }
+    alert(chn_output);*/
+    //get as many chinese words as possible
     var chn = [];
     var nonChn = [];
-		var start = (new Date()).getTime();
     for(var i=0;i<allRelated.length;i++){
       if(/.*[\u4e00-\u9fa5]+.*$/.test(allRelated[i]))
         chn.push(allRelated[i]);
       else
         nonChn.push(allRelated[i]);
     }
-		//alert(chn.length);;
+    pub.sqltime.seg0 = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
     var chnwords = pub.utils.getAllChnWords(chn,chn);
+    pub.sqltime.seg1 = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
+    
 		var findMaxGramHead = pub.utils.getAllCommonHead(chnwords);
+    pub.sqltime.seg2 = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
+    
 		var newfinds = pub.utils.getAllChnWords(findMaxGramHead,findMaxGramHead);
+    pub.sqltime.seg3 = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
+    
     //alert(newfinds);
 		chnwords = chnwords.concat(newfinds);
     //alert(chnwords);
 		chnwords = pub.utils.getAllChnWords(newfinds,chnwords);
+    pub.sqltime.seg4 = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
 		//alert(chn.length);
     //if(pub.DEBUG){
     //var newwords = chnwords.filter(function isNew(str){return orig.indexOf(str)==-1;});
     //}
     allRelated = nonChn.concat(chnwords);
-    pub.sqltime.segment = (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
 
-    var relatedFromLocalNotes = pub.getLocal(allwords, pub.stopwords, pub.specials);
-    allRelated=allRelated.concat(relatedFromLocalNotes);
-    
-    pub.sqltime.getlocal = (new Date()).getTime() -pub.tmp;
-    
     var origLen = allRelated.length;
     //sort the string array by string length, can speed up later processing
     allRelated.sort(function(a,b){return a>b});
@@ -326,7 +325,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         allover+=a.freq[a.arr[i]];
       }
       pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
-      pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild + " gettitle: "+pub.sqltime.gettitle+" segment: "+pub.sqltime.segment+"\n"+pub.DEBUGINFO;//+" segment: "+pub.sqltime.segment+"\n found new chn words: "+pub.debuginfo.newwords.length+"\n"+pub.debuginfo.newwords+
+      pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild + " gettitle: "+pub.sqltime.gettitle+" segment: "+pub.sqltime.seg0+" "+pub.sqltime.seg1+" "+pub.sqltime.seg2+" "+pub.sqltime.seg3+" "+pub.sqltime.seg4 +"\n"+pub.DEBUGINFO;//+" segment: "+pub.sqltime.segment+"\n found new chn words: "+pub.debuginfo.newwords.length+"\n"+pub.debuginfo.newwords+
       pub.DEBUGINFO="local notes: "+relatedFromLocalNotes +"\nlocal time: "+pub.sqltime.getlocal+"\n"+pub.DEBUGINFO;
     }
     var freq = a.freq;
@@ -369,19 +368,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //if there's chinese, go through every part, otherwise compare by word
       if(/.*[\u4e00-\u9fa5]+.*$/.test(t)){
         for(var j=0;j<allRelated.length;j++){
-            if(t.indexOf(allRelated[j])>-1){
-              keywords.push(allRelated[j]);
-              oF=oF*freq[allRelated[j]];
-            }
-          /*for(var k=0;k<text.length;k++){
-            if(text[k].indexOf(allRelated[j])>-1){
-              //don't recommend those with only one word, like "msnbc.com"
-              if(text[k].length==1)
-                continue;
-              keywords.push(allRelated[j]);
-              oF=oF*freq[allRelated[j]];
-            }
-          }*/
+          if(t.indexOf(allRelated[j])>-1){
+            if(text.length==1 && text[0]==allRelated[j])
+              break;
+            keywords.push(allRelated[j]);
+            oF=oF*freq[allRelated[j]];
+          }
         }
       }else{
         for(var j=0;j<allRelated.length;j++){

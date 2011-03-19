@@ -110,7 +110,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
 						continue;
 					var sp = words[j].split(newwords[i]);
 					if(sp.length>1){
-						var seg = false;
+						//var seg = false;
 						//if splitted, start checking from here
 						var origIdx = j;
 						for(var l=0;l<sp.length;l++){
@@ -120,13 +120,15 @@ com.wuxuan.fromwheretowhere.utils = function(){
 									words.splice(j,0,sp[l]);
 									news.push(sp[l]);
 								}
-								seg = true;
+								//seg = true;
 							}
 						}
-						if(seg){
-							words.splice(origIdx,1);
-							j--;
-						}
+            //replace "abc" by "ab" if there's "ab" in newwords
+						//if(seg){
+              //assume there's only one occurrence newwords[i], for title is likely
+							words.splice(origIdx,1,newwords[i]);
+							//j--;
+						//}
 					}
 				}
 			}
