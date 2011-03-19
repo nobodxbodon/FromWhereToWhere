@@ -106,9 +106,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.getTopic = function(title, sp, stopwords, specials){
-    /*if(pub.DEBUG){
-      alert(title[0]);
-    }*/
     if(title==null){
       return [];
     }
@@ -121,6 +118,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return ws;
   };
   
+  /*if the title has too few words (including stopwords), consider as non-informatic*/
   pub.tooSimple = function(allwords, specials){
     var rmSpecials = pub.filter(allwords, [], specials);
     if(rmSpecials.length<pub.TOOFEWWORDS){
@@ -384,13 +382,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
     }
     var recUri = [currLoc];
-    //TODO: remove those that are visited already, or at least display differently
+    //remove those that are visited already (maybe display differently?)
     //get rid of duplicate links
     for(var i=0;i<recLinks.length;i++){
       var uri = recLinks[i].link.href;
       if(recUri.indexOf(uri)>-1){
-        /*if(pub.DEBUG)
-          alert(recLinks[i].link.text+"\n"+uri);*/
+        //if(pub.DEBUG)
+        //  alert(recLinks[i].link.text+"\n"+uri);
         recLinks.splice(i,1);
         i--;
       }else{
@@ -412,6 +410,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return recLinks;
   };
 
+  /*-----------------UI below---------------------*/
   pub.setAttrDOMElement = function(ele, atts){
     for(var i in atts){
       ele.setAttribute(i, atts[i]);
@@ -583,6 +582,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     for(var i=0;i<recLinks.length;i++){
         var l = document.createElement("textbox");
         var t = recLinks[i].link.text;
+        var uri = recLinks[i].link.href;
         var title = pub.utils.trimString(t);
         title = pub.utils.removeEmptyLine(title);
         var numLine = pub.utils.countChar("\n",title);
@@ -598,12 +598,19 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         vbox.appendChild(l);*/
 
         var butn = document.createElement("button");
-        butn.setAttribute("style", "white-space: pre-wrap");//; text-align: center;");
+        //butn.setAttribute("style", "white-space: pre-wrap");//; text-align: center;");
         butn.setAttribute("class", "borderless");
         butn.onclick = pub.testOpen;
-        butn.setAttribute("href", recLinks[i].link.href);
+        butn.setAttribute("href", uri);
         butn.setAttribute("fwtw-title",titleForSearch);
-        butn.textContent=title;//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
+        //butn.textContent=title;//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
+        var desc = document.createElement("description");
+        desc.setAttribute("style", "white-space: pre-wrap");
+        desc.setAttribute("flex", "1");
+        desc.textContent=title;
+        if(pub.history.getIdfromUrl(uri)!=null)
+          desc.setAttribute("style", "color:gray;");
+        butn.appendChild(desc);
         vbox.appendChild(butn);
       }
     if(pub.DEBUG){
