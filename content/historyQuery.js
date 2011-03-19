@@ -143,7 +143,12 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     var id = pub.getIdfromPlaceId(pid);
     return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
-  
+       
+  pub.nodefromPlaceidWithChildInfo = function(pid, hasChildren, query) {
+    var id = pub.getIdfromPlaceId(pid);
+    return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
+  };
+	
   pub.getIdfromUrl = function(url){
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_places where url=:url");
     if(!url) {
@@ -529,10 +534,9 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 				if(bknown!=-1){
 					//if there's only one parent, the link circle is closed from pid
 					if(parentNumber==1){
-						tops=pub.addInArrayNoDup(pid.pid,tops);
+						tops.push(pid);//tops=pub.addInArrayNoDup(pid.pid,tops);
 					}
 				}else{
-					pid.knownParentPids.push(pid.pid);
 					if(pub.DEBUG)
 						pub.querytime.tmp = (new Date()).getTime();
 					var pParentPids = pub.getParentPlaceidsfromPlaceid(pid.pid, query);
@@ -544,8 +548,9 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 						/*if(pub.allKnownParentPids.indexOf(pid.pid)==-1){
 							pub.allKnownParentPids.push(pid.pid);
 						}*/
-						tops.push(pid.pid);
+						tops.push(pid);
 					} else {
+						pid.knownParentPids.push(pid.pid);
 						//if multiple ancestors, latest first
 						parentNum = pParentPids.length;
 						for(var j=0;j<parentNum;j++){
@@ -619,7 +624,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 		ancPids = pub.getAllAncestorsfromPlaceid(allpid,query);
 		pub.querytime.tmp = (new Date()).getTime();
     for(var i in ancPids){
-      nodes.push(pub.nodefromPlaceid(ancPids[i], query));
+      nodes.push(pub.nodefromPlaceidWithChildInfo(ancPids[i].pid, (ancPids[i].knownParentPids.length>0), query));
     }
 		pub.querytime.bindextime +=1;
 		pub.querytime.bindexof  += ((new Date()).getTime() - pub.querytime.tmp);
