@@ -267,46 +267,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.sqltime.getlocal = (new Date()).getTime() -pub.tmp;
     pub.tmp = (new Date()).getTime();
     
-    /*var chn_output = "";
-    for(var c=0;c<allRelated.length;c++){
-      chn_output+="\""+allRelated[c]+"\",";
-    }
-    alert(chn_output);*/
-    //get as many chinese words as possible
-    var chn = [];
-    var nonChn = [];
-    for(var i=0;i<allRelated.length;i++){
-      if(/.*[\u4e00-\u9fa5]+.*$/.test(allRelated[i]))
-        chn.push(allRelated[i]);
-      else
-        nonChn.push(allRelated[i]);
-    }
-    pub.sqltime.seg0 = (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
-    var chnwords = pub.utils.getAllChnWords(chn,chn);
-    pub.sqltime.seg1 = (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
+    allRelated = pub.utils.segmentChn(allRelated);
     
-		var findMaxGramHead = pub.utils.getAllCommonHead(chnwords);
-    pub.sqltime.seg2 = (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
-    
-		var newfinds = pub.utils.getAllChnWords(findMaxGramHead,findMaxGramHead);
-    pub.sqltime.seg3 = (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
-    
-    //alert(newfinds);
-		//chnwords = chnwords.concat(newfinds);
-    //alert(chnwords);
-		chnwords = pub.utils.getAllChnWords(newfinds,chnwords);
-    pub.sqltime.seg4 = (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
-		//alert(chn.length);
-    //if(pub.DEBUG){
-    //var newwords = chnwords.filter(function isNew(str){return orig.indexOf(str)==-1;});
-    //}
-    allRelated = nonChn.concat(chnwords);
-
     var origLen = allRelated.length;
     //sort the string array by string length, can speed up later processing
     allRelated.sort(function(a,b){return a>b});
@@ -325,7 +287,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         allover+=a.freq[a.arr[i]];
       }
       pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
-      pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild + " gettitle: "+pub.sqltime.gettitle+" segment: "+pub.sqltime.seg0+" "+pub.sqltime.seg1+" "+pub.sqltime.seg2+" "+pub.sqltime.seg3+" "+pub.sqltime.seg4 +"\n"+pub.DEBUGINFO;//+" segment: "+pub.sqltime.segment+"\n found new chn words: "+pub.debuginfo.newwords.length+"\n"+pub.debuginfo.newwords+
+      pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild +
+                  " gettitle: "+pub.sqltime.gettitle+
+                  " segment: "+pub.utils.sqltime.seg0+" "+pub.utils.sqltime.seg1+
+                  " "+pub.utils.sqltime.seg2+" "+pub.utils.sqltime.seg3+" "+pub.utils.sqltime.seg4 +"\n"+pub.DEBUGINFO;//+" segment: "+pub.sqltime.segment+"\n found new chn words: "+pub.debuginfo.newwords.length+"\n"+pub.debuginfo.newwords+
       pub.DEBUGINFO="local notes: "+relatedFromLocalNotes +"\nlocal time: "+pub.sqltime.getlocal+"\n"+pub.DEBUGINFO;
     }
     var freq = a.freq;
@@ -375,6 +340,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
             oF=oF*freq[allRelated[j]];
           }
         }
+        //TODO: could be more than 2, but 2 is more likely, those with only those keywords are likely to be catagories
+        /*if(keywords.length==2){
+          if(t.length==keywords[0].length+keywords[1].length)
+            continue;
+        }*/
       }else{
         for(var j=0;j<allRelated.length;j++){
           if(text.indexOf(allRelated[j])>-1){

@@ -3,6 +3,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
   var pub={};
   
   pub.INTERVAL_DEF = {since: -1, till: Number.MAX_VALUE};
+  pub.sqltime = {};
   
   // Utils functions from here
   pub.cloneObject = function(obj){
@@ -72,7 +73,51 @@ com.wuxuan.fromwheretowhere.utils = function(){
     //alert(all);
     return all;
   };
-  	
+  
+  pub.segmentChn = function(allRelated){
+    /*var chn_output = "";
+    for(var c=0;c<allRelated.length;c++){
+      chn_output+="\""+allRelated[c]+"\",";
+    }
+    alert(chn_output);*/
+    //get as many chinese words as possible
+    pub.tmp = (new Date()).getTime();
+    var chn = [];
+    var nonChn = [];
+    for(var i=0;i<allRelated.length;i++){
+      if(/.*[\u4e00-\u9fa5]+.*$/.test(allRelated[i]))
+        chn.push(allRelated[i]);
+      else
+        nonChn.push(allRelated[i]);
+    }
+    pub.sqltime.seg0 = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
+    var chnwords = pub.getAllChnWords(chn);
+    pub.sqltime.seg1 = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
+    
+		var findMaxGramHead = pub.getAllCommonHead(chnwords);
+    pub.sqltime.seg2 = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
+    
+		var newfinds = pub.getAllChnWords(findMaxGramHead);
+    pub.sqltime.seg3 = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
+    
+    //alert(newfinds);
+		//chnwords = chnwords.concat(newfinds);
+    //alert(chnwords);
+		chnwords = pub.getAllChnWords(newfinds,chnwords);
+    pub.sqltime.seg4 = (new Date()).getTime() -pub.tmp;
+    pub.tmp = (new Date()).getTime();
+		//alert(chn.length);
+    //if(pub.DEBUG){
+    //var newwords = chnwords.filter(function isNew(str){return orig.indexOf(str)==-1;});
+    //}
+    allRelated = nonChn.concat(chnwords);
+    return allRelated;
+  };
+  
 	pub.getAllCommonHead = function(words){
 		words.sort(function(a,b){return a>b;});
 		var newwords = [];
@@ -100,6 +145,8 @@ com.wuxuan.fromwheretowhere.utils = function(){
 	};
 	
 	pub.getAllChnWords = function(newwords, words){
+    if(words==null)
+      words = newwords;
 		while(newwords.length!=0){
 			var news = [];
 			for(var i=0;i<newwords.length;i++){
