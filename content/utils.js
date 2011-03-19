@@ -100,35 +100,30 @@ com.wuxuan.fromwheretowhere.utils = function(){
 	};
 	
 	pub.getAllChnWords = function(newwords, words){
-    //var words = w;
-		//var newwords = words;
 		while(newwords.length!=0){
 			var news = [];
 			for(var i=0;i<newwords.length;i++){
 				for(var j=0;j<words.length;j++){
-					if(words[j]==newwords[i] || words[j].length<newwords[i].length)
+					if(words[j].length<=newwords[i].length)
 						continue;
 					var sp = words[j].split(newwords[i]);
 					if(sp.length>1){
-						//var seg = false;
 						//if splitted, start checking from here
 						var origIdx = j;
+            //keep it here as newwords may be the same as words, and i shifts!!
+            var currRefWord = newwords[i];
 						for(var l=0;l<sp.length;l++){
 							if(sp[l].length>1){
-								if(words.indexOf(sp[l])==-1){
-									j+=1;
-									words.splice(j,0,sp[l]);
+								j+=1;
+								words.splice(j,0,sp[l]);
+								if(news.indexOf(sp[l])==-1){
 									news.push(sp[l]);
 								}
-								//seg = true;
 							}
 						}
             //replace "abc" by "ab" if there's "ab" in newwords
-						//if(seg){
-              //assume there's only one occurrence newwords[i], for title is likely
-							words.splice(origIdx,1,newwords[i]);
-							//j--;
-						//}
+            //assume there's only one occurrence newwords[i], for title is likely
+						words.splice(origIdx,1,currRefWord);
 					}
 				}
 			}

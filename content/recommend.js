@@ -296,7 +296,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.tmp = (new Date()).getTime();
     
     //alert(newfinds);
-		chnwords = chnwords.concat(newfinds);
+		//chnwords = chnwords.concat(newfinds);
     //alert(chnwords);
 		chnwords = pub.utils.getAllChnWords(newfinds,chnwords);
     pub.sqltime.seg4 = (new Date()).getTime() -pub.tmp;
