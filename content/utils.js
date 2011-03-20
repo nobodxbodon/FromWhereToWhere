@@ -74,10 +74,45 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return all;
   };
   
+  //get all ele that's in a but not in b
+  pub.orientDiffArray = function(a,b){
+    var diff = [];
+    for(var i=0;i<a.length;i++){
+      var ae = a[i];
+      if(b.indexOf(ae)==-1){
+        diff.push(ae);
+      }
+    }
+    return diff;
+  };
+  
+  pub.diffArray = function(a,b){
+    a.sort(function order(a,b){return a-b;});
+    b.sort(function order(a,b){return a-b;});
+    var diff = [];
+    for(var i=0;i<a.length;i++){
+      var ae = a[i];
+      var be = b[i];
+      if(!be || ae>be){
+        diff.push(ae);
+        a.splice(i,1);
+      }else if(ae<be){
+        diff.push(be);
+        b.splice(i,1);
+      }
+    }
+    for(var j=i;j<b.length;j++){
+      diff.push(b[j]);
+    }
+    return diff;
+  };
+  
+  //binary search and insert
   pub.divInsert = function(ele, ar){
     var left = 0;
     var right = ar.length;
     var center = 0;
+    
     while(left<=right){
       center = (left+right)>>1;
       if(ar[center]==ele){
@@ -96,6 +131,31 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return {exist:false,arr:ar};
   };
 
+  //binary search and insert
+  pub.binInsert = function(ele, ar){
+    var left = 0;
+    var right = ar.length;
+    var center = 0;
+    
+    while(left<=right){
+      center = (left+right)>>1;
+      if(ar[center]==ele){
+        return {exist:true,loc:center};
+      }else if(ele<ar[center]){
+        right = center-1;
+      }else{
+        left = center+1;
+      }
+    }
+    var loc = 0;
+    if(center>right){
+      loc = center;
+    }else if(left>center){
+      loc = center+1;
+    }
+    return {exist:false,loc:loc};
+  };
+  
   pub.segmentChn = function(allRelated){
     /*var chn_output = "";
     for(var c=0;c<allRelated.length;c++){
