@@ -145,6 +145,13 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   };
        
   pub.nodefromPlaceidWithChildInfo = function(pid, hasChildren, query) {
+    var actualThing = false;
+		//this has to be done because no one is above you doesn't tell if you have ones below
+		if(!hasChildren){
+			var potentialchildren = pub.getAllChildrenfromPlaceId(pid, query);
+			actualThing = (potentialchildren!=null) && (potentialchildren.length>0);
+			hasChildren = actualThing;
+		}
     var id = pub.getIdfromPlaceId(pid);
     return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
@@ -599,9 +606,9 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
         //if multiple ancestors, latest first
         var parentNum = pParentPids.length;
         for(var j=parentNum-1;j>=0;j--){
-					var known = pub.utils.binInsert(pParentPids[j], pub.allKnownParentPids);
+					var known = pub.utils.divInsert(pParentPids[j], pub.allKnownParentPids);
 					if(!known.exist){
-						pub.allKnownParentPids.splice(known.loc, 0,pParentPids[j]);
+						//pub.allKnownParentPids.splice(known.loc, 0,pParentPids[j]);
             var anc=pub.OMGgetAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum, query);
             for(var k in anc){
 							var known = pub.utils.divInsert(anc[k].pid, topPids);
@@ -681,7 +688,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     }
 		ancPids = pub.getAllAncestorsfromPlaceid(allpid,query);*/
 		
-		/*pub.allKnownParentPids = [];
+		pub.allKnownParentPids = [];
 		if(pub.DEBUG){
 			for(var i=pids.length-1; i>=0; i--){
 				//to compare with the old one
@@ -699,10 +706,10 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			}
 			alert(newAncPids);
 			alert(oldAncPids);
-			var diffar = pub.utils.orientDiffArray(oldAncPids, newAncPids);
+			var diffar = pub.utils.diffArray(oldAncPids, newAncPids);
 			if(diffar.length!=0)
 				alert("new="+newAncPids.length + " : old=" + oldAncPids.length + "\n"+diffar);
-		}*/
+		}
 		pub.querytime.tmp = (new Date()).getTime();
     for(var i in ancPids){
       nodes.push(pub.nodefromPlaceidWithChildInfo(ancPids[i].pid, (ancPids[i].knownParentPids.length>0), query));

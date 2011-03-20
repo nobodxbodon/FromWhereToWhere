@@ -109,29 +109,16 @@ com.wuxuan.fromwheretowhere.utils = function(){
   
   //binary search and insert
   pub.divInsert = function(ele, ar){
-    var left = 0;
-    var right = ar.length;
-    var center = 0;
-    
-    while(left<=right){
-      center = (left+right)>>1;
-      if(ar[center]==ele){
-        return {exist:true,arr:ar};
-      }else if(ele<ar[center]){
-        right = center-1;
-      }else{
-        left = center+1;
-      }
+    var pos = pub.binInsert(ele, ar);
+    if(pos.exist){
+      return {exist:true, arr:ar};
+    }else{
+      ar.splice(pos.loc, 0, ele);
+      return {exist:false, arr:ar};
     }
-    if(center>right){
-      ar.splice(center, 0, ele);
-    }else if(left>center){
-      ar.splice(center+1, 0, ele);
-    }
-    return {exist:false,arr:ar};
   };
 
-  //binary search and insert
+  //binary search and return the location to insert
   pub.binInsert = function(ele, ar){
     var left = 0;
     var right = ar.length;
