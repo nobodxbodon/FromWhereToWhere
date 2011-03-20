@@ -17,7 +17,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     }
   };
   
-	pub.DEBUG = true;
+	pub.DEBUG = false;
   // Utils functions finish
   pub.keywords = "";
   pub.currentURI = Application.storage.get("currentURI", false);

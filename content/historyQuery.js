@@ -531,66 +531,13 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 	pub.querytime = {};
 	
 	//return all the top ancesters of a placeid, and add to allKnownParents
-  pub.getAllAncestorsfromPlaceid = function(allpid, query){
-    var tops = [];
-		var parentNumber = 0;
-		//deal with the first element first, replace the original pid with its parents, and move one to tops if there's no parent, judge by allpid is empty (move out all)
-		while(allpid.length!=0){
-			var pid = allpid[0];
-			//no need to get ancester if pid is in allKnownParentPids
-			pub.querytime.tmp = (new Date()).getTime();
-			var known = pub.utils.binInsert(pid.pid, pub.allKnownParentPids);
-			//var known = pub.utils.divInsert(pid.pid, pub.allKnownParentPids);
-			pub.querytime.indextime +=1;
-			pub.querytime.indexof  += ((new Date()).getTime() - pub.querytime.tmp);
-			if(known.exist){
-				allpid.splice(0,1);
-				continue;
-			}else{
-				pub.allKnownParentPids.splice(known.loc, 0, pid.pid);
-				//pub.allKnownParentPids = known.arr;
-				//if it's its own ancester, still display it
-				var bknown = pid.knownParentPids.indexOf(pid.pid);
-				if(bknown!=-1){
-					//if there's only one parent, the link circle is closed from pid
-					if(parentNumber==1){
-						tops.push(pid);
-					}
-				}else{
-					if(pub.DEBUG)
-						pub.querytime.tmp = (new Date()).getTime();
-					var pParentPids = pub.getParentPlaceidsfromPlaceid(pid.pid, query);
-					if(pub.DEBUG){
-						pub.querytime.getParentTime +=1;
-						pub.querytime.search += ((new Date()).getTime() - pub.querytime.tmp);
-					}
-					if(pParentPids.length==0){
-						tops.push(pid);
-					} else {
-						pid.knownParentPids.push(pid.pid);
-						//if multiple ancestors, latest first
-						parentNum = pParentPids.length;
-						for(var j=0;j<parentNum;j++){
-							allpid.splice(1,0,{pid:pParentPids[j], knownParentPids: pid.knownParentPids});
-						}
-					}
-				}
-				allpid.splice(0,1);
-			}
-		}
-    return tops;
-  };
-	
-	//return all the top ancesters of a placeid, and add to allKnownParents
   pub.OMGgetAllAncestorsfromPlaceid = function(pid, knownParentPids, parentNumber, query){
     var tops = [];
 		var topPids = [];
     //if it's its own ancester, still display it
     if(knownParentPids.indexOf(pid)!=-1){
-      //if there's only one parent, the link circle is closed from pid
       if(parentNumber==1){
 				var known = pub.utils.divInsert(pid, topPids);
-				//topPids.splice(known.loc,0,pid);
 				if(!known.exist)
 					tops.push({pid:pid,knownParentPids:knownParentPids});
       }
@@ -598,7 +545,6 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
       var pParentPids = pub.getParentPlaceidsfromPlaceid(pid, query);
       if(pParentPids.length==0){
 				var known = pub.utils.divInsert(pid, pub.allKnownParentPids);
-				//pub.allKnownParentPids.splice(known.loc,0,pid);
 				topPids.push(pid);
         tops.push({pid:pid,knownParentPids:knownParentPids});
       } else {
@@ -608,47 +554,11 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
         for(var j=parentNum-1;j>=0;j--){
 					var known = pub.utils.divInsert(pParentPids[j], pub.allKnownParentPids);
 					if(!known.exist){
-						//pub.allKnownParentPids.splice(known.loc, 0,pParentPids[j]);
             var anc=pub.OMGgetAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum, query);
             for(var k in anc){
 							var known = pub.utils.divInsert(anc[k].pid, topPids);
-							//topPids.splice(known.loc,0,anc[k].pid);
 							if(!known.exist)
 								tops.push(anc[k]);
-            }
-          }
-        }
-      }
-    }
-    return tops;
-  };
-	
-  //return all the top ancesters of a placeid, and add to allKnownParents
-  pub.oldgetAllAncestorsfromPlaceid = function(pid, knownParentPids, parentNumber, query){
-    var tops = [];
-    //if it's its own ancester, still display it
-    if(knownParentPids.indexOf(pid)!=-1){
-      //if there's only one parent, the link circle is closed from pid
-      if(parentNumber==1){
-        tops=pub.addInArrayNoDup(pid,tops);
-      }
-    }else{
-      knownParentPids.push(pid);
-      var pParentPids = pub.getParentPlaceidsfromPlaceid(pid, query);
-      if(pParentPids.length==0){
-        if(pub.allKnownParentPids.indexOf(pid)==-1){
-          pub.allKnownParentPids.push(pid);
-        }
-        tops.push(pid);
-      } else {
-        //if multiple ancestors, latest first
-        var parentNum = pParentPids.length;
-        for(var j=parentNum-1;j>=0;j--){
-          if(pub.allKnownParentPids.indexOf(pParentPids[j])==-1){
-            pub.allKnownParentPids.push(pParentPids[j]);
-            var anc=pub.oldgetAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum, query);
-            for(var k in anc){
-              tops=pub.addInArrayNoDup(anc[k],tops);
             }
           }
         }
@@ -663,12 +573,9 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     var nodes = [];
     var ancPids = [];
     //order by time: latest first by default
-		//var len = ;
 		var allpid = [];
-		var oldAncPids = [];
 		var topPids = [];
     for(var i=pids.length-1; i>=0; i--){
-			//allpid.push({pid:pids[i], parentNum:0, knownParentPids:[]});
 			var known = pub.utils.binInsert(pids[i], pub.allKnownParentPids);
 			if(known.exist)
 				continue;
@@ -681,42 +588,10 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			}
     }
 		
-		/*for(var i=pids.length-1; i>=0; i--){
-			allpid.push({pid:pids[i], knownParentPids:[]});
-			
-      //var anc = pub.getAllAncestorsfromPlaceid(pids[i],[],0,query);
-    }
-		ancPids = pub.getAllAncestorsfromPlaceid(allpid,query);*/
-		
-		pub.allKnownParentPids = [];
-		if(pub.DEBUG){
-			for(var i=pids.length-1; i>=0; i--){
-				//to compare with the old one
-				var anc = pub.oldgetAllAncestorsfromPlaceid(pids[i],[],0,query);
-				for(var j in anc)
-					oldAncPids = pub.addInArrayNoDup(anc[j],oldAncPids);
-			}
-		}
-		//ancPids = pub.getAllAncestorsfromPlaceid(allpid,query);
-		//compare two results
-		if(pub.DEBUG){
-			var newAncPids = [];
-			for(var i in ancPids){
-				newAncPids.push(ancPids[i].pid);
-			}
-			alert(newAncPids);
-			alert(oldAncPids);
-			var diffar = pub.utils.diffArray(oldAncPids, newAncPids);
-			if(diffar.length!=0)
-				alert("new="+newAncPids.length + " : old=" + oldAncPids.length + "\n"+diffar);
-		}
 		pub.querytime.tmp = (new Date()).getTime();
     for(var i in ancPids){
       nodes.push(pub.nodefromPlaceidWithChildInfo(ancPids[i].pid, (ancPids[i].knownParentPids.length>0), query));
     }
-		/*for(var i in oldAncPids){
-      nodes.push(pub.nodefromPlaceid(oldAncPids[i], query));
-    }*/
 		pub.querytime.bindextime +=1;
 		pub.querytime.bindexof  += ((new Date()).getTime() - pub.querytime.tmp);
     return nodes;
