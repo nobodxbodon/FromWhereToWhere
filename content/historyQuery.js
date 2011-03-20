@@ -412,15 +412,23 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 	// add query restrictions to parents, time and site
   pub.getParentPlaceidsfromPlaceid = function(pid, query){
     //as id!=0, from_visit=0 doesn't matter
+		if(pub.DEBUG)
+			pub.querytime.tmp = (new Date()).getTime();
 		var term = "SELECT place_id FROM moz_historyvisits \
 					    where id IN (SELECT from_visit FROM moz_historyvisits where \
 						place_id==:id)";
     var statement = pub.mDBConn.createStatement(term);
     statement.params.id=pid;
     var pids = pub.queryAll(statement, 32, 0);
+		if(pub.DEBUG){
+			pub.querytime.getParentEasyTime +=1;
+			pub.querytime.getParentEasy += ((new Date()).getTime() - pub.querytime.tmp);
+		}
 		// IF there's no results, maybe it's inaccurate! REPEAT with range!
 		//if(pid==10247)
     if(pids.length==0){
+			if(pub.DEBUG)
+				pub.querytime.tmp = (new Date()).getTime();
       var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
 						place_id=:id");
       statement.params.id=pid;
@@ -455,6 +463,10 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 					}
 				}
       }
+			if(pub.DEBUG){
+				pub.querytime.getParentHardTime +=1;
+				pub.querytime.getParentHard += ((new Date()).getTime() - pub.querytime.tmp);
+			}
 		}
 		//fiter pid after all the keyword query
 		if(query && (query.site.length>0 || query.time.length>0)){
@@ -512,51 +524,44 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 	pub.querytime = {};
 	
 	//return all the top ancesters of a placeid, and add to allKnownParents
-  pub.getAllAncestorsfromPlaceid = function(allpid, query){
+  pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids, parentNumber, query){
     var tops = [];
-		var parentNumber = 0;
-		//deal with the first element first, replace the original pid with its parents, and move one to tops if there's no parent, judge by allpid is empty (move out all)
-		while(allpid.length!=0){
-			var pid = allpid[0];
-			//no need to get ancester if pid is in allKnownParentPids
-			pub.querytime.tmp = (new Date()).getTime();
-			var known = pub.utils.divInsert(pid.pid, pub.allKnownParentPids);
-			pub.querytime.indextime +=1;
-			pub.querytime.indexof  += ((new Date()).getTime() - pub.querytime.tmp);
-			if(known.exist){
-				allpid.splice(0,1);
-				continue;
-			}else{
+		var topPids = [];
+    //if it's its own ancester, still display it
+    if(knownParentPids.indexOf(pid)!=-1){
+      //if there's only one parent, the link circle is closed from pid
+      if(parentNumber==1){
+				var known = pub.utils.divInsert(pid, topPids);
+				topPids = known.arr;
+				if(!known.exist)
+					tops.push({pid:pid,knownParentPids:knownParentPids});
+      }
+    }else{
+      var pParentPids = pub.getParentPlaceidsfromPlaceid(pid, query);
+      if(pParentPids.length==0){
+				var known = pub.utils.divInsert(pid, pub.allKnownParentPids);
 				pub.allKnownParentPids = known.arr;
-				//if it's its own ancester, still display it
-				var bknown = pid.knownParentPids.indexOf(pid.pid);
-				if(bknown!=-1){
-					//if there's only one parent, the link circle is closed from pid
-					if(parentNumber==1){
-						tops.push(pid);
-					}
-				}else{
-					if(pub.DEBUG)
-						pub.querytime.tmp = (new Date()).getTime();
-					var pParentPids = pub.getParentPlaceidsfromPlaceid(pid.pid, query);
-					if(pub.DEBUG){
-						pub.querytime.getParentTime +=1;
-						pub.querytime.search += ((new Date()).getTime() - pub.querytime.tmp);
-					}
-					if(pParentPids.length==0){
-						tops.push(pid);
-					} else {
-						pid.knownParentPids.push(pid.pid);
-						//if multiple ancestors, latest first
-						parentNum = pParentPids.length;
-						for(var j=0;j<parentNum;j++){
-							allpid.splice(1,0,{pid:pParentPids[j], knownParentPids: pid.knownParentPids});
-						}
-					}
-				}
-				allpid.splice(0,1);
-			}
-		}
+				topPids.push(pid);
+        tops.push({pid:pid,knownParentPids:knownParentPids});
+      } else {
+				knownParentPids.push(pid);
+        //if multiple ancestors, latest first
+        var parentNum = pParentPids.length;
+        for(var j=parentNum-1;j>=0;j--){
+					var known = pub.utils.divInsert(pParentPids[j], pub.allKnownParentPids);
+					if(!known.exist){
+						pub.allKnownParentPids = known.arr;
+            var anc=pub.getAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum, query);
+            for(var k in anc){
+							var known = pub.utils.divInsert(anc[k].pid, topPids);
+							topPids = known.arr;
+							if(!known.exist)
+								tops.push(anc[k]);
+            }
+          }
+        }
+      }
+    }
     return tops;
   };
 	
@@ -571,13 +576,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
       }
     }else{
       knownParentPids.push(pid);
-			if(pub.DEBUG)
-				pub.querytime.tmp = (new Date()).getTime();
       var pParentPids = pub.getParentPlaceidsfromPlaceid(pid, query);
-			if(pub.DEBUG){
-				pub.querytime.getParentTime +=1;
-				pub.querytime.search += ((new Date()).getTime() - pub.querytime.tmp);
-			}
       if(pParentPids.length==0){
         if(pub.allKnownParentPids.indexOf(pid)==-1){
           pub.allKnownParentPids.push(pid);
@@ -608,16 +607,48 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     //order by time: latest first by default
 		//var len = ;
 		var allpid = [];
+		var oldAncPids = [];
+		var topPids = [];
     for(var i=pids.length-1; i>=0; i--){
-			allpid.push({pid:pids[i], knownParentPids:[]});
-			
-      //var anc = pub.getAllAncestorsfromPlaceid(pids[i],[],0,query);
+			//allpid.push({pid:pids[i], parentNum:0, knownParentPids:[]});
+			var newanc = pub.getAllAncestorsfromPlaceid(pids[i],[],0,query);
+			for(var j in newanc){
+				var known = pub.utils.divInsert(newanc[j].pid, topPids);
+				if(!known.exist){
+					topPids = known.arr;
+					ancPids.push(newanc[j]);
+				}
+			}
     }
-		ancPids = pub.getAllAncestorsfromPlaceid(allpid,query);
+		pub.allKnownParentPids = [];
+		if(pub.DEBUG){
+			for(var i=pids.length-1; i>=0; i--){
+				//to compare with the old one
+				var anc = pub.oldgetAllAncestorsfromPlaceid(pids[i],[],0,query);
+				for(var j in anc)
+					oldAncPids = pub.addInArrayNoDup(anc[j],oldAncPids);
+			}
+		}
+		//ancPids = pub.getAllAncestorsfromPlaceid(allpid,query);
+		//compare two results
+		if(pub.DEBUG){
+			var newAncPids = [];
+			for(var i in ancPids){
+				newAncPids.push(ancPids[i].pid);
+			}
+			alert(newAncPids);
+			alert(oldAncPids);
+			var diffar = pub.utils.orientDiffArray(oldAncPids, newAncPids);
+			if(diffar.length!=0)
+				alert("new="+newAncPids.length + " : old=" + oldAncPids.length + "\n"+diffar);
+		}
 		pub.querytime.tmp = (new Date()).getTime();
     for(var i in ancPids){
       nodes.push(pub.nodefromPlaceidWithChildInfo(ancPids[i].pid, (ancPids[i].knownParentPids.length>0), query));
     }
+		/*for(var i in oldAncPids){
+      nodes.push(pub.nodefromPlaceid(oldAncPids[i], query));
+    }*/
 		pub.querytime.bindextime +=1;
 		pub.querytime.bindexof  += ((new Date()).getTime() - pub.querytime.tmp);
     return nodes;
