@@ -17,6 +17,7 @@ com.wuxuan.fromwheretowhere.main = function(){
     }
   };
   
+	pub.DEBUG = true;
   // Utils functions finish
   pub.keywords = "";
   pub.currentURI = Application.storage.get("currentURI", false);
@@ -432,17 +433,34 @@ pub.mainThread.prototype = {
   pub.searchThread.prototype = {
     run: function() {
       try {
-	
+				var querytime = {};
         var topNodes = [];
         if(this.words.length!=0 ||  this.optional.length!=0){
           var allpids = [];
           // improve by search id from keywords directly instead of getting urls first
-					//var querytime = (new Date()).getTime();
+					if(pub.DEBUG)
+						querytime.tmp = (new Date()).getTime();
 					allpids = pub.history.searchIdbyKeywords(this.words, this.optional, this.excluded, this.site, this.time);
-					//alert(((new Date()).getTime() - querytime)/100);
+					if(pub.DEBUG){
+						querytime.search = ((new Date()).getTime() - querytime.tmp);
+						querytime.tmp = (new Date()).getTime();
+						pub.history.querytime.search=0;
+						pub.history.querytime.getParentTime=0;
+						pub.history.querytime.indexof=0;
+						pub.history.querytime.indextime=0;
+						pub.history.querytime.bindexof=0;
+						pub.history.querytime.bindextime=0;
+						pub.history.querytime.getParentEasyTime=0;
+						pub.history.querytime.getParentEasy=0;
+						pub.history.querytime.getParentHardTime=0;
+						pub.history.querytime.getParentHard=0;
+					}
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.history.createParentNodesCheckDup(allpids, this.query);
-	
+					if(pub.DEBUG){
+						querytime.parent = ((new Date()).getTime() - querytime.tmp);
+						querytime.tmp = (new Date()).getTime();
+					}
 					//search in local notes, latest first
 					//7 short records 1 long: 7ms; 7 short 11 long: 37ms; if site filter: 75ms
 					//var start = (new Date()).getTime();
@@ -450,6 +468,16 @@ pub.mainThread.prototype = {
 					//alert((new Date()).getTime()-start);
 					for(var i in filtered){
 						topNodes.splice(0,0,pub.putNodeToLevel0(filtered[i]));
+					}
+					if(pub.DEBUG){
+						querytime.local = ((new Date()).getTime() - querytime.tmp);
+						alert("search: "+querytime.search+" parent: "+querytime.parent+" local: "+querytime.local+
+									"\n"+pub.history.querytime.search+" in "+pub.history.querytime.getParentTime+
+									"\n"+pub.history.querytime.indexof + " in " + pub.history.querytime.indextime+
+									"\n"+pub.history.querytime.bindexof + " in " + pub.history.querytime.bindextime+
+									"\n"+pub.history.allKnownParentPids.length+
+									"\nEasy parent: "+pub.history.querytime.getParentEasy+" in "+pub.history.querytime.getParentEasyTime+
+									"\nHard parent: "+pub.history.querytime.getParentHard+" in "+pub.history.querytime.getParentHardTime);
 					}
 				}
 				
