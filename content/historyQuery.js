@@ -514,27 +514,26 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 	//return all the top ancesters of a placeid, and add to allKnownParents
   pub.getAllAncestorsfromPlaceid = function(allpid, query){
     var tops = [];
-		//var allpid = [{pid:pid0,knownParentPids:[]}];
 		var parentNumber = 0;
 		//deal with the first element first, replace the original pid with its parents, and move one to tops if there's no parent, judge by allpid is empty (move out all)
 		while(allpid.length!=0){
 			var pid = allpid[0];
 			//no need to get ancester if pid is in allKnownParentPids
 			pub.querytime.tmp = (new Date()).getTime();
-			var known = pub.utils.divInsert(pid.pid, pub.allKnownParentPids);//pub.allKnownParentPids.indexOf(pid.pid);
+			var known = pub.utils.divInsert(pid.pid, pub.allKnownParentPids);
 			pub.querytime.indextime +=1;
 			pub.querytime.indexof  += ((new Date()).getTime() - pub.querytime.tmp);
 			if(known.exist){
 				allpid.splice(0,1);
 				continue;
 			}else{
-				pub.allKnownParentPids = known.arr;//.push(pid.pid);
+				pub.allKnownParentPids = known.arr;
 				//if it's its own ancester, still display it
 				var bknown = pid.knownParentPids.indexOf(pid.pid);
 				if(bknown!=-1){
 					//if there's only one parent, the link circle is closed from pid
 					if(parentNumber==1){
-						tops.push(pid);//tops=pub.addInArrayNoDup(pid.pid,tops);
+						tops.push(pid);
 					}
 				}else{
 					if(pub.DEBUG)
@@ -545,20 +544,13 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 						pub.querytime.search += ((new Date()).getTime() - pub.querytime.tmp);
 					}
 					if(pParentPids.length==0){
-						/*if(pub.allKnownParentPids.indexOf(pid.pid)==-1){
-							pub.allKnownParentPids.push(pid.pid);
-						}*/
 						tops.push(pid);
 					} else {
 						pid.knownParentPids.push(pid.pid);
 						//if multiple ancestors, latest first
 						parentNum = pParentPids.length;
 						for(var j=0;j<parentNum;j++){
-							//shouldn't need this to get results, but just take too much time if not
-							//if(pub.allKnownParentPids.indexOf(pParentPids[j])==-1){
-							//	pub.allKnownParentPids.push(pParentPids[j]);
-								allpid.splice(1,0,{pid:pParentPids[j], knownParentPids: pid.knownParentPids});
-							//}
+							allpid.splice(1,0,{pid:pParentPids[j], knownParentPids: pid.knownParentPids});
 						}
 					}
 				}
