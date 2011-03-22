@@ -63,8 +63,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           for(var j=0;j<nonempty.length;j++){
             //remove all numbers and 1 char word
             if(nonempty[j].length==1 || nonempty[j].match(/[0-9]/)!=null){
-              //allwords.splice(i, 1);
-              //i--;
               continue;
             }
             /*var segs = pub.utils.segmentChn(allwords[i],pub.dictionary);
@@ -266,6 +264,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     //store the small words for future segmentation
     //TODO: add size limit to dictionary, use it for all seg, including for future allRelated titles
+    if(pub.DEBUG){
+      pub.utils.sqltime.seg2 = 0;
+      pub.utils.sqltime.seg4 = 0;
+    }
     var segResults = pub.utils.segmentChn(allRelated);
     allRelated = segResults.all;
     var chnSmall = segResults.chnSmall;
@@ -275,6 +277,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     var origLen = allRelated.length;
     //sort the string array by string length, can speed up later processing
+    //TODO: check if can save this as allRelated is sorted before in segment
     allRelated.sort(function(a,b){return a>b});
     var len = allRelated.length;
     var a = pub.utils.uniqueArray(allRelated, true);
