@@ -168,7 +168,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
       pub.tmp = (new Date()).getTime();
       
       findMaxGramHead = pub.getAllCommonHead(chn);
-      pub.sqltime.seg2 = (new Date()).getTime() -pub.tmp;
+      pub.sqltime.seg2 += (new Date()).getTime() -pub.tmp;
       /*pub.tmp = (new Date()).getTime();
       
       var newfinds = pub.getAllChnWords(findMaxGramHead);
@@ -181,7 +181,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
       //TODO: use divInsert and save the sort
       chn = pub.getAllChnWords(findMaxGramHead,chn);
       
-      pub.sqltime.seg4 = (new Date()).getTime() -pub.tmp;
+      pub.sqltime.seg4 += (new Date()).getTime() -pub.tmp;
       pub.tmp = (new Date()).getTime();
       
       if(findMaxGramHead.length==0){
