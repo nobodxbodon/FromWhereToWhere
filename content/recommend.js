@@ -38,8 +38,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       allwords[i] = allwords[i].toLowerCase();
       var orig = allwords[i];
       var upper = orig.toUpperCase();
-      /*if(pub.DEBUG)
-        alert(upper);*/
       //judge if it's English
       if(upper!=orig){
         //only for English
@@ -62,21 +60,22 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         }*/
         allwords.splice(i,1);
         if(nonempty.length!=0){
-          for(var j=0;j<nonempty.length;j++)
-            allwords.splice(j+i,0,nonempty[j]);
-        }else{
-          i--;
-          continue;
+          for(var j=0;j<nonempty.length;j++){
+            //remove all numbers and 1 char word
+            if(nonempty[j].length==1 || nonempty[j].match(/[0-9]/)!=null){
+              //allwords.splice(i, 1);
+              //i--;
+              continue;
+            }
+            /*var segs = pub.utils.segmentChn(allwords[i],pub.dictionary);
+            if(segs.length>1){
+              
+            }*/
+            allwords.splice(i,0,nonempty[j]);
+            i++;
+          }
         }
-        /*if(pub.DEBUG){
-          alert("after splice: "+ allwords +"\n"+allwords[i]);
-        }*/
-        //remove all numbers and 1 char word
-        if(allwords[i].length==1 || allwords[i].match(/[0-9]/)!=null){
-          allwords.splice(i, 1);
-          i--;
-          continue;
-        }
+        i--;
       }
     }
     return allwords;
@@ -265,7 +264,14 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.sqltime.getlocal = (new Date()).getTime() -pub.tmp;
     pub.tmp = (new Date()).getTime();
     
-    allRelated = pub.utils.segmentChn(allRelated);
+    //store the small words for future segmentation
+    //TODO: add size limit to dictionary, use it for all seg, including for future allRelated titles
+    var segResults = pub.utils.segmentChn(allRelated);
+    allRelated = segResults.all;
+    var chnSmall = segResults.chnSmall;
+    for(var s=0;s<chnSmall.length;s++){
+      pub.utils.divInsert(chnSmall, pub.dictionary);
+    }
     
     var origLen = allRelated.length;
     //sort the string array by string length, can speed up later processing
@@ -598,12 +604,20 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         vbox.appendChild(l);*/
 
         var butn = document.createElement("button");
-        //butn.setAttribute("style", "white-space: pre-wrap");//; text-align: center;");
+        //butn.setAttribute("style", "border: 0px; padding:0px;");//; text-align: center;");
         butn.setAttribute("class", "borderless");
         butn.onclick = pub.testOpen;
         butn.setAttribute("href", uri);
         butn.setAttribute("fwtw-title",titleForSearch);
         //butn.textContent=title;//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
+        /*var predesc = document.createElement("description");
+        predesc.textContent = "this is black ";
+        predesc.setAttribute("style", "color:gray;");
+        butn.appendChild(predesc);
+        var middesc = document.createElement("description");
+        middesc.textContent = "this is red ";
+        middesc.setAttribute("style", "color:red;");
+        butn.appendChild(middesc);*/
         var desc = document.createElement("description");
         desc.setAttribute("style", "white-space: pre-wrap");
         desc.setAttribute("flex", "1");
@@ -644,6 +658,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.history.init();
     pub.localmanager = com.wuxuan.fromwheretowhere.localmanager;
     pub.localmanager.init();
+    
+    pub.dictionary = [];
   };
     
   return pub;
