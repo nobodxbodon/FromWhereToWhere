@@ -159,36 +159,48 @@ com.wuxuan.fromwheretowhere.utils = function(){
       else
         nonChn.push(allRelated[i]);
     }
-    pub.sqltime.seg0 = (new Date()).getTime() -pub.tmp;
+    /*pub.sqltime.seg0 = (new Date()).getTime() -pub.tmp;
     pub.tmp = (new Date()).getTime();
     var chnwords = pub.getAllChnWords(chn);
-    pub.sqltime.seg1 = (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
-    
-		var findMaxGramHead = pub.getAllCommonHead(chnwords);
-    pub.sqltime.seg2 = (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
-    
-		var newfinds = pub.getAllChnWords(findMaxGramHead);
-    pub.sqltime.seg3 = (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
-    
-    //alert(newfinds);
-		//chnwords = chnwords.concat(newfinds);
-    //alert(chnwords);
-		chnwords = pub.getAllChnWords(newfinds,chnwords);
-    pub.sqltime.seg4 = (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
+    pub.sqltime.seg1 = (new Date()).getTime() -pub.tmp;*/
+    var findMaxGramHead = [];
+    for(var i=0;i<4;i++){
+      pub.tmp = (new Date()).getTime();
+      
+      findMaxGramHead = pub.getAllCommonHead(chn);
+      pub.sqltime.seg2 = (new Date()).getTime() -pub.tmp;
+      /*pub.tmp = (new Date()).getTime();
+      
+      var newfinds = pub.getAllChnWords(findMaxGramHead);
+      pub.sqltime.seg3 = (new Date()).getTime() -pub.tmp;*/
+      pub.tmp = (new Date()).getTime();
+      
+      //alert(newfinds);
+      //chnwords = chnwords.concat(newfinds);
+      //alert(chnwords);
+      //TODO: use divInsert and save the sort
+      chn = pub.getAllChnWords(findMaxGramHead,chn);
+      
+      pub.sqltime.seg4 = (new Date()).getTime() -pub.tmp;
+      pub.tmp = (new Date()).getTime();
+      
+      if(findMaxGramHead.length==0){
+        //if(pub.DEBUG)
+        //  alert(i);
+        break;
+      }
+    }
 		//alert(chn.length);
     //if(pub.DEBUG){
     //var newwords = chnwords.filter(function isNew(str){return orig.indexOf(str)==-1;});
     //}
-    allRelated = nonChn.concat(chnwords);
-    return allRelated;
+    allRelated = nonChn.concat(chn);
+    var chnSmall = chn.filter(function small(str){return str.length<5;});
+    return {all:allRelated, chnSmall:chnSmall};
   };
   
 	pub.getAllCommonHead = function(words){
-		words.sort(function(a,b){return a>b;});
+		words.sort(function(a,b){return a<b;});
 		var newwords = [];
 		var len = words.length-1;
 		for(var i=0;i<len;i++){
@@ -196,9 +208,12 @@ com.wuxuan.fromwheretowhere.utils = function(){
 			var w2 = words[i+1];
 			var maxLen = (w1.length>w2.length)?w1.length:w2.length;
 			for(var j=0;j<maxLen;j++){
+        //won't add if two are the same
 				if(w1[j]!=w2[j]){
+          //only add if longer than 1
 					if(j>1){
 						var w = w1.substring(0,j);
+            //TODO: divInsert
 						if(newwords.indexOf(w)==-1){
 							//alert(w);
 							newwords.push(w);
@@ -214,8 +229,12 @@ com.wuxuan.fromwheretowhere.utils = function(){
 	};
 	
 	pub.getAllChnWords = function(newwords, words){
-    if(words==null)
+    newwords.sort(function(a,b){return a<b;});
+    if(words==null){
       words = newwords;
+    }else{
+      words.sort(function(a,b){return a<b;});
+    }
 		while(newwords.length!=0){
 			var news = [];
 			for(var i=0;i<newwords.length;i++){
@@ -232,9 +251,10 @@ com.wuxuan.fromwheretowhere.utils = function(){
 							if(sp[l].length>1){
 								j+=1;
 								words.splice(j,0,sp[l]);
-								if(news.indexOf(sp[l])==-1){
+								/*if(news.indexOf(sp[l])==-1){
 									news.push(sp[l]);
-								}
+								}*/
+                pub.divInsert(sp[l], news);
 							}
 						}
             //replace "abc" by "ab" if there's "ab" in newwords
