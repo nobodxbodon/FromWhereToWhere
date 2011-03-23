@@ -174,34 +174,8 @@ com.wuxuan.fromwheretowhere.stats = function(){
 	
   pub.all = function() {
 		var allRelated = pub.allwords;
-		var chn = [];
-    var nonChn = [];
-		var start = (new Date()).getTime();
-    for(var i=0;i<allRelated.length;i++){
-      if(/.*[\u4e00-\u9fa5]+.*$/.test(allRelated[i]))
-        chn.push(allRelated[i]);
-      else
-        nonChn.push(allRelated[i]);
-    }
-		//alert(chn.length);;
-    var chnwords = pub.utils.getAllChnWords(chn,chn);
-		var findMaxGramHead = pub.utils.getAllCommonHead(chnwords);
-		var newfinds = pub.utils.getAllChnWords(findMaxGramHead,findMaxGramHead);
-		chnwords = chnwords.concat(newfinds);
-		chnwords = pub.utils.getAllChnWords(newfinds,chnwords);
-		//alert(chnwords);
-		//alert(chn.length);
-    //if(pub.DEBUG){
-    //var newwords = chnwords.filter(function isNew(str){return orig.indexOf(str)==-1;});
-    //}
-    allRelated = nonChn.concat(chnwords);
-    var segtime = (new Date()).getTime() -start;
-		var output="";
-		var shorts = chnwords;//chnwords.filter(function lessthen(str){return str.length<4;});
-		for(var l=0;l<shorts.length;l++){
-			output+=shorts[l]+"\n";
-		}
-		alert(segtime+"\n"+findMaxGramHead.length+"\n"+output);
+		allRelated = pub.utils.getAllChnWords(allRelated);
+		alert(allRelated);
     //pub.main.dispatch(new pub.searchThread(1), pub.main.DISPATCH_NORMAL);
     //pub.main.dispatch(new pub.patternThread(1), pub.main.DISPATCH_NORMAL);
   };

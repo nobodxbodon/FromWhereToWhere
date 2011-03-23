@@ -107,18 +107,22 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return diff;
   };
   
-  //merge the newArray into Array
-  pub.mergeToArray = function(newArray, origArray){
-    //sort for later divInsert
-    origArray.sort(function(a,b){return a>b;});
+  //merge the newArray into sorted Array
+  // .sort(function(a,b){return a<b;})
+  pub.mergeToSortedArray = function(newArray, origArray){
     for(var i=0;i<newArray.length;i++){
-      pub.divInsert(newArray[i], origArray);
+      pub.divInsert(newArray[i], origArray, true);
     }
   };
   
   //binary search and insert
-  pub.divInsert = function(ele, ar){
-    var pos = pub.binInsert(ele, ar);
+  pub.divInsert = function(ele, ar, reversed){
+    var pos = {};
+    if(reversed){
+      pos = pub.revBinInsert(ele, ar);
+    }else{
+      pos = pub.binInsert(ele, ar);
+    }
     if(pos.exist){
       return {exist:true, arr:ar};
     }else{
@@ -127,6 +131,31 @@ com.wuxuan.fromwheretowhere.utils = function(){
     }
   };
 
+  //binary search and return the location to insert
+  pub.revBinInsert = function(ele, ar){
+    var left = 0;
+    var right = ar.length;
+    var center = 0;
+    
+    while(left<=right){
+      center = (left+right)>>1;
+      if(ar[center]==ele){
+        return {exist:true,loc:center};
+      }else if(ele<ar[center]){
+        left = center+1;
+      }else{
+        right = center-1;
+      }
+    }
+    var loc = 0;
+    if(center>right){
+      loc = center;
+    }else if(left>center){
+      loc = center+1;
+    }
+    return {exist:false,loc:loc};
+  };
+  
   //binary search and return the location to insert
   pub.binInsert = function(ele, ar){
     var left = 0;
@@ -176,7 +205,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
       if(dictionary.length==0)
         dictionary = findMaxGramHead;
       else
-        pub.mergeToArray(findMaxGramHead, dictionary);
+        pub.mergeToSortedArray(findMaxGramHead, dictionary);
       pub.sqltime.seg3 += (new Date()).getTime() -pub.tmp;
       
       pub.tmp = (new Date()).getTime();
@@ -197,7 +226,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
   };
   
 	pub.getAllCommonHead = function(words){
-		words.sort(function(a,b){return a<b;});
+		//words.sort(function(a,b){return a<b;});
 		var newwords = [];
 		var len = words.length-1;
 		for(var i=0;i<len;i++){
@@ -210,7 +239,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
           //only add if longer than 1
 					if(j>1){
 						var w = w1.substring(0,j);
-            pub.divInsert(w,newwords);
+            pub.divInsert(w,newwords,true);
 					}
 					break;
 				}
@@ -222,7 +251,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
 	
 	pub.getAllChnWords = function(newwords, words){
     pub.tmp = (new Date()).getTime();
-    newwords.sort(function(a,b){return a<b;});
+    //newwords.sort(function(a,b){return a<b;});
     if(words==null){
       words = newwords;
     }else{
@@ -245,7 +274,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
 							if(sp[l].length>1){
 								j+=1;
 								words.splice(j,0,sp[l]);
-                pub.divInsert(sp[l], news);
+                pub.divInsert(sp[l], news, true);
 							}
 						}
             //replace "abc" by "ab" if there's "ab" in newwords

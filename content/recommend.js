@@ -61,7 +61,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         pub.tmp = (new Date()).getTime();
         var segResult = pub.utils.segmentChn(nonempty, pub.dictionary);
         nonempty = segResult.all;
-        pub.utils.mergeToArray(segResult.chnSmall, pub.dictionary);
+        pub.utils.mergeToSortedArray(segResult.chnSmall, pub.dictionary);
         pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
         allwords.splice(i,1);
         if(nonempty.length!=0){
@@ -254,7 +254,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.tmp = (new Date()).getTime();
     var segResults = pub.utils.segmentChn(allRelated, pub.dictionary);
     allRelated = segResults.all;
-    pub.utils.mergeToArray(segResults.chnSmall, pub.dictionary);
+    pub.utils.mergeToSortedArray(segResults.chnSmall, pub.dictionary);
     pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
     //for(var s=0;s<chnSmall.length;s++){
     //pub.utils.mergeToArray(chnSmall, pub.dictionary);
