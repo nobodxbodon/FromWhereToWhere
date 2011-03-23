@@ -265,6 +265,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //store the small words for future segmentation
     //TODO: add size limit to dictionary, use it for all seg, including for future allRelated titles
     if(pub.DEBUG){
+      pub.utils.sqltime.seg1 = 0;
       pub.utils.sqltime.seg2 = 0;
       pub.utils.sqltime.seg4 = 0;
     }

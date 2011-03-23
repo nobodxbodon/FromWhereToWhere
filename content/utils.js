@@ -143,14 +143,10 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return {exist:false,loc:loc};
   };
   
+  //get as many chinese words as possible
   pub.segmentChn = function(allRelated){
-    /*var chn_output = "";
-    for(var c=0;c<allRelated.length;c++){
-      chn_output+="\""+allRelated[c]+"\",";
-    }
-    alert(chn_output);*/
-    //get as many chinese words as possible
     pub.tmp = (new Date()).getTime();
+    var beginStamp = pub.tmp;
     var chn = [];
     var nonChn = [];
     for(var i=0;i<allRelated.length;i++){
@@ -159,41 +155,23 @@ com.wuxuan.fromwheretowhere.utils = function(){
       else
         nonChn.push(allRelated[i]);
     }
-    /*pub.sqltime.seg0 = (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
-    var chnwords = pub.getAllChnWords(chn);
-    pub.sqltime.seg1 = (new Date()).getTime() -pub.tmp;*/
     var findMaxGramHead = [];
     for(var i=0;i<4;i++){
       pub.tmp = (new Date()).getTime();
-      
       findMaxGramHead = pub.getAllCommonHead(chn);
       pub.sqltime.seg2 += (new Date()).getTime() -pub.tmp;
-      /*pub.tmp = (new Date()).getTime();
       
-      var newfinds = pub.getAllChnWords(findMaxGramHead);
-      pub.sqltime.seg3 = (new Date()).getTime() -pub.tmp;*/
       pub.tmp = (new Date()).getTime();
-      
-      //alert(newfinds);
-      //chnwords = chnwords.concat(newfinds);
-      //alert(chnwords);
       //TODO: use divInsert and save the sort
       chn = pub.getAllChnWords(findMaxGramHead,chn);
-      
       pub.sqltime.seg4 += (new Date()).getTime() -pub.tmp;
       pub.tmp = (new Date()).getTime();
       
-      if(findMaxGramHead.length==0){
-        //if(pub.DEBUG)
-        //  alert(i);
+      if(findMaxGramHead.length==0 || ((new Date()).getTime()-beginStamp)>1000){
         break;
       }
     }
-		//alert(chn.length);
-    //if(pub.DEBUG){
-    //var newwords = chnwords.filter(function isNew(str){return orig.indexOf(str)==-1;});
-    //}
+    
     allRelated = nonChn.concat(chn);
     var chnSmall = chn.filter(function small(str){return str.length<5;});
     return {all:allRelated, chnSmall:chnSmall};
@@ -213,12 +191,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
           //only add if longer than 1
 					if(j>1){
 						var w = w1.substring(0,j);
-            //TODO: divInsert
-						if(newwords.indexOf(w)==-1){
-							//alert(w);
-							newwords.push(w);
-							//alert(newwords);
-						}
+            pub.divInsert(w,newwords);
 					}
 					break;
 				}
@@ -229,12 +202,14 @@ com.wuxuan.fromwheretowhere.utils = function(){
 	};
 	
 	pub.getAllChnWords = function(newwords, words){
+    pub.tmp = (new Date()).getTime();
     newwords.sort(function(a,b){return a<b;});
     if(words==null){
       words = newwords;
     }else{
       words.sort(function(a,b){return a<b;});
     }
+    pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
 		while(newwords.length!=0){
 			var news = [];
 			for(var i=0;i<newwords.length;i++){
@@ -251,9 +226,6 @@ com.wuxuan.fromwheretowhere.utils = function(){
 							if(sp[l].length>1){
 								j+=1;
 								words.splice(j,0,sp[l]);
-								/*if(news.indexOf(sp[l])==-1){
-									news.push(sp[l]);
-								}*/
                 pub.divInsert(sp[l], news);
 							}
 						}
