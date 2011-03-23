@@ -107,6 +107,15 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return diff;
   };
   
+  //merge the newArray into Array
+  pub.mergeToArray = function(newArray, origArray){
+    //sort for later divInsert
+    origArray.sort(function(a,b){return a>b;});
+    for(var i=0;i<newArray.length;i++){
+      pub.divInsert(newArray[i], origArray);
+    }
+  };
+  
   //binary search and insert
   pub.divInsert = function(ele, ar){
     var pos = pub.binInsert(ele, ar);
@@ -144,8 +153,9 @@ com.wuxuan.fromwheretowhere.utils = function(){
   };
   
   //get as many chinese words as possible
-  pub.segmentChn = function(allRelated){
+  pub.segmentChn = function(allRelated, dictionary){
     pub.tmp = (new Date()).getTime();
+    //limit the total time of seg
     var beginStamp = pub.tmp;
     var chn = [];
     var nonChn = [];
@@ -155,6 +165,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
       else
         nonChn.push(allRelated[i]);
     }
+    pub.sqltime.seg0 += (new Date()).getTime() -pub.tmp;
     var findMaxGramHead = [];
     for(var i=0;i<4;i++){
       pub.tmp = (new Date()).getTime();
@@ -162,8 +173,15 @@ com.wuxuan.fromwheretowhere.utils = function(){
       pub.sqltime.seg2 += (new Date()).getTime() -pub.tmp;
       
       pub.tmp = (new Date()).getTime();
+      if(dictionary.length==0)
+        dictionary = findMaxGramHead;
+      else
+        pub.mergeToArray(findMaxGramHead, dictionary);
+      pub.sqltime.seg3 += (new Date()).getTime() -pub.tmp;
+      
+      pub.tmp = (new Date()).getTime();
       //TODO: use divInsert and save the sort
-      chn = pub.getAllChnWords(findMaxGramHead,chn);
+      chn = pub.getAllChnWords(dictionary,chn);
       pub.sqltime.seg4 += (new Date()).getTime() -pub.tmp;
       pub.tmp = (new Date()).getTime();
       
@@ -171,9 +189,10 @@ com.wuxuan.fromwheretowhere.utils = function(){
         break;
       }
     }
-    
+    pub.tmp = (new Date()).getTime();
     allRelated = nonChn.concat(chn);
-    var chnSmall = chn.filter(function small(str){return str.length<5;});
+    var chnSmall = chn.filter(function small(str){return str.length>1 && str.length<5;});
+    pub.sqltime.seg5 += (new Date()).getTime() -pub.tmp;
     return {all:allRelated, chnSmall:chnSmall};
   };
   

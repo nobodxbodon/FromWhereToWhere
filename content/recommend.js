@@ -58,6 +58,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           //alert(allwords + "\n"+allwords[i]);
           alert(parts+"\n"+nonempty);
         }*/
+        pub.tmp = (new Date()).getTime();
+        var segResult = pub.utils.segmentChn(nonempty, pub.dictionary);
+        nonempty = segResult.all;
+        pub.utils.mergeToArray(segResult.chnSmall, pub.dictionary);
+        pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
         allwords.splice(i,1);
         if(nonempty.length!=0){
           for(var j=0;j<nonempty.length;j++){
@@ -65,39 +70,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
             if(nonempty[j].length==1 || nonempty[j].match(/[0-9]/)!=null){
               continue;
             }
-            /*var segs = pub.utils.segmentChn(allwords[i],pub.dictionary);
-            if(segs.length>1){
-              
-            }*/
             allwords.splice(i,0,nonempty[j]);
             i++;
           }
         }
         i--;
       }
-    }
-    return allwords;
-  };
-  
-  pub.oldfilter = function(aw, stopwords, specials){
-    var allwords = aw;
-    for(var i=0; i<allwords.length; i++){
-      allwords[i] = allwords[i].toLowerCase();
-      //stupid way to get rid of special char from the utterance
-      //those with , and : -- useful semantic, but for now clean up
-      /*for(var j=0;j<specials.length;j++){
-        allwords[i]=allwords[i].replace(new RegExp(specials[j],"g"),"");
-      }*/
-      //if there's \W in the end or start(hp,\ (the) get the first part; (doesn't) leave it as is
-      var orig = allwords[i];
-      //only get the first part here
-      allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
-        //only for English
-        allwords[i] = pub.getOrig(allwords[i]);
-        if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
-          allwords.splice(i, 1);
-          i--;
-        }
     }
     return allwords;
   };
@@ -205,6 +183,15 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.recommend = function(pageDoc, allLinks){
+    if(pub.DEBUG){
+      pub.utils.sqltime.seg0 = 0;
+      pub.utils.sqltime.seg1 = 0;
+      pub.utils.sqltime.seg2 = 0;
+      pub.utils.sqltime.seg3 = 0;
+      pub.utils.sqltime.seg4 = 0;
+      pub.utils.sqltime.seg5 = 0;
+    }
+    pub.sqltime.segmentChn = 0;
     var currLoc = pageDoc.location.href;
     var title = pageDoc.title;
     pub.DEBUGINFO = "";
@@ -264,17 +251,14 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     //store the small words for future segmentation
     //TODO: add size limit to dictionary, use it for all seg, including for future allRelated titles
-    if(pub.DEBUG){
-      pub.utils.sqltime.seg1 = 0;
-      pub.utils.sqltime.seg2 = 0;
-      pub.utils.sqltime.seg4 = 0;
-    }
-    var segResults = pub.utils.segmentChn(allRelated);
+    pub.tmp = (new Date()).getTime();
+    var segResults = pub.utils.segmentChn(allRelated, pub.dictionary);
     allRelated = segResults.all;
-    var chnSmall = segResults.chnSmall;
-    for(var s=0;s<chnSmall.length;s++){
-      pub.utils.divInsert(chnSmall, pub.dictionary);
-    }
+    pub.utils.mergeToArray(segResults.chnSmall, pub.dictionary);
+    pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
+    //for(var s=0;s<chnSmall.length;s++){
+    //pub.utils.mergeToArray(chnSmall, pub.dictionary);
+    //}
     
     var origLen = allRelated.length;
     //sort the string array by string length, can speed up later processing
@@ -297,8 +281,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
       pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild +
                   " gettitle: "+pub.sqltime.gettitle+
-                  " segment: "+pub.utils.sqltime.seg0+" "+pub.utils.sqltime.seg1+
-                  " "+pub.utils.sqltime.seg2+" "+pub.utils.sqltime.seg3+" "+pub.utils.sqltime.seg4 +"\n"+pub.DEBUGINFO;//+" segment: "+pub.sqltime.segment+"\n found new chn words: "+pub.debuginfo.newwords.length+"\n"+pub.debuginfo.newwords+
+                  " segment: " + "all - "+pub.sqltime.segmentChn+"\n"+pub.utils.sqltime.seg0+" "+pub.utils.sqltime.seg1+
+                  " "+pub.utils.sqltime.seg2+" "+pub.utils.sqltime.seg3+" "+pub.utils.sqltime.seg4+" "+pub.utils.sqltime.seg5 +"\n"+pub.DEBUGINFO;//+" segment: "+pub.sqltime.segment+"\n found new chn words: "+pub.debuginfo.newwords.length+"\n"+pub.debuginfo.newwords+
       pub.DEBUGINFO="local notes: "+relatedFromLocalNotes +"\nlocal time: "+pub.sqltime.getlocal+"\n"+pub.DEBUGINFO;
     }
     var freq = a.freq;
@@ -408,7 +392,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(recLinks.length>0){ 
       var o="";
       if(pub.DEBUG){
-        o="removed "+removed+" from "+len+"\r\n";
+        if(/.*[\u4e00-\u9fa5]+.*$/.title)
+          o=pub.dictionary.length + " " +allwords+" ";//"removed "+removed+" from "+len+"\r\n";
       }
       //ONLY refresh current page when the panel is changed
       pub.currLoc = currLoc;
@@ -510,7 +495,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       ratio = (0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10;
     }
     outputText += "Time: "+spendtime+"s      ";
-    outputText += "Ratio(Num. of suggested/Num. of all links): "+ratio+"%\n";
+    outputText += "Ratio(Num. of suggested/all links): "+ratio+"%\n";
     return outputText;
   };
   
@@ -662,7 +647,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.history.init();
     pub.localmanager = com.wuxuan.fromwheretowhere.localmanager;
     pub.localmanager.init();
-    
     pub.dictionary = [];
   };
     
