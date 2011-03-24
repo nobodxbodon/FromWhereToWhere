@@ -197,30 +197,30 @@ com.wuxuan.fromwheretowhere.utils = function(){
       else
         nonChn.push(allRelated[i]);
     }
-    pub.sqltime.seg0 += (new Date()).getTime() -pub.tmp;
     var findMaxGramHead = [];
     for(var i=0;i<4;i++){
-      pub.tmp = (new Date()).getTime();
+      //pub.tmp = (new Date()).getTime();
       findMaxGramHead = pub.getAllCommonHead(chn);
-      pub.sqltime.seg2 += (new Date()).getTime() -pub.tmp;
+      //pub.sqltime.seg2 += (new Date()).getTime() -pub.tmp;
       
-      pub.tmp = (new Date()).getTime();
+      //pub.tmp = (new Date()).getTime();
       if(dictionary.length==0)
         dictionary = findMaxGramHead;
       else
         pub.mergeToSortedArray(findMaxGramHead, dictionary);
-      pub.sqltime.seg3 += (new Date()).getTime() -pub.tmp;
+      //pub.sqltime.seg3 += (new Date()).getTime() -pub.tmp;
       
-      pub.tmp = (new Date()).getTime();
+      //pub.tmp = (new Date()).getTime();
       //TODO: use divInsert and save the sort
       chn = pub.getAllChnWords(dictionary,chn);
-      pub.sqltime.seg4 += (new Date()).getTime() -pub.tmp;
-      pub.tmp = (new Date()).getTime();
+      //pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
+      //pub.tmp = (new Date()).getTime();
       
-      if(findMaxGramHead.length==0){
-        if(((new Date()).getTime()-beginStamp)>1000){
-          alert(i);
-        }
+      if(findMaxGramHead.length==0 || ((new Date()).getTime()-beginStamp)>1000){
+        /*if(((new Date()).getTime()-beginStamp)>1000){
+          //alert(i);
+          break;
+        }*/
         break;
       }
     }
@@ -260,17 +260,23 @@ com.wuxuan.fromwheretowhere.utils = function(){
     if(words==null){
       words = newwords;
     }else{
+      pub.tmp = (new Date()).getTime();
       words.sort(function(a,b){return a<b;});
+      pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
     }
+    var start = (new Date()).getTime();
 		while(newwords.length!=0){
 			var news = [];
 			for(var i=0;i<newwords.length;i++){
 				for(var j=0;j<words.length;j++){
-					if(words[j].length<=newwords[i].length+1)
+          //TODO: to avoid indexing...for now
+          //var haveWord = words[j].indexOf(newwords[i]);
+					if(words[j].length<=newwords[i].length+1 || words[j].indexOf(newwords[i])==-1)
 						continue;
-          //pub.tmp = (new Date()).getTime();
+          pub.sqltime.coreTime++;
+          pub.tmp = (new Date()).getTime();
 					var sp = words[j].split(newwords[i]);
-          //pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
+          pub.sqltime.seg2 += (new Date()).getTime() -pub.tmp;
 					if(sp.length>1){
 						//if splitted, start checking from here
 						var origIdx = j;
@@ -279,18 +285,23 @@ com.wuxuan.fromwheretowhere.utils = function(){
 						for(var l=0;l<sp.length;l++){
 							if(sp[l].length>1){
 								j+=1;
+                pub.tmp = (new Date()).getTime();
 								words.splice(j,0,sp[l]);
                 pub.divInsert(sp[l], news, true);
+                pub.sqltime.seg3 += (new Date()).getTime() -pub.tmp;
 							}
 						}
             //replace "abc" by "ab" if there's "ab" in newwords
             //assume there's only one occurrence newwords[i], for title is likely
+            pub.tmp = (new Date()).getTime();
 						words.splice(origIdx,1,currRefWord);
+            pub.sqltime.seg4 += (new Date()).getTime() -pub.tmp;
 					}
 				}
 			}
 			newwords = news;
     }
+    pub.sqltime.seg0 += (new Date()).getTime() -start;
     return words;
   };
   

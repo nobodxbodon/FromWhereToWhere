@@ -8,7 +8,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIDOMWindow);
  
-  pub.DEBUG = false;
+  pub.DEBUG = true;
   pub.ANCHOR = false;
   pub.DEBUGINFO = "";
   pub.debuginfo = {};
@@ -190,6 +190,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       pub.utils.sqltime.seg3 = 0;
       pub.utils.sqltime.seg4 = 0;
       pub.utils.sqltime.seg5 = 0;
+      pub.utils.sqltime.coreTime = 0;
     }
     pub.sqltime.segmentChn = 0;
     var currLoc = pageDoc.location.href;
@@ -284,7 +285,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
       pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild +
                   " gettitle: "+pub.sqltime.gettitle+
-                  " segment: " + "all - "+pub.sqltime.segmentChn+"\n"+pub.utils.sqltime.seg0+" "+pub.utils.sqltime.seg1+
+                  " segment: " + "all - "+pub.sqltime.segmentChn+" in " +pub.utils.sqltime.coreTime +"\n"+pub.utils.sqltime.seg0+" "+pub.utils.sqltime.seg1+
                   " "+pub.utils.sqltime.seg2+" "+pub.utils.sqltime.seg3+" "+pub.utils.sqltime.seg4+" "+pub.utils.sqltime.seg5 +"\n"+pub.DEBUGINFO;//+" segment: "+pub.sqltime.segment+"\n found new chn words: "+pub.debuginfo.newwords.length+"\n"+pub.debuginfo.newwords+
       pub.DEBUGINFO="local notes: "+relatedFromLocalNotes +"\nlocal time: "+pub.sqltime.getlocal+"\n"+pub.DEBUGINFO;
     }
