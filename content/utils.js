@@ -116,7 +116,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
   };
   
   //binary search and insert
-  pub.divInsert = function(ele, ar, reversed){
+  pub.divInsert = function(ele, ar, reversed, dup){
     var pos = {};
     if(reversed){
       pos = pub.revBinInsert(ele, ar);
@@ -124,6 +124,9 @@ com.wuxuan.fromwheretowhere.utils = function(){
       pos = pub.binInsert(ele, ar);
     }
     if(pos.exist){
+      if(dup){
+        ar.splice(pos.loc, 0, ele);
+      }
       return {exist:true, arr:ar};
     }else{
       ar.splice(pos.loc, 0, ele);
@@ -190,7 +193,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
     var nonChn = [];
     for(var i=0;i<allRelated.length;i++){
       if(/.*[\u4e00-\u9fa5]+.*$/.test(allRelated[i]))
-        chn.push(allRelated[i]);
+        pub.divInsert(allRelated[i], chn, true, true);
       else
         nonChn.push(allRelated[i]);
     }
@@ -214,19 +217,22 @@ com.wuxuan.fromwheretowhere.utils = function(){
       pub.sqltime.seg4 += (new Date()).getTime() -pub.tmp;
       pub.tmp = (new Date()).getTime();
       
-      if(findMaxGramHead.length==0 || ((new Date()).getTime()-beginStamp)>1000){
+      if(findMaxGramHead.length==0){
+        if(((new Date()).getTime()-beginStamp)>1000){
+          alert(i);
+        }
         break;
       }
     }
     pub.tmp = (new Date()).getTime();
     allRelated = nonChn.concat(chn);
-    var chnSmall = chn.filter(function small(str){return str.length>1 && str.length<5;});
+    var chnSmall = chn.filter(function small(str){return str.length>1 && str.length<3;});
     pub.sqltime.seg5 += (new Date()).getTime() -pub.tmp;
     return {all:allRelated, chnSmall:chnSmall};
   };
   
 	pub.getAllCommonHead = function(words){
-		//words.sort(function(a,b){return a<b;});
+		words.sort(function(a,b){return a<b;});
 		var newwords = [];
 		var len = words.length-1;
 		for(var i=0;i<len;i++){
@@ -250,21 +256,21 @@ com.wuxuan.fromwheretowhere.utils = function(){
 	};
 	
 	pub.getAllChnWords = function(newwords, words){
-    pub.tmp = (new Date()).getTime();
     //newwords.sort(function(a,b){return a<b;});
     if(words==null){
       words = newwords;
     }else{
       words.sort(function(a,b){return a<b;});
     }
-    pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
 		while(newwords.length!=0){
 			var news = [];
 			for(var i=0;i<newwords.length;i++){
 				for(var j=0;j<words.length;j++){
-					if(words[j].length<=newwords[i].length)
+					if(words[j].length<=newwords[i].length+1)
 						continue;
+          //pub.tmp = (new Date()).getTime();
 					var sp = words[j].split(newwords[i]);
+          //pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
 					if(sp.length>1){
 						//if splitted, start checking from here
 						var origIdx = j;

@@ -8,7 +8,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIDOMWindow);
  
-  pub.DEBUG = true;
+  pub.DEBUG = false;
   pub.ANCHOR = false;
   pub.DEBUGINFO = "";
   pub.debuginfo = {};
@@ -228,20 +228,23 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     var allRelated=[];
     pub.tmp = (new Date()).getTime();
-    
+    var titleStart = pub.tmp;
     //remove dup titles for now
     var titles = [];
     for(var i=0;i<pidsWithWord.length;i++){
       var t = pub.history.getTitlefromId(pidsWithWord[i]);
-      if(titles.indexOf(t)==-1){
+      var processed = pub.utils.divInsert(t, titles);
+      if(processed.exist)
+        continue;
+      /*if(titles.indexOf(t)==-1){
         titles.push(t);
       }else{
         continue;
-      }
+      }*/
       var relatedWords=pub.getTopic(t, " ", pub.stopwords, pub.specials);
       allRelated=allRelated.concat(relatedWords);
     }
-    pub.sqltime.gettitle = (new Date()).getTime() -pub.tmp;
+    pub.sqltime.gettitle = (new Date()).getTime() -titleStart;
     pub.tmp = (new Date()).getTime();
     
     var relatedFromLocalNotes = pub.getLocal(allwords, pub.stopwords, pub.specials);
