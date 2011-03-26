@@ -21,10 +21,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var orig = pub.mapOrigVerb[word];
     //need to check type because array have function like "match, map"
     if((typeof orig)=="string" && orig){
-      //alert(word+"->"+orig);
       return orig;
-    }
-    else
+    }else
       return word;
   };
   
@@ -54,10 +52,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         //get all the parts separated by non-word, for now only consider Eng and Chn
         var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5]+/);//(/[~|!|@|#|$|%|^|&|*|(|)|\-|_|+|=|¡ª|:|;|\"|\'|<|>|,|.|?|\/|\\|{|}|[|]|£¡|£¤|¡­¡­|£¨|£©|\||¡¢|¡ª¡ª|¡¾|¡¿|¡°|¡±|¡¯|¡®|£º|£»|¡¶|¡·|£¬|¡£|£¿]+/);
         var nonempty = parts.filter(function notEmpty(str){return str!="";});
-        /*if(pub.DEBUG){
-          //alert(allwords + "\n"+allwords[i]);
-          alert(parts+"\n"+nonempty);
-        }*/
         pub.tmp = (new Date()).getTime();
         var segResult = pub.utils.segmentChn(nonempty, pub.dictionary);
         nonempty = segResult.all;
@@ -88,8 +82,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var allwords = title.split(sp);//(" ");/\W/
     //TODO: if CHN, segment using N-gram, and split the sentence by those same words, to get more words/phrases
     var ws = pub.filter(allwords, stopwords, specials);
-    //if(pub.DEBUG)
-    //  alert(ws);
     return ws;
   };
   
@@ -125,7 +117,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     var titleset = [];
     for(var j in alltitles){
-      //no repeat titles!
+      //TODO divInsert, no repeat titles!
       if(titleset.indexOf(alltitles[j])>-1){
         continue;
       }else{
@@ -186,10 +178,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.getRelated = function(allLinks, allRelated, freq){
     var recLinks=[];
     var recTitles = [];
-    //var deb = false;
     var linkNumber = allLinks.length;
     for(var i=0;i<linkNumber;i++){
-      //deb = false;
       var currLink = allLinks[i];
       var trimed = "";
       if(currLink.text)
@@ -197,15 +187,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       else
         continue;
       var t = trimed.toLowerCase();
-      //if(t.length==1)
-      //  deb = true;
       //remove the duplicate links (titles)
       var processed = pub.utils.divInsert(t, recTitles);
       if(processed.exist)
         continue;
       var text=pub.getTopic(t, " ", pub.stopwords, pub.specials);
-      //if(deb)
-      //  alert(text);
       //remove dup word in the title, for freq mult
       //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
       text = pub.utils.uniqueArray(text, false);
@@ -246,8 +232,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           }
         }
       }
-      //if(deb)
-      //  alert(t+" have: "+keywords+ " freq: "+oF);
       if(oF<1){
         recLinks.push({link:currLink,overallFreq:oF,kw:keywords});
       }
@@ -282,9 +266,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //if new tab or no title at all, no recommendation
     if(allwords.length==0){
       return [];
-    }/*else if(pub.DEBUG){
-      alert(allwords);
-    }*/
+    }
     pub.tmp = (new Date()).getTime();
     
     pidsWithWord = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
@@ -331,9 +313,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     allRelated = segResults.all;
     pub.utils.mergeToSortedArray(segResults.chnSmall, pub.dictionary);
     pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
-    //for(var s=0;s<chnSmall.length;s++){
-    //pub.utils.mergeToArray(chnSmall, pub.dictionary);
-    //}
     
     var origLen = allRelated.length;
     //sort the string array by string length, can speed up later processing
@@ -375,21 +354,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       if(pub.DEBUG)
         alert("just from current title:"+allwords);
       recLinks = pub.getRelated(allLinks, allwords, freq);
-      /*for(var i=0;i<allLinks.length;i++){
-        var trimed = pub.utils.trimString(allLinks[i].text);
-        var t = trimed.toLowerCase();
-        //remove the duplicate links (titles)
-        if(recTitles.indexOf(t)>-1){
-          continue;
-        }else{
-          recTitles.push(t);
-        }
-        for(var w in allwords){
-          if(t.indexOf(allwords[w])>-1){
-            recLinks.push({link:allLinks[i],overallFreq:0,kw:allwords[w]});
-          }
-        }
-      }*/
     }
     var recUri = [currLoc];
     //remove those that are visited already (maybe display differently?)
@@ -397,8 +361,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     for(var i=0;i<recLinks.length;i++){
       var uri = recLinks[i].link.href;
       if(recUri.indexOf(uri)>-1){
-        //if(pub.DEBUG)
-        //  alert(recLinks[i].link.text+"\n"+uri);
         recLinks.splice(i,1);
         i--;
       }else{
