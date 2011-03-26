@@ -105,9 +105,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   /* get titles from all the nodes in the note */
   pub.getAllTitles = function(note, titles){
-    if(!titles){
+    /*if(!titles){
       alert(note.label);
-    }
+    }*/
     titles.push(note.label);
     for(var i in note.children){
       titles=titles.concat(pub.getAllTitles(note.children[i],[]));
@@ -182,6 +182,82 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
   };
   
+  //all the links; all the keywords; word frequency of keywords
+  pub.getRelated = function(allLinks, allRelated, freq){
+    var recLinks=[];
+    var recTitles = [];
+    //var deb = false;
+    var linkNumber = allLinks.length;
+    for(var i=0;i<linkNumber;i++){
+      //deb = false;
+      var currLink = allLinks[i];
+      var trimed = "";
+      if(currLink.text)
+        trimed = pub.utils.trimString(currLink.text);
+      else
+        continue;
+      var t = trimed.toLowerCase();
+      //if(t.length==1)
+      //  deb = true;
+      //remove the duplicate links (titles)
+      var processed = pub.utils.divInsert(t, recTitles);
+      if(processed.exist)
+        continue;
+      var text=pub.getTopic(t, " ", pub.stopwords, pub.specials);
+      //if(deb)
+      //  alert(text);
+      //remove dup word in the title, for freq mult
+      //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
+      text = pub.utils.uniqueArray(text, false);
+      //if there's too few words (<3 for now), either catalog or tag, or very obvious already
+      if(pub.tooSimple(text, pub.specials) && !/.*[\u4e00-\u9fa5]+.*$/.test(t)){
+        continue;
+      }
+      //get the mul of keyword freq in all titles to be sorted
+      var oF = 1;
+      var keywords = [];
+      //if there's chinese, go through every part, otherwise compare by word
+      if(/.*[\u4e00-\u9fa5]+.*$/.test(t)){
+        for(var j=0;j<allRelated.length;j++){
+          if(t.indexOf(allRelated[j])>-1){
+            if(text.length==1 && text[0]==allRelated[j])
+              break;
+            keywords.push(allRelated[j]);
+            oF=oF*freq[allRelated[j]];
+          }
+        }
+        //TBD: could be more than 2, but 2 is more likely, those with only those keywords are likely to be catagories
+        if(keywords.length>0 && keywords.length<=2){
+          var allKeyLen = 0;
+          for(var i=0;i<keywords.length;i++){
+            allKeyLen+=keywords[i].length;
+          }
+          if(t.length==allKeyLen)
+            continue;
+        }
+      }else{
+        for(var j=0;j<allRelated.length;j++){
+          if(text.indexOf(allRelated[j])>-1){
+            //don't recommend those with only one word, like "msnbc.com"
+            if(text.length==1 && text[0]==allRelated[j])
+              break;
+            keywords.push(allRelated[j]);
+            oF=oF*freq[allRelated[j]];
+          }
+        }
+      }
+      //if(deb)
+      //  alert(t+" have: "+keywords+ " freq: "+oF);
+      if(oF<1){
+        recLinks.push({link:currLink,overallFreq:oF,kw:keywords});
+      }
+    }
+    //sort by overallFreq
+    recLinks.sort(function(a,b){return a.overallFreq-b.overallFreq});
+    //don't pop up if there's no related links
+    return recLinks;
+  };
+  
   pub.recommend = function(pageDoc, allLinks){
     if(pub.DEBUG){
       pub.utils.sqltime.seg0 = 0;
@@ -237,11 +313,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var processed = pub.utils.divInsert(t, titles);
       if(processed.exist)
         continue;
-      /*if(titles.indexOf(t)==-1){
-        titles.push(t);
-      }else{
-        continue;
-      }*/
       var relatedWords=pub.getTopic(t, " ", pub.stopwords, pub.specials);
       allRelated=allRelated.concat(relatedWords);
     }
@@ -298,72 +369,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       relFreq[allRelated[i]]=(pub.history.getNumofPidWithWord(allRelated[i])+0.0)/allPids;
     }*/
     //recLinks have object which format is: {link:xx,overallFreq:0.xx,kw:somewords}
-    var recLinks = [];
-    var recTitles = [];
-    //alert("try on");
-    var linkNumber = allLinks.length;
-    for(var i=0;i<linkNumber;i++){
-      var trimed = "";
-      if(allLinks[i].text)
-        trimed = pub.utils.trimString(allLinks[i].text);
-      else
-        continue;
-      var t = trimed.toLowerCase();
-      //remove the duplicate links (titles)
-      if(recTitles.indexOf(t)>-1){
-        continue;
-      }else{
-        recTitles.push(t);
-      }
-      var text=pub.getTopic(t, " ", pub.stopwords, pub.specials);
-      //remove dup word in the title, for freq mult
-      //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
-      text = pub.utils.uniqueArray(text, false);
-      //if there's too few words (<3 for now), either catalog or tag, or very obvious already
-      if(pub.tooSimple(text, pub.specials) && !/.*[\u4e00-\u9fa5]+.*$/.test(t)){
-        continue;
-      }
-      //get the mul of keyword freq in all titles to be sorted
-      var oF = 1;
-      var keywords = [];
-      //if there's chinese, go through every part, otherwise compare by word
-      if(/.*[\u4e00-\u9fa5]+.*$/.test(t)){
-        for(var j=0;j<allRelated.length;j++){
-          if(t.indexOf(allRelated[j])>-1){
-            if(text.length==1 && text[0]==allRelated[j])
-              break;
-            keywords.push(allRelated[j]);
-            oF=oF*freq[allRelated[j]];
-          }
-        }
-        //TODO: could be more than 2, but 2 is more likely, those with only those keywords are likely to be catagories
-        /*if(keywords.length==2){
-          if(t.length==keywords[0].length+keywords[1].length)
-            continue;
-        }*/
-      }else{
-        for(var j=0;j<allRelated.length;j++){
-          if(text.indexOf(allRelated[j])>-1){
-            //don't recommend those with only one word, like "msnbc.com"
-            if(text.length==1 && text[0]==allRelated[j])
-              break;
-            keywords.push(allRelated[j]);
-            oF=oF*freq[allRelated[j]];
-          }
-        }
-      }
-      if(oF<1){
-        recLinks.push({link:allLinks[i],overallFreq:oF,kw:keywords});
-      }
-    }
-    //sort by overallFreq
-    recLinks.sort(function(a,b){return a.overallFreq-b.overallFreq});
-    //don't pop up if there's no related links
+    var recLinks = pub.getRelated(allLinks, allRelated, freq);
     
     if(recLinks.length==0){
       if(pub.DEBUG)
         alert("just from current title:"+allwords);
-      for(var i=0;i<allLinks.length;i++){
+      recLinks = pub.getRelated(allLinks, allwords, freq);
+      /*for(var i=0;i<allLinks.length;i++){
         var trimed = pub.utils.trimString(allLinks[i].text);
         var t = trimed.toLowerCase();
         //remove the duplicate links (titles)
@@ -377,7 +389,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
             recLinks.push({link:allLinks[i],overallFreq:0,kw:allwords[w]});
           }
         }
-      }
+      }*/
     }
     var recUri = [currLoc];
     //remove those that are visited already (maybe display differently?)
@@ -582,6 +594,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         var l = document.createElement("textbox");
         var t = recLinks[i].link.text;
         var uri = recLinks[i].link.href;
+        if(!t)
+          continue;
         var title = pub.utils.trimString(t);
         title = pub.utils.removeEmptyLine(title);
         var numLine = pub.utils.countChar("\n",title);
