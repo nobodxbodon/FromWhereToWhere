@@ -38,3 +38,4 @@ Feature below (all about link suggestion) is targeting at FF4, tested in 4.0b13p
 3) if the suggestion is derived from current page, clicking the link button will find the corresponding link on the page; if the title isn't found (some link are hidden) open the url in new tab.
 4) if the suggestion isn't derived from current page, click any link button will switch to that page if it's still opened, if it's not opened, it'll be reopened, and 1) can be performed.
 5) "refresh" button on the panel will give the suggestion for current page
+6) in a new profile without any browsing history, after importing external local notes, the suggestion will be based on the local notes
