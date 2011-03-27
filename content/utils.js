@@ -202,7 +202,6 @@ com.wuxuan.fromwheretowhere.utils = function(){
     }
     var findMaxGramHead = [];
     var processed = [];
-    var shorts = [];
     var phrases = [];
     for(var i=0;i<pub.SEGMENTITERATIONLIMIT;i++){
       //split the chn into word part (not more spliting) and phrases
@@ -210,7 +209,8 @@ com.wuxuan.fromwheretowhere.utils = function(){
       for(var j=0;j<chn.length;j++){
         var len = chn[j].length;
         if(len>pub.MINWORDLENGTH && len<pub.MAXWORDLENGTH){
-          shorts.push(chn[j]);
+          pub.divInsert(chn[j], dictionary, true);
+          processed.push(chn[j]);
         }else{
           pub.divInsert(chn[j], phrases, true);
         }
@@ -227,22 +227,14 @@ com.wuxuan.fromwheretowhere.utils = function(){
         pub.mergeToSortedArray(findMaxGramHead, dictionary);
       //pub.sqltime.seg3 += (new Date()).getTime() -pub.tmp;
       
-      pub.mergeToSortedArray(shorts, dictionary);
-      processed = processed.concat(shorts);
-      
       //pub.tmp = (new Date()).getTime();
       chn = pub.getAllChnWords(dictionary,phrases);
       //pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
       //pub.tmp = (new Date()).getTime();
       
       if(findMaxGramHead.length==0 || ((new Date()).getTime()-beginStamp)>1000){
-        /*if(((new Date()).getTime()-beginStamp)>1000){
-          //alert(i);
-          break;
-        }*/
         break;
       }else{
-        shorts = [];
         phrases = [];
       }
     }
@@ -259,8 +251,8 @@ com.wuxuan.fromwheretowhere.utils = function(){
   };
   
   // no seg here as the common head may be not good splitter (max length)
+  // NOTE: words are reversely sorted!
 	pub.getAllCommonHead = function(words){
-		//words.sort(function(a,b){return a<b;});
 		var newwords = [];
 		var len = words.length-1;
 		for(var i=0;i<len;i++){
@@ -283,14 +275,10 @@ com.wuxuan.fromwheretowhere.utils = function(){
 		return newwords;
 	};
 	
+  //NOTE: words are reversed sorted!
 	pub.getAllChnWords = function(newwords, words){
-    //newwords.sort(function(a,b){return a<b;});
     if(words==null){
       words = newwords;
-    }else{
-      //pub.tmp = (new Date()).getTime();
-      //words.sort(function(a,b){return a<b;});
-      //pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
     }
     var start = (new Date()).getTime();
 		while(newwords.length!=0){

@@ -8,7 +8,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIDOMWindow);
  
-  pub.DEBUG = true;
+  pub.DEBUG = false;
   pub.ANCHOR = false;
   pub.DEBUGINFO = "";
   pub.debuginfo = {};
@@ -49,7 +49,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           allwords.splice(i, 1);
           i--;
         }
-      }else{//for Chinese
+      }else{//segmentation for Chinese
         //get all the parts separated by non-word, for now only consider Eng and Chn
         var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5]+/);//(/[~|!|@|#|$|%|^|&|*|(|)|\-|_|+|=|¡ª|:|;|\"|\'|<|>|,|.|?|\/|\\|{|}|[|]|£¡|£¤|¡­¡­|£¨|£©|\||¡¢|¡ª¡ª|¡¾|¡¿|¡°|¡±|¡¯|¡®|£º|£»|¡¶|¡·|£¬|¡£|£¿]+/);
         var nonempty = parts.filter(function notEmpty(str){return str!="";});
@@ -79,9 +79,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(title==null){
       return [];
     }
-    //TODO: some language requires more complex segmentation, like CHN
     var allwords = title.split(sp);//(" ");/\W/
-    //TODO: if CHN, segment using N-gram, and split the sentence by those same words, to get more words/phrases
     var ws = pub.filter(allwords, stopwords, specials);
     return ws;
   };
@@ -115,14 +113,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     var titleset = [];
     for(var j in alltitles){
-      //TODO divInsert, no repeat titles!
-      /*if(titleset.indexOf(alltitles[j])>-1){
-        continue;
-      }else{
-        titleset.push(alltitles[j]);
-      }*/
       var titleExist = pub.utils.divInsert(alltitles[j], titleset);
-      if(titleExist)
+      if(titleExist.exist)
         continue;
       var topicStart = (new Date()).getTime();
       var relatedWords=pub.getTopic(alltitles[j], " ", stopwords, specials);
@@ -275,7 +267,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //TODO: only pick the words related to interest, not every non-stopword
     //TODO: search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
     var pidsWithWord=[];
-    //if new tab or no title at all, no recommendation
+    //if new tab or no title at all, no recommendation. TODO: extract from text body
     if(allwords.length==0){
       return [];
     }
@@ -552,14 +544,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       
       vbox = document.createElement("vbox");
       vbox = pub.setAttrDOMElement(vbox, {"flex":"1","style":"overflow:auto","width":"500","height":"100"});
-      //alert("vbox created");
-      //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
       //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
 
       savePanel.appendChild(vbox);
       if(version>=4){
         var resizer = document.createElement("resizer");
-        resizer = pub.setAttrDOMElement(resizer, {"dir":"bottomright", "element":"fwtwRelPanel"});//, "right":"0", "bottom":"0", "width":"0", "height":"0"});
+        resizer = pub.setAttrDOMElement(resizer, {"dir":"bottomright", "element":"fwtwRelPanel"});
         savePanel.appendChild(resizer);
       }
       //this put the panel on the menu bar
@@ -590,13 +580,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         var titleForSearch = title;
         if(pub.DEBUG)
           title+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
-        
-        /*if(numLine>0){
-          l=pub.setAttrDOMElement(l, {"multiline":"true", "rows":new Number(numLine).toString()});
-        }
-        l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title});
-        l.setAttribute("style", (i&1)?"background-color:#FFFFFF":"background-color:#EEEEEE");
-        vbox.appendChild(l);*/
 
         var butn = document.createElement("button");
         //butn.setAttribute("style", "border: 0px; padding:0px;");//; text-align: center;");
