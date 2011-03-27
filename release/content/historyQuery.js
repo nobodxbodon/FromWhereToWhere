@@ -143,7 +143,19 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     var id = pub.getIdfromPlaceId(pid);
     return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
-  
+       
+  pub.nodefromPlaceidWithChildInfo = function(pid, hasChildren, query) {
+    var actualThing = false;
+		//this has to be done because no one is above you doesn't tell if you have ones below
+		if(!hasChildren){
+			var potentialchildren = pub.getAllChildrenfromPlaceId(pid, query);
+			actualThing = (potentialchildren!=null) && (potentialchildren.length>0);
+			hasChildren = actualThing;
+		}
+    var id = pub.getIdfromPlaceId(pid);
+    return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
+  };
+	
   pub.getIdfromUrl = function(url){
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_places where url=:url");
     if(!url) {
@@ -398,27 +410,34 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 		//	}
 		}
 		if(singular_table)
-			return "SELECT place_id FROM moz_historyvisits WHERE place_id=("+term+ ")" + t + fterm + " GROUP BY place_id";
+			return "SELECT DISTINCT place_id FROM moz_historyvisits WHERE place_id=("+term+ ")" + t + fterm;
 		else
-			return "SELECT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm + " GROUP BY place_id";
+			return "SELECT DISTINCT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm;
 			
 	};
 	
 	// add query restrictions to parents, time and site
   pub.getParentPlaceidsfromPlaceid = function(pid, query){
     //as id!=0, from_visit=0 doesn't matter
+		if(pub.DEBUG)
+			pub.querytime.tmp = (new Date()).getTime();
 		var term = "SELECT place_id FROM moz_historyvisits \
 					    where id IN (SELECT from_visit FROM moz_historyvisits where \
 						place_id==:id)";
-		//alert(term);
     var statement = pub.mDBConn.createStatement(term);
     statement.params.id=pid;
     var pids = pub.queryAll(statement, 32, 0);
+		if(pub.DEBUG){
+			pub.querytime.getParentEasyTime +=1;
+			pub.querytime.getParentEasy += ((new Date()).getTime() - pub.querytime.tmp);
+		}
 		// IF there's no results, maybe it's inaccurate! REPEAT with range!
 		//if(pid==10247)
     if(pids.length==0){
+			if(pub.DEBUG)
+				pub.querytime.tmp = (new Date()).getTime();
       var statement = pub.mDBConn.createStatement("SELECT from_visit FROM moz_historyvisits where \
-						place_id=:id and from_visit!=0");
+						place_id=:id");
       statement.params.id=pid;
       var placeids = pub.queryAll(statement, 32, 0);
       if(placeids.length==0){
@@ -426,6 +445,8 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
       } else {
 				var accPids=[];
 				for(var i in placeids){
+					if(placeids[i]==0)
+						continue;
 					var rangeStart = 0;
 					var rangeEnd = 10;
 					var initInterval = 10;
@@ -433,7 +454,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 					for(var j=0;j<10;j++){
 						var fterm = "SELECT place_id FROM moz_historyvisits \
 										where id<=:id-:start and id>:id-:end \
-										order by -id limit 1";
+										order by id DESC limit 1";
 						var statement1 = pub.mDBConn.createStatement(fterm);
 						statement1.params.id=placeids[i];
 						statement1.params.start=rangeStart;
@@ -443,12 +464,16 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 							pids.push(thispid);
 							break;
 						}
-						initInterval = initInterval * 3;
+						initInterval = initInterval * 2;
 						rangeStart = rangeEnd;
 						rangeEnd += initInterval;
 					}
 				}
       }
+			if(pub.DEBUG){
+				pub.querytime.getParentHardTime +=1;
+				pub.querytime.getParentHard += ((new Date()).getTime() - pub.querytime.tmp);
+			}
 		}
 		//fiter pid after all the keyword query
 		if(query && (query.site.length>0 || query.time.length>0)){
@@ -502,33 +527,38 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   };
   
   pub.allKnownParentPids = [];
-  
-  //return all the top ancesters of a placeid, and add to allKnownParents
-  pub.getAllAncestorsfromPlaceid = function(pid, knownParentPids, parentNumber, query){
+  pub.DEBUG = true;
+	pub.querytime = {};
+	
+	//return all the top ancesters of a placeid, and add to allKnownParents
+  pub.OMGgetAllAncestorsfromPlaceid = function(pid, knownParentPids, parentNumber, query){
     var tops = [];
+		var topPids = [];
     //if it's its own ancester, still display it
     if(knownParentPids.indexOf(pid)!=-1){
-      //if there's only one parent, the link circle is closed from pid
       if(parentNumber==1){
-        tops=pub.addInArrayNoDup(pid,tops);
+				var known = pub.utils.divInsert(pid, topPids);
+				if(!known.exist)
+					tops.push({pid:pid,knownParentPids:knownParentPids});
       }
     }else{
-      knownParentPids.push(pid);
       var pParentPids = pub.getParentPlaceidsfromPlaceid(pid, query);
       if(pParentPids.length==0){
-        if(pub.allKnownParentPids.indexOf(pid)==-1){
-          pub.allKnownParentPids.push(pid);
-        }
-        tops.push(pid);
+				var known = pub.utils.divInsert(pid, pub.allKnownParentPids);
+				topPids.push(pid);
+        tops.push({pid:pid,knownParentPids:knownParentPids});
       } else {
+				knownParentPids.push(pid);
         //if multiple ancestors, latest first
         var parentNum = pParentPids.length;
         for(var j=parentNum-1;j>=0;j--){
-          if(pub.allKnownParentPids.indexOf(pParentPids[j])==-1){
-            pub.allKnownParentPids.push(pParentPids[j]);
-            var anc=pub.getAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum, query);
+					var known = pub.utils.divInsert(pParentPids[j], pub.allKnownParentPids);
+					if(!known.exist){
+            var anc=pub.OMGgetAllAncestorsfromPlaceid(pParentPids[j], knownParentPids, parentNum, query);
             for(var k in anc){
-              tops=pub.addInArrayNoDup(anc[k],tops);
+							var known = pub.utils.divInsert(anc[k].pid, topPids);
+							if(!known.exist)
+								tops.push(anc[k]);
             }
           }
         }
@@ -543,16 +573,27 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     var nodes = [];
     var ancPids = [];
     //order by time: latest first by default
+		var allpid = [];
+		var topPids = [];
     for(var i=pids.length-1; i>=0; i--){
-      var anc = pub.getAllAncestorsfromPlaceid(pids[i],[],0,query);
-			//alert("create anc nodes: " + pids[i] + "\n" + anc);
-      for(var j in anc){
-        ancPids = pub.addInArrayNoDup(anc[j],ancPids);
-      }
+			var known = pub.utils.binInsert(pids[i], pub.allKnownParentPids);
+			if(known.exist)
+				continue;
+			var newanc = pub.OMGgetAllAncestorsfromPlaceid(pids[i],[],0,query);
+			for(var j in newanc){
+				var known = pub.utils.divInsert(newanc[j].pid, topPids);
+				if(!known.exist){
+					ancPids.push(newanc[j]);
+				}
+			}
     }
+		
+		pub.querytime.tmp = (new Date()).getTime();
     for(var i in ancPids){
-      nodes.push(pub.nodefromPlaceid(ancPids[i], query));
+      nodes.push(pub.nodefromPlaceidWithChildInfo(ancPids[i].pid, (ancPids[i].knownParentPids.length>0), query));
     }
+		pub.querytime.bindextime +=1;
+		pub.querytime.bindexof  += ((new Date()).getTime() - pub.querytime.tmp);
     return nodes;
   };
   

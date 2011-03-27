@@ -11,7 +11,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.DEBUG = false;
   pub.ANCHOR = false;
   pub.DEBUGINFO = "";
-  pub.TOOFEWWORDS = 4
+  pub.debuginfo = {};
+  pub.TOOFEWWORDS = 4;
+  pub.MINCHNKEYWORDS = 2;
   pub.MULTILINE_LIMIT = 3;
   pub.starttime = 0;
   pub.sqltime = {};
@@ -20,30 +22,53 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var orig = pub.mapOrigVerb[word];
     //need to check type because array have function like "match, map"
     if((typeof orig)=="string" && orig){
-      //alert(word+"->"+orig);
       return orig;
-    }
-    else
+    }else
       return word;
   };
   
   //also remove all numbers, as they don't seem to carry much "theme" info
   //remove word.length==1
-  pub.filter = function(allwords, stopwords, specials){
+  pub.filter = function(aw, stopwords, specials){
+    var allwords = aw;
+    var alloccurrence = [];
+    //TODO: for now can't handle mixed languages
     for(var i=0; i<allwords.length; i++){
       allwords[i] = allwords[i].toLowerCase();
-      //stupid way to get rid of special char from the utterance
-      //those with , and : -- useful semantic, but for now clean up
-      /*for(var j=0;j<specials.length;j++){
-        allwords[i]=allwords[i].replace(new RegExp(specials[j],"g"),"");
-      }*/
-      //if there's \W in the end or start(hp,\ (the) get the first part; (doesn't) leave it as is
       var orig = allwords[i];
-      //only get the first part here
-      allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
-      allwords[i] = pub.getOrig(allwords[i]);
-      if(stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 || allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null){
-        allwords.splice(i, 1);
+      var upper = orig.toUpperCase();
+      //judge if it's English
+      if(upper!=orig){
+        //only for English
+        //only get the first part here
+        //TODO: should get more words out, split them with the recognized words, expensive though (keep those with special words, and then indexof the recog, split with those, then recurrent)
+        allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
+        //only for English
+        allwords[i] = pub.getOrig(allwords[i]);
+        if(allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null || stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 ){
+          allwords.splice(i, 1);
+          i--;
+        }
+      }else{//segmentation for Chinese
+        //get all the parts separated by non-word, for now only consider Eng and Chn
+        var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5]+/);//(/[~|!|@|#|$|%|^|&|*|(|)|\-|_|+|=|¡ª|:|;|\"|\'|<|>|,|.|?|\/|\\|{|}|[|]|£¡|£¤|¡­¡­|£¨|£©|\||¡¢|¡ª¡ª|¡¾|¡¿|¡°|¡±|¡¯|¡®|£º|£»|¡¶|¡·|£¬|¡£|£¿]+/);
+        var nonempty = parts.filter(function notEmpty(str){return str!="";});
+        pub.tmp = (new Date()).getTime();
+        var segResult = pub.utils.segmentChn(nonempty, pub.dictionary);
+        nonempty = segResult.all;
+        pub.utils.mergeToSortedArray(segResult.chnSmall, pub.dictionary);
+        pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
+        allwords.splice(i,1);
+        if(nonempty.length!=0){
+          for(var j=0;j<nonempty.length;j++){
+            //remove all numbers and 1 char word
+            if(nonempty[j].length==1 || nonempty[j].match(/[0-9]/)!=null){
+              continue;
+            }
+            allwords.splice(i,0,nonempty[j]);
+            i++;
+          }
+        }
         i--;
       }
     }
@@ -54,11 +79,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(title==null){
       return [];
     }
-    //TODO: some language requires more complex segmentation, like CHN
     var allwords = title.split(sp);//(" ");/\W/
-    return pub.filter(allwords, stopwords, specials);
+    var ws = pub.filter(allwords, stopwords, specials);
+    return ws;
   };
   
+  /*if the title has too few words (including stopwords), consider as non-informatic*/
   pub.tooSimple = function(allwords, specials){
     var rmSpecials = pub.filter(allwords, [], specials);
     if(rmSpecials.length<pub.TOOFEWWORDS){
@@ -70,9 +96,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   /* get titles from all the nodes in the note */
   pub.getAllTitles = function(note, titles){
-    if(!titles){
-      alert(note.label);
-    }
     titles.push(note.label);
     for(var i in note.children){
       titles=titles.concat(pub.getAllTitles(note.children[i],[]));
@@ -90,14 +113,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     var titleset = [];
     for(var j in alltitles){
-      //no repeat titles!
-      if(titleset.indexOf(alltitles[j])>-1){
+      var titleExist = pub.utils.divInsert(alltitles[j], titleset);
+      if(titleExist.exist)
         continue;
-      }else{
-        titleset.push(alltitles[j]);
-      }
+      var topicStart = (new Date()).getTime();
       var relatedWords=pub.getTopic(alltitles[j], " ", stopwords, specials);
       allRelated=allRelated.concat(relatedWords);
+      pub.sqltime.gettopic += (new Date()).getTime() -topicStart;
     }
     return allRelated;
   };
@@ -147,7 +169,94 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
   };
   
+  //all the links; all the keywords; word frequency of keywords
+  pub.getRelated = function(allLinks, allRelated, freq){
+    var recLinks=[];
+    var recTitles = [];
+    var linkNumber = allLinks.length;
+    for(var i=0;i<linkNumber;i++){
+      var currLink = allLinks[i];
+      var trimed = "";
+      if(currLink.text)
+        trimed = pub.utils.trimString(currLink.text);
+      else
+        continue;
+      var t = trimed.toLowerCase();
+      //remove the duplicate links (titles)
+      var processed = pub.utils.divInsert(t, recTitles);
+      if(processed.exist)
+        continue;
+      var topicStart = (new Date()).getTime();
+      var text=pub.getTopic(t, " ", pub.stopwords, pub.specials);
+      pub.sqltime.gettopic += (new Date()).getTime() -topicStart;
+      //remove dup word in the title, for freq mult
+      //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
+      text = pub.utils.uniqueArray(text, false);
+      //if there's too few words (<3 for now), either catalog or tag, or very obvious already
+      if(pub.tooSimple(text, pub.specials) && !/.*[\u4e00-\u9fa5]+.*$/.test(t)){
+        continue;
+      }
+      //get the mul of keyword freq in all titles to be sorted
+      var oF = 1;
+      var keywords = [];
+      //if there's chinese, go through every part, otherwise compare by word
+      if(/.*[\u4e00-\u9fa5]+.*$/.test(t)){
+        for(var j=0;j<allRelated.length;j++){
+          if(t.indexOf(allRelated[j])>-1){
+            if(text.length==1 && text[0]==allRelated[j])
+              break;
+            keywords.push(allRelated[j]);
+            oF=oF*freq[allRelated[j]];
+          }
+        }
+        //TBD: could be more than 2, but 2 is more likely, those with only those keywords are likely to be catagories
+        if(keywords.length>0 && keywords.length<=pub.MINCHNKEYWORDS){
+          var allKeyLen = 0;
+          for(var i=0;i<keywords.length;i++){
+            allKeyLen+=keywords[i].length;
+          }
+          if(t.length==allKeyLen)
+            continue;
+        }
+      }else{
+        for(var j=0;j<allRelated.length;j++){
+          if(text.indexOf(allRelated[j])>-1){
+            //don't recommend those with only one word, like "msnbc.com"
+            if(text.length==1 && text[0]==allRelated[j])
+              break;
+            keywords.push(allRelated[j]);
+            oF=oF*freq[allRelated[j]];
+          }
+        }
+      }
+      if(oF<1){
+        recLinks.push({link:currLink,overallFreq:oF,kw:keywords});
+      }
+    }
+    //sort by overallFreq
+    recLinks.sort(function(a,b){return a.overallFreq-b.overallFreq});
+    //don't pop up if there's no related links
+    return recLinks;
+  };
+  
   pub.recommend = function(pageDoc, allLinks){
+    if(pub.DEBUG){
+      pub.utils.sqltime.seg0 = 0;
+      pub.utils.sqltime.seg1 = 0;
+      pub.utils.sqltime.seg2 = 0;
+      pub.utils.sqltime.seg3 = 0;
+      pub.utils.sqltime.seg4 = 0;
+      pub.utils.sqltime.seg5 = 0;
+      pub.utils.sqltime.coreTime = 0;
+      pub.utils.sqltime.smallerTime = 0;
+      pub.utils.sqltime.largerTime =0;
+      pub.utils.sqltime.noIndexTime =0;
+			pub.sqltime.gettitle = 0;
+      pub.sqltime.gettopic = 0;
+      pub.sqltime.segmentChn = 0;
+			pub.sqltime.sortUnique =0;
+			pub.sqltime.getrelated = 0;
+    }
     var currLoc = pageDoc.location.href;
     var title = pageDoc.title;
     pub.DEBUGINFO = "";
@@ -158,7 +267,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //TODO: only pick the words related to interest, not every non-stopword
     //TODO: search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
     var pidsWithWord=[];
-    //if new tab or no title at all, no recommendation
+    //if new tab or no title at all, no recommendation. TODO: extract from text body
     if(allwords.length==0){
       return [];
     }
@@ -181,22 +290,39 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.sqltime.getchild = (new Date()).getTime()-pub.tmp;
     
     var allRelated=[];
-    pub.tmp = (new Date()).getTime();
-    
+    //remove dup titles for now
+    var titles = [];
+    pub.numberRefTitles = pidsWithWord.length;
     for(var i=0;i<pidsWithWord.length;i++){
+      pub.tmp = (new Date()).getTime();
       var t = pub.history.getTitlefromId(pidsWithWord[i]);
+      var processed = pub.utils.divInsert(t, titles);
+      if(processed.exist)
+        continue;
+      pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
+      var topicStart = (new Date()).getTime();
       var relatedWords=pub.getTopic(t, " ", pub.stopwords, pub.specials);
       allRelated=allRelated.concat(relatedWords);
+      pub.sqltime.gettopic += (new Date()).getTime() -topicStart;
     }
-    pub.sqltime.gettitle = (new Date()).getTime() -pub.tmp;
     pub.tmp = (new Date()).getTime();
+    
     var relatedFromLocalNotes = pub.getLocal(allwords, pub.stopwords, pub.specials);
     allRelated=allRelated.concat(relatedFromLocalNotes);
-    
     pub.sqltime.getlocal = (new Date()).getTime() -pub.tmp;
     
+    //store the small words for future segmentation
+    //TODO: add size limit to dictionary, use it for all seg, including for future allRelated titles
+    pub.tmp = (new Date()).getTime();
+    var segResults = pub.utils.segmentChn(allRelated, pub.dictionary);
+    allRelated = segResults.all;
+    pub.utils.mergeToSortedArray(segResults.chnSmall, pub.dictionary);
+    pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
+    
+		pub.sqltime.sortUnique = (new Date()).getTime();
     var origLen = allRelated.length;
     //sort the string array by string length, can speed up later processing
+    //TODO: check if can save this as allRelated is sorted before in segment
     allRelated.sort(function(a,b){return a>b});
     var len = allRelated.length;
     var a = pub.utils.uniqueArray(allRelated, true);
@@ -204,18 +330,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     /*a = pub.utils.removeHaveSubstring(a);*/
     var removed = len-a.arr.length;
     allRelated = a.arr;
-    if(pub.DEBUG){
-      var allover = 0;
-      for(var i=0;i<a.arr.length;i++){
-        if(!a.freq[a.arr[i]])
-          alert("NO FREQ!: "+a.arr[i]);
-        pub.DEBUGINFO+=a.arr[i]+ " " +a.freq[a.arr[i]]+"\n";
-        allover+=a.freq[a.arr[i]];
-      }
-      pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
-      pub.DEBUGINFO="searchid: "+ pub.sqltime.searchid + " getchild: "+pub.sqltime.getchild + " gettitle: "+pub.sqltime.gettitle+"\n"+pub.DEBUGINFO;
-      pub.DEBUGINFO="local notes: "+relatedFromLocalNotes +"\nlocal time: "+pub.sqltime.getlocal+"\n"+pub.DEBUGINFO;
-    }
+		pub.sqltime.sortUnique = (new Date()).getTime() -pub.sqltime.sortUnique;
+		
+    pub.sqltime.getrelated = (new Date()).getTime();
     var freq = a.freq;
     //LATER: getNumofPidWithWord might be more precise, but much more time consuming.
     //       for now just use the wf in "relatedWords"
@@ -225,84 +342,54 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       relFreq[allRelated[i]]=(pub.history.getNumofPidWithWord(allRelated[i])+0.0)/allPids;
     }*/
     //recLinks have object which format is: {link:xx,overallFreq:0.xx,kw:somewords}
-    var recLinks = [];
-    var recTitles = [];
-    //alert("try on");
-    var linkNumber = allLinks.length;
-    for(var i=0;i<linkNumber;i++){
-      var trimed = pub.utils.trimString(allLinks[i].text);
-      var t = trimed.toLowerCase();
-      //remove the duplicate links (titles)
-      if(recTitles.indexOf(t)>-1){
-        continue;
-      }else{
-        recTitles.push(t);
-      }
-      var text=pub.getTopic(t, " ", pub.stopwords, pub.specials);
-      //remove dup word in the title, for freq mult
-      //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
-      text = pub.utils.uniqueArray(text, false);
-      //if there's too few words (<3 for now), either catalog or tag, or very obvious already
-      if(pub.tooSimple(text, pub.specials)){
-        continue;
-      }
-      //get the mul of keyword freq in all titles to be sorted
-      var oF = 1;
-      var keywords = [];
-      for(var j=0;j<allRelated.length;j++){
-        if(text.indexOf(allRelated[j])>-1){
-          //don't recommend those with only one word, like "msnbc.com"
-          if(text.length==1 && text[0]==allRelated[j])
-            break;
-          keywords.push(allRelated[j]);
-          oF=oF*freq[allRelated[j]];
-        }
-      }
-      if(oF<1){
-        recLinks.push({link:allLinks[i],overallFreq:oF,kw:keywords});
-      }
-    }
-    //sort by overallFreq
-    recLinks.sort(function(a,b){return a.overallFreq-b.overallFreq});
-    //don't pop up if there's no related links
+    var recLinks = pub.getRelated(allLinks, allRelated, freq);
     
     if(recLinks.length==0){
       if(pub.DEBUG)
         alert("just from current title:"+allwords);
-      for(var i=0;i<allLinks.length;i++){
-        var trimed = pub.utils.trimString(allLinks[i].text);
-        var t = trimed.toLowerCase();
-        //remove the duplicate links (titles)
-        if(recTitles.indexOf(t)>-1){
-          continue;
-        }else{
-          recTitles.push(t);
-        }
-        for(var w in allwords){
-          if(t.indexOf(allwords[w])>-1){
-            recLinks.push({link:allLinks[i],overallFreq:0,kw:allwords[w]});
-          }
-        }
-      }
+      recLinks = pub.getRelated(allLinks, allwords, freq);
     }
+		pub.sqltime.getrelated = (new Date()).getTime() -pub.sqltime.getrelated;
+    
     var recUri = [currLoc];
-    //TODO: remove those that are visited already, or at least display differently
+    //remove those that are visited already (maybe display differently?)
     //get rid of duplicate links
     for(var i=0;i<recLinks.length;i++){
       var uri = recLinks[i].link.href;
-      if(recUri.indexOf(uri)>-1){
-        if(pub.DEBUG)
-          alert(recLinks[i].link.text+"\n"+uri);
+      var linkExist = pub.utils.divInsert(uri, recUri);
+      if(linkExist.exist){
         recLinks.splice(i,1);
         i--;
-      }else{
-        recUri.push(uri);
       }
-    }    
+    }
+		
+    if(pub.DEBUG){
+      var allover = 0;
+      for(var i=0;i<a.arr.length;i++){
+        if(!a.freq[a.arr[i]])
+          alert("NO FREQ!: "+a.arr[i]);
+        pub.DEBUGINFO+=a.arr[i]+ " " +a.freq[a.arr[i]]+"\n";
+        allover+=a.freq[a.arr[i]];
+      }
+      pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
+      pub.DEBUGINFO="dictionary size: "+pub.dictionary.length+"\n"+
+                  "searchid: "+ pub.sqltime.searchid +
+                  " getchild: "+pub.sqltime.getchild +" from " + pub.numberRefTitles +"\n"+
+                  " gettitle: "+pub.sqltime.gettitle + " gettopic: "+pub.sqltime.gettopic +
+									" sortUnique: "+pub.sqltime.sortUnique + " getrelated: "+pub.sqltime.getrelated+"\n"+
+                  " segment: " + "all - "+pub.sqltime.segmentChn+" in " +pub.utils.sqltime.coreTime +
+                  ", smaller: " +pub.utils.sqltime.smallerTime+ " larger: "+pub.utils.sqltime.largerTime+ " index: "+pub.utils.sqltime.noIndexTime+"\n"+
+          pub.utils.sqltime.seg0+" "+pub.utils.sqltime.seg1+
+                  " "+pub.utils.sqltime.seg2+" "+pub.utils.sqltime.seg3+
+          " "+pub.utils.sqltime.seg4+" "+pub.utils.sqltime.seg5 +"\n"+
+          pub.DEBUGINFO;//+" segment: "+pub.sqltime.segment+"\n found new chn words: "+pub.debuginfo.newwords.length+"\n"+pub.debuginfo.newwords+
+      pub.DEBUGINFO="local notes: "+relatedFromLocalNotes +"\nlocal time: "+pub.sqltime.getlocal+"\n"+pub.DEBUGINFO;
+    }
     if(recLinks.length>0){ 
       var o="";
       if(pub.DEBUG){
-        o="removed "+removed+" from "+len+"\r\n";
+        if(/.*[\u4e00-\u9fa5]+.*$/.title)
+          o=pub.dictionary.length + " " +allwords+" ";//"removed "+removed+" from "+len+"\r\n";
       }
       //ONLY refresh current page when the panel is changed
       pub.currLoc = currLoc;
@@ -314,6 +401,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return recLinks;
   };
 
+  /*-----------------UI below---------------------*/
   pub.setAttrDOMElement = function(ele, atts){
     for(var i in atts){
       ele.setAttribute(i, atts[i]);
@@ -403,7 +491,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       ratio = (0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10;
     }
     outputText += "Time: "+spendtime+"s      ";
-    outputText += "Ratio(Num. of suggested/Num. of all links): "+ratio+"%\n";
+    outputText += "Ratio(Num. of suggested/all links found): "+ratio+"%\n";
     return outputText;
   };
   
@@ -456,14 +544,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       
       vbox = document.createElement("vbox");
       vbox = pub.setAttrDOMElement(vbox, {"flex":"1","style":"overflow:auto","width":"500","height":"100"});
-      //alert("vbox created");
-      //<textbox id="property" readonly="true" multiline="true" clickSelectsAll="true" rows="20" flex="1"/>
       //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
 
       savePanel.appendChild(vbox);
       if(version>=4){
         var resizer = document.createElement("resizer");
-        resizer = pub.setAttrDOMElement(resizer, {"dir":"bottomright", "element":"fwtwRelPanel"});//, "right":"0", "bottom":"0", "width":"0", "height":"0"});
+        resizer = pub.setAttrDOMElement(resizer, {"dir":"bottomright", "element":"fwtwRelPanel"});
         savePanel.appendChild(resizer);
       }
       //this put the panel on the menu bar
@@ -485,27 +571,38 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     for(var i=0;i<recLinks.length;i++){
         var l = document.createElement("textbox");
         var t = recLinks[i].link.text;
+        var uri = recLinks[i].link.href;
+        if(!t)
+          continue;
         var title = pub.utils.trimString(t);
         title = pub.utils.removeEmptyLine(title);
         var numLine = pub.utils.countChar("\n",title);
         var titleForSearch = title;
         if(pub.DEBUG)
           title+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
-        
-        /*if(numLine>0){
-          l=pub.setAttrDOMElement(l, {"multiline":"true", "rows":new Number(numLine).toString()});
-        }
-        l = pub.setAttrDOMElement(l, {"class":"plain", "readonly":"true", "value":title});
-        l.setAttribute("style", (i&1)?"background-color:#FFFFFF":"background-color:#EEEEEE");
-        vbox.appendChild(l);*/
 
         var butn = document.createElement("button");
-        butn.setAttribute("style", "white-space: pre-wrap");//; text-align: center;");
+        //butn.setAttribute("style", "border: 0px; padding:0px;");//; text-align: center;");
         butn.setAttribute("class", "borderless");
         butn.onclick = pub.testOpen;
-        butn.setAttribute("href", recLinks[i].link.href);
+        butn.setAttribute("href", uri);
         butn.setAttribute("fwtw-title",titleForSearch);
-        butn.textContent=title;//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
+        //butn.textContent=title;//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
+        /*var predesc = document.createElement("description");
+        predesc.textContent = "this is black ";
+        predesc.setAttribute("style", "color:gray;");
+        butn.appendChild(predesc);
+        var middesc = document.createElement("description");
+        middesc.textContent = "this is red ";
+        middesc.setAttribute("style", "color:red;");
+        butn.appendChild(middesc);*/
+        var desc = document.createElement("description");
+        desc.setAttribute("style", "white-space: pre-wrap");
+        desc.setAttribute("flex", "1");
+        desc.textContent=title;
+        if(pub.history.getIdfromUrl(uri)!=null)
+          desc.setAttribute("style", "color:gray;");
+        butn.appendChild(desc);
         vbox.appendChild(butn);
       }
     if(pub.DEBUG){
@@ -539,6 +636,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.history.init();
     pub.localmanager = com.wuxuan.fromwheretowhere.localmanager;
     pub.localmanager.init();
+    pub.dictionary = [];
   };
     
   return pub;

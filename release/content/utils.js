@@ -3,6 +3,10 @@ com.wuxuan.fromwheretowhere.utils = function(){
   var pub={};
   
   pub.INTERVAL_DEF = {since: -1, till: Number.MAX_VALUE};
+  pub.SEGMENTITERATIONLIMIT = 4;
+  pub.MAXWORDLENGTH = 4;
+  pub.MINWORDLENGTH = 1;
+  pub.sqltime = {};
   
   // Utils functions from here
   pub.cloneObject = function(obj){
@@ -60,6 +64,272 @@ com.wuxuan.fromwheretowhere.utils = function(){
   //remove all spaces \n in front and at end of a string
   pub.trimString = function (str) {
     return str.replace(/^\s*/, "").replace(/\s*$/, "");
+  };
+  
+  //get n gram of the string
+  pub.getGram = function(num, str){
+    var all = [];
+    var end = str.length-1;
+    for(var i=0;i<end;i++){
+      all.push(str.substring(i,i+2));
+    }
+    //alert(all);
+    return all;
+  };
+  
+  //get all ele that's in a but not in b
+  pub.orientDiffArray = function(a,b){
+    var diff = [];
+    for(var i=0;i<a.length;i++){
+      var ae = a[i];
+      if(b.indexOf(ae)==-1){
+        diff.push(ae);
+      }
+    }
+    return diff;
+  };
+  
+  pub.diffArray = function(a,b){
+    a.sort(function order(a,b){return a-b;});
+    b.sort(function order(a,b){return a-b;});
+    var diff = [];
+    for(var i=0;i<a.length;i++){
+      var ae = a[i];
+      var be = b[i];
+      if(!be || ae>be){
+        diff.push(ae);
+        a.splice(i,1);
+      }else if(ae<be){
+        diff.push(be);
+        b.splice(i,1);
+      }
+    }
+    for(var j=i;j<b.length;j++){
+      diff.push(b[j]);
+    }
+    return diff;
+  };
+  
+  //merge the newArray into sorted Array
+  // .sort(function(a,b){return a<b;})
+  pub.mergeToSortedArray = function(newArray, origArray){
+    for(var i=0;i<newArray.length;i++){
+      pub.divInsert(newArray[i], origArray, true);
+    }
+  };
+  
+  //binary search and insert
+  pub.divInsert = function(ele, ar, reversed, dup){
+    var pos = {};
+    if(reversed){
+      pos = pub.revBinInsert(ele, ar);
+    }else{
+      pos = pub.binInsert(ele, ar);
+    }
+    if(pos.exist){
+      if(dup){
+        ar.splice(pos.loc, 0, ele);
+      }
+      return {exist:true, arr:ar};
+    }else{
+      ar.splice(pos.loc, 0, ele);
+      return {exist:false, arr:ar};
+    }
+  };
+
+  //binary search and return the location to insert
+  pub.revBinInsert = function(ele, ar){
+    var left = 0;
+    var right = ar.length;
+    var center = 0;
+    
+    while(left<=right){
+      center = (left+right)>>1;
+      if(ar[center]==ele){
+        return {exist:true,loc:center};
+      }else if(ele<ar[center]){
+        left = center+1;
+      }else{
+        right = center-1;
+      }
+    }
+    var loc = 0;
+    if(center>right){
+      loc = center;
+    }else if(left>center){
+      loc = center+1;
+    }
+    return {exist:false,loc:loc};
+  };
+  
+  //binary search and return the location to insert
+  pub.binInsert = function(ele, ar){
+    var left = 0;
+    var right = ar.length;
+    var center = 0;
+    
+    while(left<=right){
+      center = (left+right)>>1;
+      if(ar[center]==ele){
+        return {exist:true,loc:center};
+      }else if(ele<ar[center]){
+        right = center-1;
+      }else{
+        left = center+1;
+      }
+    }
+    var loc = 0;
+    if(center>right){
+      loc = center;
+    }else if(left>center){
+      loc = center+1;
+    }
+    return {exist:false,loc:loc};
+  };
+  
+  //get as many chinese words as possible
+  pub.segmentChn = function(allRelated, dictionary){
+    pub.tmp = (new Date()).getTime();
+    //limit the total time of seg
+    var beginStamp = pub.tmp;
+    var chn = [];
+    var nonChn = [];
+    for(var i=0;i<allRelated.length;i++){
+      if(/.*[\u4e00-\u9fa5]+.*$/.test(allRelated[i]))
+        pub.divInsert(allRelated[i], chn, true, true);
+      else
+        nonChn.push(allRelated[i]);
+    }
+    var findMaxGramHead = [];
+    var processed = [];
+    var phrases = [];
+    for(var i=0;i<pub.SEGMENTITERATIONLIMIT;i++){
+      //split the chn into word part (not more spliting) and phrases
+      
+      for(var j=0;j<chn.length;j++){
+        var len = chn[j].length;
+        if(len>pub.MINWORDLENGTH && len<pub.MAXWORDLENGTH){
+          pub.divInsert(chn[j], dictionary, true);
+          processed.push(chn[j]);
+        }else{
+          pub.divInsert(chn[j], phrases, true);
+        }
+      }
+      
+      //pub.tmp = (new Date()).getTime();
+      findMaxGramHead = pub.getAllCommonHead(phrases);
+      //pub.sqltime.seg2 += (new Date()).getTime() -pub.tmp;
+      
+      //pub.tmp = (new Date()).getTime();
+      if(dictionary.length==0)
+        dictionary = findMaxGramHead;
+      else
+        pub.mergeToSortedArray(findMaxGramHead, dictionary);
+      //pub.sqltime.seg3 += (new Date()).getTime() -pub.tmp;
+      
+      //pub.tmp = (new Date()).getTime();
+      chn = pub.getAllChnWords(dictionary,phrases);
+      //pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
+      //pub.tmp = (new Date()).getTime();
+      
+      if(findMaxGramHead.length==0 || ((new Date()).getTime()-beginStamp)>1000){
+        break;
+      }else{
+        phrases = [];
+      }
+    }
+    pub.tmp = (new Date()).getTime();
+    chn = processed.concat(chn);
+    allRelated = nonChn.concat(chn);
+    var chnSmall = chn.filter(
+                              function small(str){
+                                var len = str.length;
+                                return len>pub.MINWORDLENGTH && len<pub.MAXWORDLENGTH;
+                                });
+    pub.sqltime.seg5 += (new Date()).getTime() -pub.tmp;
+    return {all:allRelated, chnSmall:chnSmall};
+  };
+  
+  // no seg here as the common head may be not good splitter (max length)
+  // NOTE: words are reversely sorted!
+	pub.getAllCommonHead = function(words){
+		var newwords = [];
+		var len = words.length-1;
+		for(var i=0;i<len;i++){
+			var w1 = words[i];
+			var w2 = words[i+1];
+			var maxLen = (w1.length>w2.length)?w1.length:w2.length;
+			for(var j=0;j<maxLen;j++){
+        //won't add if two are the same
+				if(w1[j]!=w2[j]){
+          //only add if longer than 1
+					if(j>pub.MINWORDLENGTH){
+						var w = w1.substring(0,j);
+            pub.divInsert(w,newwords,true);
+					}
+					break;
+				}
+			}
+			
+		}
+		return newwords;
+	};
+	
+  //NOTE: words are reversed sorted!
+	pub.getAllChnWords = function(newwords, words){
+    if(words==null){
+      words = newwords;
+    }
+    var start = (new Date()).getTime();
+		while(newwords.length!=0){
+			var news = [];
+			for(var i=0;i<newwords.length;i++){
+				for(var j=0;j<words.length;j++){
+          //TODO: to avoid indexing...for now
+          var len = newwords[i].length;
+					if (len > pub.MAXWORDLENGTH) {
+            pub.sqltime.smallerTime++;
+            continue;
+          }//this might miss some, but accuracy and speed can't be achieved at the same time
+          else if (words[j].length < len + pub.MAXWORDLENGTH) {
+            pub.sqltime.largerTime++;
+            continue;
+          }
+          else if (words[j].indexOf(newwords[i]) == -1) {
+            pub.sqltime.noIndexTime++;
+            continue;
+          }  
+          
+          pub.sqltime.coreTime++;
+          pub.tmp = (new Date()).getTime();
+					var sp = words[j].split(newwords[i]);
+          pub.sqltime.seg2 += (new Date()).getTime() -pub.tmp;
+					if(sp.length>1){
+						//if splitted, start checking from here
+						var origIdx = j;
+            //keep it here as newwords may be the same as words, and i shifts!!
+            var currRefWord = newwords[i];
+						for(var l=0;l<sp.length;l++){
+							if(sp[l].length>1){
+								j+=1;
+                pub.tmp = (new Date()).getTime();
+								words.splice(j,0,sp[l]);
+                pub.divInsert(sp[l], news, true);
+                pub.sqltime.seg3 += (new Date()).getTime() -pub.tmp;
+							}
+						}
+            //replace "abc" by "ab" if there's "ab" in newwords
+            //assume there's only one occurrence newwords[i], for title is likely
+            pub.tmp = (new Date()).getTime();
+						words.splice(origIdx,1,currRefWord);
+            pub.sqltime.seg4 += (new Date()).getTime() -pub.tmp;
+					}
+				}
+			}
+			newwords = news;
+    }
+    pub.sqltime.seg0 += (new Date()).getTime() -start;
+    return words;
   };
   
   //remove all empty lines in between (there's no empty lines at front/end in input)
