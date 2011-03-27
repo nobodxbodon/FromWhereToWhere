@@ -36,6 +36,8 @@
    The panel can't be repositioned, and will hide if click outside.
 Feature below (all about link suggestion) is targeting at FF4, tested in 4.0b13pre under Vista, and 3.6 under Ubuntu.
 3) if the suggestion is derived from current page, clicking the link button will find the corresponding link on the page; if the title isn't found (some link are hidden) open the url in new tab.
-4) if the suggestion isn't derived from current page, click any link button will switch to that page if it's still opened, if it's not opened, it'll be reopened, and 1) can be performed.
+4) if the suggestion isn't derived from current page (tab switched), click any link button will switch to that page if it's still opened, if it's not opened, it'll be reopened, and 1) can be performed.
 5) "refresh" button on the panel will give the suggestion for current page
 6) in a new profile without any browsing history, after importing external local notes, the suggestion will be based on the local notes
+7) if a suggested link is visited before, it's shown in gray
+8) if there's no suggestion link for the current page, the panel will stay showing the last results
