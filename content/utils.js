@@ -202,10 +202,11 @@ com.wuxuan.fromwheretowhere.utils = function(){
     }
     var findMaxGramHead = [];
     var processed = [];
+    var shorts = [];
+    var phrases = [];
     for(var i=0;i<pub.SEGMENTITERATIONLIMIT;i++){
       //split the chn into word part (not more spliting) and phrases
-      var shorts = [];
-      var phrases = [];
+      
       for(var j=0;j<chn.length;j++){
         var len = chn[j].length;
         if(len>pub.MINWORDLENGTH && len<pub.MAXWORDLENGTH){
@@ -230,7 +231,6 @@ com.wuxuan.fromwheretowhere.utils = function(){
       processed = processed.concat(shorts);
       
       //pub.tmp = (new Date()).getTime();
-      //TODO: use divInsert and save the sort
       chn = pub.getAllChnWords(dictionary,phrases);
       //pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
       //pub.tmp = (new Date()).getTime();
@@ -241,6 +241,9 @@ com.wuxuan.fromwheretowhere.utils = function(){
           break;
         }*/
         break;
+      }else{
+        shorts = [];
+        phrases = [];
       }
     }
     pub.tmp = (new Date()).getTime();
@@ -285,9 +288,9 @@ com.wuxuan.fromwheretowhere.utils = function(){
     if(words==null){
       words = newwords;
     }else{
-      pub.tmp = (new Date()).getTime();
-      words.sort(function(a,b){return a<b;});
-      pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
+      //pub.tmp = (new Date()).getTime();
+      //words.sort(function(a,b){return a<b;});
+      //pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
     }
     var start = (new Date()).getTime();
 		while(newwords.length!=0){
