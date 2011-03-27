@@ -203,8 +203,20 @@ com.wuxuan.fromwheretowhere.utils = function(){
     var findMaxGramHead = [];
     var processed = [];
     for(var i=0;i<pub.SEGMENTITERATIONLIMIT;i++){
+      //split the chn into word part (not more spliting) and phrases
+      var shorts = [];
+      var phrases = [];
+      for(var j=0;j<chn.length;j++){
+        var len = chn[j].length;
+        if(len>pub.MINWORDLENGTH && len<pub.MAXWORDLENGTH){
+          shorts.push(chn[j]);
+        }else{
+          pub.divInsert(chn[j], phrases, true);
+        }
+      }
+      
       //pub.tmp = (new Date()).getTime();
-      findMaxGramHead = pub.getAllCommonHead(chn);
+      findMaxGramHead = pub.getAllCommonHead(phrases);
       //pub.sqltime.seg2 += (new Date()).getTime() -pub.tmp;
       
       //pub.tmp = (new Date()).getTime();
@@ -214,17 +226,6 @@ com.wuxuan.fromwheretowhere.utils = function(){
         pub.mergeToSortedArray(findMaxGramHead, dictionary);
       //pub.sqltime.seg3 += (new Date()).getTime() -pub.tmp;
       
-      //split the chn into word part (not more spliting) and phrases
-      var shorts = [];
-      var phrases = [];
-      for(var j=0;j<chn.length;j++){
-        var len = chn[j].length;
-        if(len>pub.MINWORDLENGTH && len<pub.MAXWORDLENGTH){
-          shorts.push(chn[j]);
-        }else{
-          phrases.push(chn[j]);
-        }
-      }
       pub.mergeToSortedArray(shorts, dictionary);
       processed = processed.concat(shorts);
       
@@ -254,8 +255,9 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return {all:allRelated, chnSmall:chnSmall};
   };
   
+  // no seg here as the common head may be not good splitter (max length)
 	pub.getAllCommonHead = function(words){
-		words.sort(function(a,b){return a<b;});
+		//words.sort(function(a,b){return a<b;});
 		var newwords = [];
 		var len = words.length-1;
 		for(var i=0;i<len;i++){
