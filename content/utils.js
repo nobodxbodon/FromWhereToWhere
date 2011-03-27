@@ -3,6 +3,9 @@ com.wuxuan.fromwheretowhere.utils = function(){
   var pub={};
   
   pub.INTERVAL_DEF = {since: -1, till: Number.MAX_VALUE};
+  pub.SEGMENTITERATIONLIMIT = 4;
+  pub.MAXWORDLENGTH = 4;
+  pub.MINWORDLENGTH = 1;
   pub.sqltime = {};
   
   // Utils functions from here
@@ -198,7 +201,8 @@ com.wuxuan.fromwheretowhere.utils = function(){
         nonChn.push(allRelated[i]);
     }
     var findMaxGramHead = [];
-    for(var i=0;i<4;i++){
+    var processed = [];
+    for(var i=0;i<pub.SEGMENTITERATIONLIMIT;i++){
       //pub.tmp = (new Date()).getTime();
       findMaxGramHead = pub.getAllCommonHead(chn);
       //pub.sqltime.seg2 += (new Date()).getTime() -pub.tmp;
@@ -210,9 +214,23 @@ com.wuxuan.fromwheretowhere.utils = function(){
         pub.mergeToSortedArray(findMaxGramHead, dictionary);
       //pub.sqltime.seg3 += (new Date()).getTime() -pub.tmp;
       
+      //split the chn into word part (not more spliting) and phrases
+      var shorts = [];
+      var phrases = [];
+      for(var j=0;j<chn.length;j++){
+        var len = chn[j].length;
+        if(len>pub.MINWORDLENGTH && len<pub.MAXWORDLENGTH){
+          shorts.push(chn[j]);
+        }else{
+          phrases.push(chn[j]);
+        }
+      }
+      pub.mergeToSortedArray(shorts, dictionary);
+      processed = processed.concat(shorts);
+      
       //pub.tmp = (new Date()).getTime();
       //TODO: use divInsert and save the sort
-      chn = pub.getAllChnWords(dictionary,chn);
+      chn = pub.getAllChnWords(dictionary,phrases);
       //pub.sqltime.seg1 += (new Date()).getTime() -pub.tmp;
       //pub.tmp = (new Date()).getTime();
       
@@ -225,8 +243,13 @@ com.wuxuan.fromwheretowhere.utils = function(){
       }
     }
     pub.tmp = (new Date()).getTime();
+    chn = processed.concat(chn);
     allRelated = nonChn.concat(chn);
-    var chnSmall = chn.filter(function small(str){return str.length>1 && str.length<3;});
+    var chnSmall = chn.filter(
+                              function small(str){
+                                var len = str.length;
+                                return len>pub.MINWORDLENGTH && len<pub.MAXWORDLENGTH;
+                                });
     pub.sqltime.seg5 += (new Date()).getTime() -pub.tmp;
     return {all:allRelated, chnSmall:chnSmall};
   };
@@ -243,7 +266,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
         //won't add if two are the same
 				if(w1[j]!=w2[j]){
           //only add if longer than 1
-					if(j>1){
+					if(j>pub.MINWORDLENGTH){
 						var w = w1.substring(0,j);
             pub.divInsert(w,newwords,true);
 					}
@@ -270,9 +293,20 @@ com.wuxuan.fromwheretowhere.utils = function(){
 			for(var i=0;i<newwords.length;i++){
 				for(var j=0;j<words.length;j++){
           //TODO: to avoid indexing...for now
-          //var haveWord = words[j].indexOf(newwords[i]);
-					if(words[j].length<=newwords[i].length+1 || words[j].indexOf(newwords[i])==-1)
-						continue;
+          var len = newwords[i].length;
+					if (len > pub.MAXWORDLENGTH) {
+            pub.sqltime.smallerTime++;
+            continue;
+          }//this might miss some, but accuracy and speed can't be achieved at the same time
+          else if (words[j].length < len + pub.MAXWORDLENGTH) {
+            pub.sqltime.largerTime++;
+            continue;
+          }
+          else if (words[j].indexOf(newwords[i]) == -1) {
+            pub.sqltime.noIndexTime++;
+            continue;
+          }  
+          
           pub.sqltime.coreTime++;
           pub.tmp = (new Date()).getTime();
 					var sp = words[j].split(newwords[i]);
