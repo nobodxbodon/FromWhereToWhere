@@ -174,9 +174,8 @@ com.wuxuan.fromwheretowhere.stats = function(){
 	
   pub.all = function() {
 		var allRelated = pub.allwords;
-		allRelated = pub.utils.segmentChn(allRelated, []);
-		alert(allRelated.all);
-		alert(allRelated.chnSmall);
+		allRelated = pub.utils.getAllChnWords(allRelated);
+		alert(allRelated);
     //pub.main.dispatch(new pub.searchThread(1), pub.main.DISPATCH_NORMAL);
     //pub.main.dispatch(new pub.patternThread(1), pub.main.DISPATCH_NORMAL);
   };
