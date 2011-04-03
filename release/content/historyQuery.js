@@ -75,22 +75,18 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     }
     return pub.queryAll(statement, 32, 0);
   };
-  
-  /* the url visited before are all associated with the first place_id */
-  pub.getAllIdfromPlaceId = function(pid){
-    var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits where place_id=:pid");
-    try{
-      statement.params.pid=pid;
-    }catch(err){
-      alert(err);
+
+  //linear search in array, may improve if in order
+  pub.addInArrayNoDup = function(pid, ls){
+    if(ls.indexOf(pid)==-1){
+      ls.push(pid);
     }
-    return pub.queryAll(statement, 32, 0);
+    return ls;
   };
-    
-  pub.getChildren = function(parentId, query) {
-    //all from_visit between id and next larger id are the same
-		var term = "SELECT place_id FROM moz_historyvisits where from_visit>=:id and from_visit< \
-						(SELECT id FROM moz_historyvisits where id>:id limit 1)";
+	
+	//ids: intermediate table for id that's for placeId; get place_id that has from_visit is in range of ids.id and the first id that's >ids.id
+	pub.getAllChildrenfromPlaceId = function(placeId, query) {
+		var term = "SELECT DISTINCT place_id FROM moz_historyvisits, (SELECT id FROM moz_historyvisits where place_id=:pid) as ids where from_visit>=ids.id and from_visit<(SELECT id FROM moz_historyvisits where id>ids.id limit 1)";
 		if(query){
 			if(query.site.length>0){
 				term = pub.sqlStUrlFilter(term, query.site, false);
@@ -99,42 +95,13 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 				term = pub.sqlStTimeFilter(term, query.time, false);
 			}
 		}
-		//alert(term);
-    var statement = pub.mDBConn.createStatement(term);
-    statement.params.id=parentId;
+		var statement = pub.mDBConn.createStatement(term);
+		try{
+      statement.params.pid=placeId;
+    }catch(err){
+      alert(err);
+    }
     return pub.queryAll(statement, 32, 0);
-  };
-  
-  //linear search in array, may improve if in order
-  pub.addInArrayNoDup = function(pid, ls){
-    if(ls.indexOf(pid)==-1){
-      ls.push(pid);
-    }
-    return ls;
-  };
-  
-  //pub.timestats1=0;
-  /* placeId: the placeId of the parent, which is unique even when this url is visited multiple times
-    retrievedId: the id of the child, which correspond to the current url only
-    TOOPT: use pure SQL instead of concat and dupcheck*/
-  pub.getAllChildrenfromPlaceId = function(placeId, query) {
-    //var start = (new Date()).getTime();
-    var potentialchildren = [];
-    /*var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=thisid and from_visit<\
-						(SELECT id FROM moz_historyvisits where id>thisid limit 1) where thisid IN \
-						(SELECT id FROM moz_historyvisits where place_id=:pid)");
-      statement.params.pid=placeId;*/
-    var ids = pub.getAllIdfromPlaceId(placeId);
-    
-    for(var j = 0; j<ids.length; j++) {
-      var newChildren = pub.getChildren(ids[j], query);
-      for(var i in newChildren){
-	potentialchildren = pub.addInArrayNoDup(newChildren[i], potentialchildren);
-      }
-    }
-    //potentialchildren = pub.queryAll(statement, 32, 0);
-    //pub.timestats1+=(new Date()).getTime()-start;
-    return potentialchildren;
   };
      
   pub.nodefromPlaceid = function(pid, query) {
@@ -210,8 +177,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 	};
 	
 	pub.sqlStExcludeFilter = function(term, excluded){
-		//TODO: seems dup condition, to simplify
-    if(excluded.length!=0){
+		if(excluded.length!=0){
       for(var i = excluded.length-1; i>=0; i--){
 				// no proof to be faster to use conjunction (AND)
         term = "SELECT * FROM (" + term + ") WHERE TITLE NOT LIKE '%" + excluded[i] + "%'";
@@ -305,8 +271,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
       }
     }
 		
-		//TODO: seems dup condition, to simplify
-    var excludeTerm = siteTerm;
+		var excludeTerm = siteTerm;
     if(excluded.length!=0){
 			var titleNotLike = "";
       for(var i = excluded.length-1; i>=0; i--){

@@ -79,6 +79,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     if(title==null){
       return [];
     }
+    //TODO: should be special char?
     var allwords = title.split(sp);//(" ");/\W/
     var ws = pub.filter(allwords, stopwords, specials);
     return ws;
@@ -499,7 +500,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
-    var topbar, statsInfoLabel, vbox,debugtext,linkBox, testLink;
+    var topbar, statsInfoLabel, vbox,debugtext,linkBox, testLink, divEle;
     if(pub.ANCHOR && recLinks.length>0){
     //for(var i=0;i<recLinks.length;i++){
       testLink = document.createElement("label");
@@ -518,6 +519,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //alert("there's panel!");
       topbar = savePanel.firstChild;
       statsInfoLabel = topbar.firstChild.nextSibling;
+      //divEle = topbar.firstChild.nextSibling;
       vbox = savePanel.firstChild.nextSibling;
     }else{
       //alert("creating new panel");
@@ -542,6 +544,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       topbar.appendChild(statsInfoLabel);
       savePanel.appendChild(topbar);
       
+      /*divEle = document.createElement("div");
+      savePanel.appendChild(divEle);
+      */
       vbox = document.createElement("vbox");
       vbox = pub.setAttrDOMElement(vbox, {"flex":"1","style":"overflow:auto","width":"500","height":"100"});
       //TODO: put links instead of pure text, and point to the links in page, may need to add bookmark in the page??
@@ -582,6 +587,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           title+=" "+recLinks[i].kw+" "+ recLinks[i].overallFreq;
 
         var butn = document.createElement("button");
+        butn.setAttribute("align", "start");
+        butn.setAttribute("tooltiptext", recLinks[i].kw)
         //butn.setAttribute("style", "border: 0px; padding:0px;");//; text-align: center;");
         butn.setAttribute("class", "borderless");
         butn.onclick = pub.testOpen;
@@ -603,7 +610,14 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         if(pub.history.getIdfromUrl(uri)!=null)
           desc.setAttribute("style", "color:gray;");
         butn.appendChild(desc);
+        /*var descs = pub.highlightKeywords(title, recLinks[i].kw);
+        for(var j=0;j<descs.length;j++){
+          butn.appendChild(descs[j]);
+        }*/
         vbox.appendChild(butn);
+        /*var link = document.createElement("a");
+        link=pub.setAttrDOMElement(link, {"value":title,"href":"com.wuxuan.fromwheretowhere.recommendation.testOpen()"});
+        divEle.appendChild(link);*/
       }
     if(pub.DEBUG){
       debugtext = document.createElement("textbox");
@@ -624,6 +638,34 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     //get all the links on current page, and their texts shown on page
     //can't get from overlay, still wondering
+  };
+  
+  pub.highlightKeywords = function(origtitle, keywords){
+    var indice = [];
+    var title = origtitle.toLowerCase();
+    for(var i=0;i<keywords.length;i++){
+      var idx = title.indexOf(keywords[i]);
+      indice.push(idx);
+      indice.push(idx+keywords[i].length);
+    }
+    indice.sort(function smaller(a,b){return a>b;});
+    var descs = [];
+    var starter = 0;
+    var ender = 0;
+    for(var i=0;i<indice.length;i++){
+      var desc = document.createElement("description");
+      if(starter!=indice[i]){
+        desc.textContent = origtitle.substring(starter,indice[i]);
+        if(i%2==0){
+          //desc.setAttribute("style", "color:black;");
+        }else{
+          desc.setAttribute("style", "font-weight: bolder");//"color:red;");
+        }
+        descs.push(desc);
+        starter = indice[i];
+      }
+    }
+    return descs;
   };
   
   pub.init = function(){
