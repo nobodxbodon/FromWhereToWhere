@@ -75,36 +75,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     }
     return pub.queryAll(statement, 32, 0);
   };
-  
-  /* the url visited before are all associated with the first place_id */
-  pub.getAllIdfromPlaceId = function(pid){
-    var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits where place_id=:pid");
-    try{
-      statement.params.pid=pid;
-    }catch(err){
-      alert(err);
-    }
-    return pub.queryAll(statement, 32, 0);
-  };
-    
-  pub.getChildren = function(parentId, query) {
-    //all from_visit between id and next larger id are the same
-		var term = "SELECT place_id FROM moz_historyvisits where from_visit>=:id and from_visit< \
-						(SELECT id FROM moz_historyvisits where id>:id limit 1)";
-		if(query){
-			if(query.site.length>0){
-				term = pub.sqlStUrlFilter(term, query.site, false);
-			}
-			if(query.time.length>0){
-				term = pub.sqlStTimeFilter(term, query.time, false);
-			}
-		}
-		//alert(term);
-    var statement = pub.mDBConn.createStatement(term);
-    statement.params.id=parentId;
-    return pub.queryAll(statement, 32, 0);
-  };
-  
+
   //linear search in array, may improve if in order
   pub.addInArrayNoDup = function(pid, ls){
     if(ls.indexOf(pid)==-1){
@@ -113,7 +84,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return ls;
   };
 	
-	//intermediate table for ids 
+	//ids: intermediate table for id that's for placeId; get place_id that has from_visit is in range of ids.id and the first id that's >ids.id
 	pub.getAllChildrenfromPlaceId = function(placeId, query) {
 		var term = "SELECT DISTINCT place_id FROM moz_historyvisits, (SELECT id FROM moz_historyvisits where place_id=:pid) as ids where from_visit>=ids.id and from_visit<(SELECT id FROM moz_historyvisits where id>ids.id limit 1)";
 		if(query){
