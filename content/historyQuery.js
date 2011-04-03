@@ -143,8 +143,17 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 select * from moz_historyvisits, ids where from_visit=ids.id;
 DROP  VIEW ids;*/
 	pub.getAllChildrenfromPlaceId = function(placeId, query) {
-		var statement = pub.mDBConn.createStatement("SELECT DISTINCT place_id FROM moz_historyvisits, (SELECT id FROM moz_historyvisits where place_id=:pid) as ids where from_visit>=ids.id and from_visit<(SELECT id FROM moz_historyvisits where id>ids.id limit 1)");
-    try{
+		var term = "SELECT DISTINCT place_id FROM moz_historyvisits, (SELECT id FROM moz_historyvisits where place_id=:pid) as ids where from_visit>=ids.id and from_visit<(SELECT id FROM moz_historyvisits where id>ids.id limit 1)";
+    if(query){
+			if(query.site.length>0){
+				term = pub.sqlStUrlFilter(term, query.site, false);
+			}
+			if(query.time.length>0){
+				term = pub.sqlStTimeFilter(term, query.time, false);
+			}
+		}
+		var statement = pub.mDBConn.createStatement(term);
+		try{
       statement.params.pid=placeId;
     }catch(err){
       alert(err);
