@@ -113,11 +113,12 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return ls;
   };
   
+	//OLD
   //pub.timestats1=0;
   /* placeId: the placeId of the parent, which is unique even when this url is visited multiple times
     retrievedId: the id of the child, which correspond to the current url only
     TOOPT: use pure SQL instead of concat and dupcheck*/
-  pub.getAllChildrenfromPlaceId = function(placeId, query) {
+  pub.oldgetAllChildrenfromPlaceId = function(placeId, query) {
     //var start = (new Date()).getTime();
     var potentialchildren = [];
     /*var statement = pub.mDBConn.createStatement("SELECT place_id FROM moz_historyvisits where from_visit>=thisid and from_visit<\
@@ -135,6 +136,20 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     //potentialchildren = pub.queryAll(statement, 32, 0);
     //pub.timestats1+=(new Date()).getTime()-start;
     return potentialchildren;
+  };
+	
+	//NEW
+	/*CREATE TEMP VIEW ids AS SELECT id FROM moz_historyvisits where place_id=3523;
+select * from moz_historyvisits, ids where from_visit=ids.id;
+DROP  VIEW ids;*/
+	pub.getAllChildrenfromPlaceId = function(placeId, query) {
+		var statement = pub.mDBConn.createStatement("SELECT DISTINCT place_id FROM moz_historyvisits, (SELECT id FROM moz_historyvisits where place_id=:pid) as ids where from_visit>=ids.id and from_visit<(SELECT id FROM moz_historyvisits where id>ids.id limit 1)");
+    try{
+      statement.params.pid=placeId;
+    }catch(err){
+      alert(err);
+    }
+    return pub.queryAll(statement, 32, 0);
   };
      
   pub.nodefromPlaceid = function(pid, query) {
