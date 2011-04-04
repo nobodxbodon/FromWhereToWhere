@@ -323,8 +323,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
 		pub.sqltime.sortUnique = (new Date()).getTime();
     var origLen = allRelated.length;
     //sort the string array by string length, can speed up later processing
-    //TODO: check if can save this as allRelated is sorted before in segment
-    allRelated.sort(function(a,b){return a>b});
+    //allRelated is sorted before, but <, uniqueArray should still work
+    allRelated.sort(function(a,b){return a<b});
     var len = allRelated.length;
     var a = pub.utils.uniqueArray(allRelated, true);
     //get frequency of word (number of titles that contains it/number of all titles)

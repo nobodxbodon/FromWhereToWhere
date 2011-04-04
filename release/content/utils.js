@@ -113,6 +113,8 @@ com.wuxuan.fromwheretowhere.utils = function(){
   //merge the newArray into sorted Array
   // .sort(function(a,b){return a<b;})
   pub.mergeToSortedArray = function(newArray, origArray){
+    if(newArray==null)
+      return;
     for(var i=0;i<newArray.length;i++){
       pub.divInsert(newArray[i], origArray, true);
     }
