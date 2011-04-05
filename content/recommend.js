@@ -8,7 +8,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIDOMWindow);
  
-  pub.DEBUG = false;
+  pub.DEBUG = true;
   pub.ANCHOR = false;
   pub.DEBUGINFO = "";
   pub.debuginfo = {};
@@ -36,9 +36,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     for(var i=0; i<allwords.length; i++){
       allwords[i] = allwords[i].toLowerCase();
       var orig = allwords[i];
-      var upper = orig.toUpperCase();
-      //judge if it's English
-      if(upper!=orig){
+      //var upper = orig.toUpperCase();
+      //judge if there's no Chinese
+      if(orig.match(/[\u4e00-\u9fa5\u3044-\u30ff]+/)==null){
         //only for English
         //only get the first part here
         //TODO: should get more words out, split them with the recognized words, expensive though (keep those with special words, and then indexof the recog, split with those, then recurrent)
@@ -607,6 +607,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         desc.setAttribute("style", "white-space: pre-wrap");
         desc.setAttribute("flex", "1");
         desc.textContent=title;
+        //TODO: more precise detection of visited page, some have different url but very "close" titles...
         if(pub.history.getIdfromUrl(uri)!=null)
           desc.setAttribute("style", "color:gray;");
         butn.appendChild(desc);

@@ -197,7 +197,8 @@ com.wuxuan.fromwheretowhere.utils = function(){
     var chn = [];
     var nonChn = [];
     for(var i=0;i<allRelated.length;i++){
-      if(/.*[\u4e00-\u9fa5]+.*$/.test(allRelated[i]))
+      //TODO: separate dictionary of different languages, like jpn
+      if(/.*[\u4e00-\u9fa5\u3044-\u30ff]+.*$/.test(allRelated[i]))
         pub.divInsert(allRelated[i], chn, true, true);
       else
         nonChn.push(allRelated[i]);
