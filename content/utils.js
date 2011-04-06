@@ -294,7 +294,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
             pub.sqltime.smallerTime++;
             continue;
           }//this might miss some, but accuracy and speed can't be achieved at the same time
-          else if (words[j].length < len + pub.MAXWORDLENGTH) {
+          else if (words[j].length <= len + pub.MINWORDLENGTH) {
             pub.sqltime.largerTime++;
             continue;
           }

@@ -37,19 +37,31 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       allwords[i] = allwords[i].toLowerCase();
       var orig = allwords[i];
       //var upper = orig.toUpperCase();
-      //judge if there's no Chinese
-      if(orig.match(/[\u4e00-\u9fa5\u3044-\u30ff]+/)==null){
-        //only for English
-        //only get the first part here
-        //TODO: should get more words out, split them with the recognized words, expensive though (keep those with special words, and then indexof the recog, split with those, then recurrent)
-        allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
-        //only for English
-        allwords[i] = pub.getOrig(allwords[i]);
-        if(allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null || stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 ){
-          allwords.splice(i, 1);
-          i--;
+      //judge if there's jpn
+      //TODO: merge with chn, as only reg expr is different
+      if(orig.match(/[\u3044-\u30ff]+/)!=null){
+        //get all the parts separated by non-word, for now only consider Eng and Chn
+        var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5\u3044-\u30ff]+/);//(/[~|!|@|#|$|%|^|&|*|(|)|\-|_|+|=|¡ª|:|;|\"|\'|<|>|,|.|?|\/|\\|{|}|[|]|£¡|£¤|¡­¡­|£¨|£©|\||¡¢|¡ª¡ª|¡¾|¡¿|¡°|¡±|¡¯|¡®|£º|£»|¡¶|¡·|£¬|¡£|£¿]+/);
+        var nonempty = parts.filter(function notEmpty(str){return str!="";});
+        pub.tmp = (new Date()).getTime();
+        var segResult = pub.utils.segmentChn(nonempty, pub.dictionary_jpn);
+        nonempty = segResult.all;
+        pub.utils.mergeToSortedArray(segResult.chnSmall, pub.dictionary_jpn);
+        pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
+        allwords.splice(i,1);
+        if(nonempty.length!=0){
+          for(var j=0;j<nonempty.length;j++){
+            //remove all numbers and 1 char word
+            if(nonempty[j].length==1 || nonempty[j].match(/[0-9]/)!=null){
+              continue;
+            }
+            allwords.splice(i,0,nonempty[j]);
+            i++;
+          }
         }
-      }else{//segmentation for Chinese
+        i--;
+      }//if there's chn
+      else if(orig.match(/[\u4e00-\u9fa5]+/)!=null){
         //get all the parts separated by non-word, for now only consider Eng and Chn
         var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5]+/);//(/[~|!|@|#|$|%|^|&|*|(|)|\-|_|+|=|¡ª|:|;|\"|\'|<|>|,|.|?|\/|\\|{|}|[|]|£¡|£¤|¡­¡­|£¨|£©|\||¡¢|¡ª¡ª|¡¾|¡¿|¡°|¡±|¡¯|¡®|£º|£»|¡¶|¡·|£¬|¡£|£¿]+/);
         var nonempty = parts.filter(function notEmpty(str){return str!="";});
@@ -70,6 +82,17 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           }
         }
         i--;
+      }else{
+        //stopwords only for English
+        //only get the first part here
+        //TODO: should get more words out, split them with the recognized words, expensive though (keep those with special words, and then indexof the recog, split with those, then recurrent)
+        allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
+        //only for English
+        allwords[i] = pub.getOrig(allwords[i]);
+        if(allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null || stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 ){
+          allwords.splice(i, 1);
+          i--;
+        }
       }
     }
     return allwords;
@@ -314,11 +337,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     //store the small words for future segmentation
     //TODO: add size limit to dictionary, use it for all seg, including for future allRelated titles
-    pub.tmp = (new Date()).getTime();
+    /*pub.tmp = (new Date()).getTime();
     var segResults = pub.utils.segmentChn(allRelated, pub.dictionary);
     allRelated = segResults.all;
     pub.utils.mergeToSortedArray(segResults.chnSmall, pub.dictionary);
-    pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
+    pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;*/
     
 		pub.sqltime.sortUnique = (new Date()).getTime();
     var origLen = allRelated.length;
@@ -373,7 +396,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         allover+=a.freq[a.arr[i]];
       }
       pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
-      pub.DEBUGINFO="dictionary size: "+pub.dictionary.length+"\n"+
+      pub.DEBUGINFO="dictionary size: "+pub.dictionary.length+" jp: "+pub.dictionary_jpn.length+"\n"+
                   "searchid: "+ pub.sqltime.searchid +
                   " getchild: "+pub.sqltime.getchild +" from " + pub.numberRefTitles +"\n"+
                   " gettitle: "+pub.sqltime.gettitle + " gettopic: "+pub.sqltime.gettopic +
@@ -680,6 +703,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.localmanager = com.wuxuan.fromwheretowhere.localmanager;
     pub.localmanager.init();
     pub.dictionary = [];
+    pub.dictionary_jpn = [];
   };
     
   return pub;
