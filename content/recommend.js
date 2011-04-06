@@ -216,15 +216,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //remove dup word in the title, for freq mult
       //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
       text = pub.utils.uniqueArray(text, false);
-      //if there's too few words (<3 for now), either catalog or tag, or very obvious already
-      if(pub.tooSimple(text, pub.specials) && !/.*[\u4e00-\u9fa5]+.*$/.test(t)){
-        continue;
-      }
       //get the mul of keyword freq in all titles to be sorted
       var oF = 1;
       var keywords = [];
       //if there's chinese, go through every part, otherwise compare by word
-      if(/.*[\u4e00-\u9fa5]+.*$/.test(t)){
+      if(/.*[\u4e00-\u9fa5\u3044-\u30ff]+.*$/.test(t)){
         for(var j=0;j<allRelated.length;j++){
           if(t.indexOf(allRelated[j])>-1){
             if(text.length==1 && text[0]==allRelated[j])
@@ -243,6 +239,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
             continue;
         }
       }else{
+        //if there's too few words (<3 for now), either catalog or tag, or very obvious already
+        if(pub.tooSimple(text, pub.specials)){
+          continue;
+        }
         for(var j=0;j<allRelated.length;j++){
           if(text.indexOf(allRelated[j])>-1){
             //don't recommend those with only one word, like "msnbc.com"
@@ -289,25 +289,25 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var allwords = pub.getTopic(title, " ", pub.stopwords, pub.specials);
     //without any history tracking
     //TODO: only pick the words related to interest, not every non-stopword
-    //TODO: search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
+    //search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
     var pidsWithWord=[];
     //if new tab or no title at all, no recommendation. TODO: extract from text body
-    if(allwords.length==0){
+    if(allwords==null || allwords.length==0){
       return [];
     }
     pub.tmp = (new Date()).getTime();
     
     pidsWithWord = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
-    
+    //getAllChildrenfromKeywords(allwords);
     pub.sqltime.searchid = (new Date()).getTime()-pub.tmp;
     pub.tmp = (new Date()).getTime();
     
-    var children = [];
+    var children = pub.history.getAllChildrenfromAllPlaceId(pidsWithWord);
     //get their children in history
-    for(var i=0;i<pidsWithWord.length;i++){
+    /*for(var i=0;i<pidsWithWord.length;i++){
       var c = pub.history.getAllChildrenfromPlaceId(pidsWithWord[i], null);
       children = children.concat(c);
-    }
+    }*/
     pidsWithWord = pidsWithWord.concat(children);
     pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);
     

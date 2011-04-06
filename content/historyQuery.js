@@ -84,6 +84,21 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return ls;
   };
 	
+	pub.getAllChildrenfromAllPlaceId = function(placeIds) {
+		var pids="";
+		var lastIdx=placeIds.length-1;
+		for(var i=0;i<placeIds.length;i++){
+			pids+= placeIds[i];
+			if(i!=lastIdx){
+				pids+=",";
+			}
+		}
+		var term = "SELECT DISTINCT place_id FROM moz_historyvisits, (SELECT id FROM moz_historyvisits where place_id IN ("+pids+")) as ids where from_visit>=ids.id and from_visit<(SELECT id FROM moz_historyvisits where id>ids.id limit 1)";
+		//alert(term);
+		var statement = pub.mDBConn.createStatement(term);
+    return pub.queryAll(statement, 32, 0);
+	};
+	
 	//ids: intermediate table for id that's for placeId; get place_id that has from_visit is in range of ids.id and the first id that's >ids.id
 	pub.getAllChildrenfromPlaceId = function(placeId, query) {
 		var term = "SELECT DISTINCT place_id FROM moz_historyvisits, (SELECT id FROM moz_historyvisits where place_id=:pid) as ids where from_visit>=ids.id and from_visit<(SELECT id FROM moz_historyvisits where id>ids.id limit 1)";
