@@ -39,20 +39,14 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     for(var i=0; i<allwords.length; i++){
       allwords[i] = allwords[i].toLowerCase();
       var orig = allwords[i];
-      //var upper = orig.toUpperCase();
       //judge if there's jpn
       //TODO: merge with chn, as only reg expr is different
       if(orig.match(/[\u3044-\u30ff]+/)!=null){
         //get all the parts separated by non-word, for now only consider Eng and Chn
-        var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5\u3044-\u30ff]+/);//(/[~|!|@|#|$|%|^|&|*|(|)|\-|_|+|=|¡ª|:|;|\"|\'|<|>|,|.|?|\/|\\|{|}|[|]|£¡|£¤|¡­¡­|£¨|£©|\||¡¢|¡ª¡ª|¡¾|¡¿|¡°|¡±|¡¯|¡®|£º|£»|¡¶|¡·|£¬|¡£|£¿]+/);
-        //var nonempty = parts.filter(function notEmpty(str){return str!="";});
-        /*pub.tmp = (new Date()).getTime();
-        var segResult = pub.utils.segmentChn(nonempty, pub.dictionary_jpn);
-        nonempty = segResult.all;
-        pub.utils.mergeToSortedArray(segResult.chnSmall, pub.dictionary_jpn);
-        pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;*/
+        var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5\u3044-\u30ff]+/);
         allwords.splice(i,1);
         i--;
+        //pre-filter those that's not suitable for segmentation, lang dependent?
         if(parts.length!=0){
           for(var j=0;j<parts.length;j++){
             //remove all numbers and 1 char word
@@ -65,13 +59,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }//if there's chn
       else if(orig.match(/[\u4e00-\u9fa5]+/)!=null){
         //get all the parts separated by non-word, for now only consider Eng and Chn
-        var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5]+/);//(/[~|!|@|#|$|%|^|&|*|(|)|\-|_|+|=|¡ª|:|;|\"|\'|<|>|,|.|?|\/|\\|{|}|[|]|£¡|£¤|¡­¡­|£¨|£©|\||¡¢|¡ª¡ª|¡¾|¡¿|¡°|¡±|¡¯|¡®|£º|£»|¡¶|¡·|£¬|¡£|£¿]+/);
-        //var nonempty = parts.filter(function notEmpty(str){return str!="";});
-        /*pub.tmp = (new Date()).getTime();
-        var segResult = pub.utils.segmentChn(nonempty, pub.dictionary);
-        nonempty = segResult.all;
-        pub.utils.mergeToSortedArray(segResult.chnSmall, pub.dictionary);
-        pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;*/
+        var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5]+/);
         allwords.splice(i,1);
         i--;
         if(parts.length!=0){
@@ -103,9 +91,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var segResult = pub.utils.segmentChn(chnoccur, pub.dictionary);
     alloccurrence = alloccurrence.concat(segResult.all);
     pub.utils.mergeToSortedArray(segResult.chnSmall, pub.dictionary);
-    pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
     //seg jpnoccur using jpn dictionary
-    pub.tmp = (new Date()).getTime();
     var segResult = pub.utils.segmentChn(jpnoccur, pub.dictionary_jpn);
     alloccurrence = alloccurrence.concat(segResult.all);
     pub.utils.mergeToSortedArray(segResult.chnSmall, pub.dictionary_jpn);
@@ -172,10 +158,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var titleExist = pub.utils.divInsert(alltitles[j], titleset);
       if(titleExist.exist)
         continue;
-      var topicStart = (new Date()).getTime();
-      //var relatedWords=pub.getTopic(alltitles[j], " ", stopwords, specials);
-      allRelated.push(alltitles[j]);//concat(relatedWords);
-      pub.sqltime.gettopic += (new Date()).getTime() -topicStart;
+      allRelated.push(alltitles[j]);
     }
     return allRelated;
   };
@@ -330,16 +313,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.tmp = (new Date()).getTime();
     
     pidsWithWord = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
-    //getAllChildrenfromKeywords(allwords);
     pub.sqltime.searchid = (new Date()).getTime()-pub.tmp;
     pub.tmp = (new Date()).getTime();
     
     var children = pub.history.getAllChildrenfromAllPlaceId(pidsWithWord);
-    //get their children in history
-    /*for(var i=0;i<pidsWithWord.length;i++){
-      var c = pub.history.getAllChildrenfromPlaceId(pidsWithWord[i], null);
-      children = children.concat(c);
-    }*/
     pidsWithWord = pidsWithWord.concat(children);
     pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);
     
@@ -357,8 +334,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         continue;
       pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
       var topicStart = (new Date()).getTime();
-      //var relatedWords=pub.getTopic(t, " ", pub.stopwords, pub.specials);
-      allRelated.push(t);//concat(relatedWords);
+      allRelated.push(t);
       pub.sqltime.gettopic += (new Date()).getTime() -topicStart;
     }
     pub.tmp = (new Date()).getTime();
@@ -370,9 +346,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //store the small words for future segmentation
     //TODO: add size limit to dictionary, use it for all seg, including for future allRelated titles
     pub.tmp = (new Date()).getTime();
-    /*var segResults = pub.utils.segmentChn(allRelated, pub.dictionary);
-    allRelated = segResults.all;
-    pub.utils.mergeToSortedArray(segResults.chnSmall, pub.dictionary);*/
     allRelated=pub.getTopic(allRelated, " ", pub.stopwords, pub.specials);
     pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
     
@@ -519,7 +492,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
     }
     var link = this.getAttribute("fwtw-title");
-    //TODO: this is to search for any line found first, can be inprecise
+    //search for any line found first, can be inprecise
     var lines = link.split("\n");
     //get the first non-empty line of the link and search for it, but can mis-locate
     var found = false;
