@@ -326,17 +326,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //remove dup titles for now
     var titles = [];
     pub.numberRefTitles = pidsWithWord.length;
-    for(var i=0;i<pidsWithWord.length;i++){
-      pub.tmp = (new Date()).getTime();
-      var t = pub.history.getTitlefromId(pidsWithWord[i]);
-      var processed = pub.utils.divInsert(t, titles);
-      if(processed.exist)
-        continue;
-      pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
-      var topicStart = (new Date()).getTime();
-      allRelated.push(t);
-      pub.sqltime.gettopic += (new Date()).getTime() -topicStart;
-    }
+
+    pub.tmp = (new Date()).getTime();
+    var relTitles = pub.history.getAllTitlefromIds(pidsWithWord);
+    allRelated = allRelated.concat(relTitles);
+    pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
     pub.tmp = (new Date()).getTime();
     
     var relatedFromLocalNotes = pub.getLocal(allwords, pub.stopwords, pub.specials);
@@ -382,7 +376,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
 		pub.sqltime.getrelated = (new Date()).getTime() -pub.sqltime.getrelated;
     
     var recUri = [currLoc];
-    //remove those that are visited already (maybe display differently?)
     //get rid of duplicate links
     for(var i=0;i<recLinks.length;i++){
       var uri = recLinks[i].link.href;

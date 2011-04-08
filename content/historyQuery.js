@@ -153,6 +153,19 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return pub.queryOne(statement, "str", 0);
   };
 
+	pub.getAllTitlefromIds = function(placeIds){
+		var pids="";
+		var lastIdx=placeIds.length-1;
+		for(var i=0;i<placeIds.length;i++){
+			pids+= placeIds[i];
+			if(i!=lastIdx){
+				pids+=",";
+			}
+		}
+    var statement = pub.mDBConn.createStatement("SELECT DISTINCT title FROM moz_places where id IN ("+pids+")");
+    return pub.queryAll(statement, "str", 0); 
+  };
+	
   pub.getTitlefromId = function(id){
     var statement = pub.mDBConn.createStatement("SELECT title FROM moz_places where id=:id");
     statement.params.id=id;
