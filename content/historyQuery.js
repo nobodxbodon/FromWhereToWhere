@@ -122,7 +122,6 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   pub.nodefromPlaceid = function(pid, query) {
     var potentialchildren = pub.getAllChildrenfromPlaceId(pid, query);
     var hasChildren = (potentialchildren!=null) && (potentialchildren.length>0);
-    //var id = pub.getIdfromPlaceId(pid);
     return pub.ReferedHistoryNode(null, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
        
@@ -134,7 +133,6 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			actualThing = (potentialchildren!=null) && (potentialchildren.length>0);
 			hasChildren = actualThing;
 		}
-    //var id = pub.getIdfromPlaceId(pid);
     return pub.ReferedHistoryNode(null, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
 	
@@ -147,6 +145,23 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return pub.queryOne(statement, 32, 0);
   };
   
+	pub.getTitleAndUrlfromId = function(id){
+		var statement = pub.mDBConn.createStatement("SELECT title,url FROM moz_places where id=:id");
+    statement.params.id=id;
+		var rtn = {};
+		try {
+      if (statement.executeStep()) {
+				rtn.title = statement.getString(0);
+				rtn.url = statement.getString(1);
+				statement.reset();
+				return rtn;
+      }
+    } 
+    catch (e) {
+      statement.reset();
+    }
+	};
+	
   pub.getUrlfromId = function(id){
     var statement = pub.mDBConn.createStatement("SELECT url FROM moz_places where id=:id");
     statement.params.id=id;
@@ -177,13 +192,6 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     statement.params.pid=pid;
     return pub.queryOne(statement, 64, 0);
   };
-  
-  /*pub.getIdfromPlaceId = function(pid){
-    var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
-					    where place_id=:id");
-    statement.params.id=pid;
-    return pub.queryOne(statement, 32, 0);
-  };*/
   
   pub.getImagefromUrl = function(url){
     try{

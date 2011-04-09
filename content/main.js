@@ -88,9 +88,8 @@ pub.mainThread.prototype = {
     var urls = [];
 		
     for(var i=0; i<allChildrenPId.length; i++) {
-      //var thisid = pub.history.getIdfromPlaceId(allChildrenPId[i]);
-      var childTitle = pub.history.getTitlefromId(allChildrenPId[i]);
-      var newChildNode = pub.history.ReferedHistoryNode(null, allChildrenPId[i], childTitle, pub.history.getUrlfromId(allChildrenPId[i]), false, false, [], parentLevel+1);
+      var tu = pub.history.getTitleAndUrlfromId(allChildrenPId[i]);
+      var newChildNode = pub.history.ReferedHistoryNode(null, allChildrenPId[i], tu.title, tu.url, false, false, [], parentLevel+1);
       
 			//track topic since expanding, and keep short/long term memory
 			if(pub.topicTracker){
