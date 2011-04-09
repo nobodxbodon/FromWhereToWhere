@@ -165,8 +165,27 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   //recommend based on current page
   pub.recommendCurrent = function(){
+    /*var alllinks = [];
+    alert(currDoc);
+    if(!currDoc)
+      currDoc = gBrowser.selectedBrowser.contentDocument;
+    var links = currDoc.links;
+    if(!links)
+      return;
+    var len = links.length;
     var alllinks = [];
-    var pageDoc = gBrowser.selectedBrowser.contentDocument;
+    for(var i=0;i<len;i++){
+      if(links[i]){
+        alllinks.push(links[i]);
+      }
+    }*/
+    pub.recommendInThread(null);//pageDoc, alllinks);
+  };
+  
+  pub.recommendInThread = function(pageDoc){
+    if(pageDoc==null){
+      pageDoc = gBrowser.selectedBrowser.contentDocument;
+    }
     var links = pageDoc.links;
     if(!links)
       return;
@@ -177,10 +196,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         alllinks.push(links[i]);
       }
     }
-    pub.recommendInThread(pageDoc, alllinks);
-  };
-  
-  pub.recommendInThread = function(pageDoc, alllinks){
     pub.main.dispatch(new pub.recommendThread(1, pageDoc, alllinks), pub.main.DISPATCH_NORMAL);
   };
   

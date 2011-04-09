@@ -30,7 +30,7 @@ com.wuxuan.fromwheretowhere.events = function(){
         //only recommond for current page, and when it's loaded
         if(currentDoc == gBrowser.selectedBrowser.contentDocument && currentDoc.title!=lasttitle){
           lasttitle=currentDoc.title;
-          var links = currentDoc.links;//.getElementsByTagNameNS("*", "a");
+          /*var links = currentDoc.links;//.getElementsByTagNameNS("*", "a");
           if(!links)
             return;
           var len = links.length;
@@ -39,8 +39,8 @@ com.wuxuan.fromwheretowhere.events = function(){
             if(links[i]){
               alllinks.push(links[i]);
             }
-          }
-          recLinks = com.wuxuan.fromwheretowhere.recommendation.recommend(currentDoc, alllinks);
+          }*/
+          recLinks = com.wuxuan.fromwheretowhere.recommendation.recommendInThread(currentDoc);
         }
       } catch(err) {
         Components.utils.reportError(err);
