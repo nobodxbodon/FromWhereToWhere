@@ -30,16 +30,6 @@ com.wuxuan.fromwheretowhere.events = function(){
         //only recommond for current page, and when it's loaded
         if(currentDoc == gBrowser.selectedBrowser.contentDocument && currentDoc.title!=lasttitle){
           lasttitle=currentDoc.title;
-          /*var links = currentDoc.links;//.getElementsByTagNameNS("*", "a");
-          if(!links)
-            return;
-          var len = links.length;
-          var alllinks = [];
-          for(var i=0;i<len;i++){
-            if(links[i]){
-              alllinks.push(links[i]);
-            }
-          }*/
           recLinks = com.wuxuan.fromwheretowhere.recommendation.recommendInThread(currentDoc);
         }
       } catch(err) {
@@ -62,7 +52,6 @@ com.wuxuan.fromwheretowhere.events = function(){
     // this is the content document of the loaded page.
     var doc = event.originalTarget;
     pub.main.dispatch(new pub.recommendThread(1, doc), pub.main.DISPATCH_NORMAL);
-    //return alllinks;
   };
   
   pub.mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
