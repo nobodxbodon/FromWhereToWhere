@@ -116,8 +116,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //if titles is array
     if((titles.constructor.name=="Array")){
       for(var i=0;i<titles.length;i++){
-      //TODO: should be special char?
-        allwords = allwords.concat(titles[i].split(sp));//(" ");/\W/
+        if(titles[i])
+          //TODO: should be special char?
+          allwords = allwords.concat(titles[i].split(sp));//(" ");/\W/
       }
     }else{
       allwords = titles.split(sp);
