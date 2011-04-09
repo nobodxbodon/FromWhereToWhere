@@ -1,12 +1,5 @@
 com.wuxuan.fromwheretowhere.recommendation = function(){
   var pub={};
-    
-  pub.mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-        .getInterface(Components.interfaces.nsIWebNavigation)
-        .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
-        .rootTreeItem
-        .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-        .getInterface(Components.interfaces.nsIDOMWindow);
  
   pub.DEBUG = true;
   pub.ANCHOR = false;
@@ -166,21 +159,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
   //recommend based on current page
   pub.recommendCurrent = function(){
-    /*var alllinks = [];
-    alert(currDoc);
-    if(!currDoc)
-      currDoc = gBrowser.selectedBrowser.contentDocument;
-    var links = currDoc.links;
-    if(!links)
-      return;
-    var len = links.length;
-    var alllinks = [];
-    for(var i=0;i<len;i++){
-      if(links[i]){
-        alllinks.push(links[i]);
-      }
-    }*/
-    pub.recommendInThread(null);//pageDoc, alllinks);
+    pub.recommendInThread(null);
   };
   
   pub.recommendInThread = function(pageDoc){
@@ -666,7 +645,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     //document.parentNode.appendChild(savePanel); ->document.parentNode is null
     //document.appendChild(savePanel); -> node can't be inserted
-    //pub.mainWindow.document.appendChild(savePanel);
     
     if(version<4){
       //can't anchor as in 4. WHY?
