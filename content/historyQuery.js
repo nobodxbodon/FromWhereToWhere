@@ -122,8 +122,8 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   pub.nodefromPlaceid = function(pid, query) {
     var potentialchildren = pub.getAllChildrenfromPlaceId(pid, query);
     var hasChildren = (potentialchildren!=null) && (potentialchildren.length>0);
-    var id = pub.getIdfromPlaceId(pid);
-    return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
+    //var id = pub.getIdfromPlaceId(pid);
+    return pub.ReferedHistoryNode(null, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
        
   pub.nodefromPlaceidWithChildInfo = function(pid, hasChildren, query) {
@@ -134,8 +134,8 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			actualThing = (potentialchildren!=null) && (potentialchildren.length>0);
 			hasChildren = actualThing;
 		}
-    var id = pub.getIdfromPlaceId(pid);
-    return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
+    //var id = pub.getIdfromPlaceId(pid);
+    return pub.ReferedHistoryNode(null, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
 	
   pub.getIdfromUrl = function(url){
@@ -178,12 +178,12 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return pub.queryOne(statement, 64, 0);
   };
   
-  pub.getIdfromPlaceId = function(pid){
+  /*pub.getIdfromPlaceId = function(pid){
     var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
 					    where place_id=:id");
     statement.params.id=pid;
     return pub.queryOne(statement, 32, 0);
-  };
+  };*/
   
   pub.getImagefromUrl = function(url){
     try{
@@ -494,7 +494,8 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   // Main Datastructure for each Node
   pub.ReferedHistoryNode = function(id, placeId, label, url, isContainer, isFolded, children, level) {
     var obj = new Object();
-    obj.id = id;
+		//obsolete...can't remember why it's here in the first place, null for all
+    obj.id = null;
     obj.placeId = placeId;
     obj.label = label;
     obj.url = url;
