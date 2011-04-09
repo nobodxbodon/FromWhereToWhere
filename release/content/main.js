@@ -88,9 +88,8 @@ pub.mainThread.prototype = {
     var urls = [];
 		
     for(var i=0; i<allChildrenPId.length; i++) {
-      var thisid = pub.history.getIdfromPlaceId(allChildrenPId[i]);
-      var childTitle = pub.history.getTitlefromId(allChildrenPId[i]);
-      var newChildNode = pub.history.ReferedHistoryNode(thisid, allChildrenPId[i], childTitle, pub.history.getUrlfromId(allChildrenPId[i]), false, false, [], parentLevel+1);
+      var tu = pub.history.getTitleAndUrlfromId(allChildrenPId[i]);
+      var newChildNode = pub.history.ReferedHistoryNode(null, allChildrenPId[i], tu.title, tu.url, false, false, [], parentLevel+1);
       
 			//track topic since expanding, and keep short/long term memory
 			if(pub.topicTracker){
@@ -315,14 +314,15 @@ pub.mainThread.prototype = {
       // if there's keywords, recordUrl isn't set
       if(pub.keywords!=""){  
         searchTerm = pub.keywords;
-	recordType = 1;
+				recordType = 1;
       } else if(pub.currentURI){
         currentURI = pub.currentURI;
-	recordType = 0;
-      } else if(select[0].id==null) {
+				recordType = 0;
+			//id is null always, placeId isn't null unless it's imported
+      } else if(select[0].placeId==null) {
         // imported: use the label of first top node as name for now
         // TODO: pick tags
-	recordType = 2;
+				recordType = 2;
       }
       var saved = pub.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
 			if(saved!=-1){

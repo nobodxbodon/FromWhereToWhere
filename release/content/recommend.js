@@ -1,12 +1,5 @@
 com.wuxuan.fromwheretowhere.recommendation = function(){
   var pub={};
-    
-  pub.mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-        .getInterface(Components.interfaces.nsIWebNavigation)
-        .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
-        .rootTreeItem
-        .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-        .getInterface(Components.interfaces.nsIDOMWindow);
  
   pub.DEBUG = false;
   pub.ANCHOR = false;
@@ -32,14 +25,47 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.filter = function(aw, stopwords, specials){
     var allwords = aw;
     var alloccurrence = [];
+    var chnoccur = [];
+    var jpnoccur = [];
+    var engoccur = [];
     //TODO: for now can't handle mixed languages
     for(var i=0; i<allwords.length; i++){
       allwords[i] = allwords[i].toLowerCase();
       var orig = allwords[i];
-      var upper = orig.toUpperCase();
-      //judge if it's English
-      if(upper!=orig){
-        //only for English
+      //judge if there's jpn
+      //TODO: merge with chn, as only reg expr is different
+      if(orig.match(/[\u3044-\u30ff]+/)!=null){
+        //get all the parts separated by non-word, for now only consider Eng and Chn
+        var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5\u3044-\u30ff]+/);
+        allwords.splice(i,1);
+        i--;
+        //pre-filter those that's not suitable for segmentation, lang dependent?
+        if(parts.length!=0){
+          for(var j=0;j<parts.length;j++){
+            //remove all numbers and 1 char word
+            if(parts[j].length<=1 || parts[j].match(/[0-9]/)!=null){
+              continue;
+            }
+            jpnoccur.push(parts[j]);
+          }
+        }
+      }//if there's chn
+      else if(orig.match(/[\u4e00-\u9fa5]+/)!=null){
+        //get all the parts separated by non-word, for now only consider Eng and Chn
+        var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5]+/);
+        allwords.splice(i,1);
+        i--;
+        if(parts.length!=0){
+          for(var j=0;j<parts.length;j++){
+            //remove all numbers and 1 char word
+            if(parts[j].length<=1 || parts[j].match(/[0-9]/)!=null){
+              continue;
+            }
+            chnoccur.push(parts[j]);
+          }
+        }
+      }else{
+        //stopwords only for English
         //only get the first part here
         //TODO: should get more words out, split them with the recognized words, expensive though (keep those with special words, and then indexof the recog, split with those, then recurrent)
         allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
@@ -48,39 +74,48 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         if(allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null || stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 ){
           allwords.splice(i, 1);
           i--;
+        }else{
+          engoccur.push(allwords[i]);
         }
-      }else{//segmentation for Chinese
-        //get all the parts separated by non-word, for now only consider Eng and Chn
-        var parts = orig.split(/[^a-zA-Z\d\.\u4e00-\u9fa5]+/);//(/[~|!|@|#|$|%|^|&|*|(|)|\-|_|+|=|¡ª|:|;|\"|\'|<|>|,|.|?|\/|\\|{|}|[|]|£¡|£¤|¡­¡­|£¨|£©|\||¡¢|¡ª¡ª|¡¾|¡¿|¡°|¡±|¡¯|¡®|£º|£»|¡¶|¡·|£¬|¡£|£¿]+/);
-        var nonempty = parts.filter(function notEmpty(str){return str!="";});
-        pub.tmp = (new Date()).getTime();
-        var segResult = pub.utils.segmentChn(nonempty, pub.dictionary);
-        nonempty = segResult.all;
-        pub.utils.mergeToSortedArray(segResult.chnSmall, pub.dictionary);
-        pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
-        allwords.splice(i,1);
-        if(nonempty.length!=0){
-          for(var j=0;j<nonempty.length;j++){
-            //remove all numbers and 1 char word
-            if(nonempty[j].length==1 || nonempty[j].match(/[0-9]/)!=null){
-              continue;
-            }
-            allwords.splice(i,0,nonempty[j]);
-            i++;
-          }
-        }
-        i--;
       }
     }
-    return allwords;
+    //seg chnoccur using chn dictionary
+    pub.tmp = (new Date()).getTime();
+    var segResult = pub.utils.segmentChn(chnoccur, pub.dictionary);
+    alloccurrence = alloccurrence.concat(segResult.all);
+    pub.utils.mergeToSortedArray(segResult.chnSmall, pub.dictionary);
+    //seg jpnoccur using jpn dictionary
+    var segResult = pub.utils.segmentChn(jpnoccur, pub.dictionary_jpn);
+    alloccurrence = alloccurrence.concat(segResult.all);
+    pub.utils.mergeToSortedArray(segResult.chnSmall, pub.dictionary_jpn);
+    pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
+    if(alloccurrence.length!=0){
+      for(var j=0;j<alloccurrence.length;j++){
+        //remove all numbers and 1 char word
+        if(alloccurrence[j].length==1 || alloccurrence[j].match(/[0-9]/)!=null){
+          continue;
+        }
+      }
+    }
+    alloccurrence = alloccurrence.concat(engoccur);
+    return alloccurrence;
   };
   
-  pub.getTopic = function(title, sp, stopwords, specials){
-    if(title==null){
+  pub.getTopic = function(titles, sp, stopwords, specials){
+    if(titles==null){
       return [];
     }
-    //TODO: should be special char?
-    var allwords = title.split(sp);//(" ");/\W/
+    var allwords = [];
+    //if titles is array
+    if((titles.constructor.name=="Array")){
+      for(var i=0;i<titles.length;i++){
+        if(titles[i])
+          //TODO: should be special char?
+          allwords = allwords.concat(titles[i].split(sp));//(" ");/\W/
+      }
+    }else{
+      allwords = titles.split(sp);
+    }
     var ws = pub.filter(allwords, stopwords, specials);
     return ws;
   };
@@ -117,18 +152,20 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       var titleExist = pub.utils.divInsert(alltitles[j], titleset);
       if(titleExist.exist)
         continue;
-      var topicStart = (new Date()).getTime();
-      var relatedWords=pub.getTopic(alltitles[j], " ", stopwords, specials);
-      allRelated=allRelated.concat(relatedWords);
-      pub.sqltime.gettopic += (new Date()).getTime() -topicStart;
+      allRelated.push(alltitles[j]);
     }
     return allRelated;
   };
   
   //recommend based on current page
   pub.recommendCurrent = function(){
-    var alllinks = [];
-    var pageDoc = gBrowser.selectedBrowser.contentDocument;
+    pub.recommendInThread(null);
+  };
+  
+  pub.recommendInThread = function(pageDoc){
+    if(pageDoc==null){
+      pageDoc = gBrowser.selectedBrowser.contentDocument;
+    }
     var links = pageDoc.links;
     if(!links)
       return;
@@ -139,10 +176,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         alllinks.push(links[i]);
       }
     }
-    pub.recommendInThread(pageDoc, alllinks);
-  };
-  
-  pub.recommendInThread = function(pageDoc, alllinks){
     pub.main.dispatch(new pub.recommendThread(1, pageDoc, alllinks), pub.main.DISPATCH_NORMAL);
   };
   
@@ -193,15 +226,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //remove dup word in the title, for freq mult
       //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
       text = pub.utils.uniqueArray(text, false);
-      //if there's too few words (<3 for now), either catalog or tag, or very obvious already
-      if(pub.tooSimple(text, pub.specials) && !/.*[\u4e00-\u9fa5]+.*$/.test(t)){
-        continue;
-      }
       //get the mul of keyword freq in all titles to be sorted
       var oF = 1;
       var keywords = [];
       //if there's chinese, go through every part, otherwise compare by word
-      if(/.*[\u4e00-\u9fa5]+.*$/.test(t)){
+      if(/.*[\u4e00-\u9fa5\u3044-\u30ff]+.*$/.test(t)){
         for(var j=0;j<allRelated.length;j++){
           if(t.indexOf(allRelated[j])>-1){
             if(text.length==1 && text[0]==allRelated[j])
@@ -220,6 +249,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
             continue;
         }
       }else{
+        //if there's too few words (<3 for now), either catalog or tag, or very obvious already
+        if(pub.tooSimple(text, pub.specials)){
+          continue;
+        }
         for(var j=0;j<allRelated.length;j++){
           if(text.indexOf(allRelated[j])>-1){
             //don't recommend those with only one word, like "msnbc.com"
@@ -266,25 +299,19 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var allwords = pub.getTopic(title, " ", pub.stopwords, pub.specials);
     //without any history tracking
     //TODO: only pick the words related to interest, not every non-stopword
-    //TODO: search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
+    //search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
     var pidsWithWord=[];
     //if new tab or no title at all, no recommendation. TODO: extract from text body
-    if(allwords.length==0){
+    if(allwords==null || allwords.length==0){
       return [];
     }
     pub.tmp = (new Date()).getTime();
     
     pidsWithWord = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
-    
     pub.sqltime.searchid = (new Date()).getTime()-pub.tmp;
     pub.tmp = (new Date()).getTime();
     
-    var children = [];
-    //get their children in history
-    for(var i=0;i<pidsWithWord.length;i++){
-      var c = pub.history.getAllChildrenfromPlaceId(pidsWithWord[i], null);
-      children = children.concat(c);
-    }
+    var children = pub.history.getAllChildrenfromAllPlaceId(pidsWithWord);
     pidsWithWord = pidsWithWord.concat(children);
     pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);
     
@@ -294,18 +321,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //remove dup titles for now
     var titles = [];
     pub.numberRefTitles = pidsWithWord.length;
-    for(var i=0;i<pidsWithWord.length;i++){
-      pub.tmp = (new Date()).getTime();
-      var t = pub.history.getTitlefromId(pidsWithWord[i]);
-      var processed = pub.utils.divInsert(t, titles);
-      if(processed.exist)
-        continue;
-      pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
-      var topicStart = (new Date()).getTime();
-      var relatedWords=pub.getTopic(t, " ", pub.stopwords, pub.specials);
-      allRelated=allRelated.concat(relatedWords);
-      pub.sqltime.gettopic += (new Date()).getTime() -topicStart;
-    }
+
+    pub.tmp = (new Date()).getTime();
+    var relTitles = pub.history.getAllTitlefromIds(pidsWithWord);
+    allRelated = allRelated.concat(relTitles);
+    pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
     pub.tmp = (new Date()).getTime();
     
     var relatedFromLocalNotes = pub.getLocal(allwords, pub.stopwords, pub.specials);
@@ -315,9 +335,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //store the small words for future segmentation
     //TODO: add size limit to dictionary, use it for all seg, including for future allRelated titles
     pub.tmp = (new Date()).getTime();
-    var segResults = pub.utils.segmentChn(allRelated, pub.dictionary);
-    allRelated = segResults.all;
-    pub.utils.mergeToSortedArray(segResults.chnSmall, pub.dictionary);
+    allRelated=pub.getTopic(allRelated, " ", pub.stopwords, pub.specials);
     pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
     
 		pub.sqltime.sortUnique = (new Date()).getTime();
@@ -353,7 +371,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
 		pub.sqltime.getrelated = (new Date()).getTime() -pub.sqltime.getrelated;
     
     var recUri = [currLoc];
-    //remove those that are visited already (maybe display differently?)
     //get rid of duplicate links
     for(var i=0;i<recLinks.length;i++){
       var uri = recLinks[i].link.href;
@@ -373,7 +390,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         allover+=a.freq[a.arr[i]];
       }
       pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
-      pub.DEBUGINFO="dictionary size: "+pub.dictionary.length+"\n"+
+      pub.DEBUGINFO="dictionary size: "+pub.dictionary.length+" jp: "+pub.dictionary_jpn.length+"\n"+
                   "searchid: "+ pub.sqltime.searchid +
                   " getchild: "+pub.sqltime.getchild +" from " + pub.numberRefTitles +"\n"+
                   " gettitle: "+pub.sqltime.gettitle + " gettopic: "+pub.sqltime.gettopic +
@@ -463,7 +480,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
     }
     var link = this.getAttribute("fwtw-title");
-    //TODO: this is to search for any line found first, can be inprecise
+    //search for any line found first, can be inprecise
     var lines = link.split("\n");
     //get the first non-empty line of the link and search for it, but can mis-locate
     var found = false;
@@ -607,6 +624,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         desc.setAttribute("style", "white-space: pre-wrap");
         desc.setAttribute("flex", "1");
         desc.textContent=title;
+        //TODO: more precise detection of visited page, some have different url but very "close" titles...
         if(pub.history.getIdfromUrl(uri)!=null)
           desc.setAttribute("style", "color:gray;");
         butn.appendChild(desc);
@@ -627,7 +645,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     //document.parentNode.appendChild(savePanel); ->document.parentNode is null
     //document.appendChild(savePanel); -> node can't be inserted
-    //pub.mainWindow.document.appendChild(savePanel);
     
     if(version<4){
       //can't anchor as in 4. WHY?
@@ -679,6 +696,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.localmanager = com.wuxuan.fromwheretowhere.localmanager;
     pub.localmanager.init();
     pub.dictionary = [];
+    pub.dictionary_jpn = [];
   };
     
   return pub;

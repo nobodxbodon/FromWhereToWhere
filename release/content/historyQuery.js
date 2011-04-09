@@ -84,6 +84,21 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return ls;
   };
 	
+	pub.getAllChildrenfromAllPlaceId = function(placeIds) {
+		var pids="";
+		var lastIdx=placeIds.length-1;
+		for(var i=0;i<placeIds.length;i++){
+			pids+= placeIds[i];
+			if(i!=lastIdx){
+				pids+=",";
+			}
+		}
+		var term = "SELECT DISTINCT place_id FROM moz_historyvisits, (SELECT id FROM moz_historyvisits where place_id IN ("+pids+")) as ids where from_visit>=ids.id and from_visit<(SELECT id FROM moz_historyvisits where id>ids.id limit 1)";
+		//alert(term);
+		var statement = pub.mDBConn.createStatement(term);
+    return pub.queryAll(statement, 32, 0);
+	};
+	
 	//ids: intermediate table for id that's for placeId; get place_id that has from_visit is in range of ids.id and the first id that's >ids.id
 	pub.getAllChildrenfromPlaceId = function(placeId, query) {
 		var term = "SELECT DISTINCT place_id FROM moz_historyvisits, (SELECT id FROM moz_historyvisits where place_id=:pid) as ids where from_visit>=ids.id and from_visit<(SELECT id FROM moz_historyvisits where id>ids.id limit 1)";
@@ -107,8 +122,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   pub.nodefromPlaceid = function(pid, query) {
     var potentialchildren = pub.getAllChildrenfromPlaceId(pid, query);
     var hasChildren = (potentialchildren!=null) && (potentialchildren.length>0);
-    var id = pub.getIdfromPlaceId(pid);
-    return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
+    return pub.ReferedHistoryNode(null, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
        
   pub.nodefromPlaceidWithChildInfo = function(pid, hasChildren, query) {
@@ -119,8 +133,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			actualThing = (potentialchildren!=null) && (potentialchildren.length>0);
 			hasChildren = actualThing;
 		}
-    var id = pub.getIdfromPlaceId(pid);
-    return pub.ReferedHistoryNode(id, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
+    return pub.ReferedHistoryNode(null, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
 	
   pub.getIdfromUrl = function(url){
@@ -132,12 +145,42 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return pub.queryOne(statement, 32, 0);
   };
   
+	pub.getTitleAndUrlfromId = function(id){
+		var statement = pub.mDBConn.createStatement("SELECT title,url FROM moz_places where id=:id");
+    statement.params.id=id;
+		var rtn = {};
+		try {
+      if (statement.executeStep()) {
+				rtn.title = statement.getString(0);
+				rtn.url = statement.getString(1);
+				statement.reset();
+				return rtn;
+      }
+    } 
+    catch (e) {
+      statement.reset();
+    }
+	};
+	
   pub.getUrlfromId = function(id){
     var statement = pub.mDBConn.createStatement("SELECT url FROM moz_places where id=:id");
     statement.params.id=id;
     return pub.queryOne(statement, "str", 0);
   };
 
+	pub.getAllTitlefromIds = function(placeIds){
+		var pids="";
+		var lastIdx=placeIds.length-1;
+		for(var i=0;i<placeIds.length;i++){
+			pids+= placeIds[i];
+			if(i!=lastIdx){
+				pids+=",";
+			}
+		}
+    var statement = pub.mDBConn.createStatement("SELECT DISTINCT title FROM moz_places where id IN ("+pids+")");
+    return pub.queryAll(statement, "str", 0); 
+  };
+	
   pub.getTitlefromId = function(id){
     var statement = pub.mDBConn.createStatement("SELECT title FROM moz_places where id=:id");
     statement.params.id=id;
@@ -148,13 +191,6 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     var statement = pub.mDBConn.createStatement("SELECT last_visit_date FROM moz_places where id=:pid");
     statement.params.pid=pid;
     return pub.queryOne(statement, 64, 0);
-  };
-  
-  pub.getIdfromPlaceId = function(pid){
-    var statement = pub.mDBConn.createStatement("SELECT id FROM moz_historyvisits \
-					    where place_id=:id");
-    statement.params.id=pid;
-    return pub.queryOne(statement, 32, 0);
   };
   
   pub.getImagefromUrl = function(url){
@@ -466,7 +502,8 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   // Main Datastructure for each Node
   pub.ReferedHistoryNode = function(id, placeId, label, url, isContainer, isFolded, children, level) {
     var obj = new Object();
-    obj.id = id;
+		//obsolete...can't remember why it's here in the first place, null for all
+    obj.id = null;
     obj.placeId = placeId;
     obj.label = label;
     obj.url = url;
