@@ -358,7 +358,7 @@ pub.mainThread.prototype = {
       }
     }
     if(newNodes.length>0){
-      if(pub.treeView.visibleData.length==1 && pub.treeView.visibleData[0].id == -1){
+      if(pub.treeView.visibleData.length==1 && pub.treeView.visibleData[0].placeId == -1){
 	pub.treeView.visibleData = [];
 	pub.treeView.treeBox.rowCountChanged(0, -1);
       }
