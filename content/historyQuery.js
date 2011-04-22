@@ -177,7 +177,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 				pids+=",";
 			}
 		}
-    var statement = pub.mDBConn.createStatement("SELECT DISTINCT title FROM moz_places where id IN ("+pids+")");
+    var statement = pub.mDBConn.createStatement("SELECT DISTINCT title FROM moz_places where id IN ("+pids+") AND title!=''");
     return pub.queryAll(statement, "str", 0); 
   };
 	
