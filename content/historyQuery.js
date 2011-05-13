@@ -93,7 +93,8 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 				pids+=",";
 			}
 		}
-		var term = "SELECT DISTINCT place_id FROM moz_historyvisits, (SELECT id FROM moz_historyvisits where place_id IN ("+pids+")) as ids where from_visit>=ids.id and from_visit<(SELECT id FROM moz_historyvisits where id>ids.id limit 1)";
+		//if add DISTINCT can cost >100x in some cases...not sure why
+		var term = "SELECT place_id FROM moz_historyvisits, (SELECT id FROM moz_historyvisits where place_id IN ("+pids+")) as ids where from_visit>=ids.id and from_visit<(SELECT id FROM moz_historyvisits where id>ids.id limit 1)";
 		//alert(term);
 		var statement = pub.mDBConn.createStatement(term);
     return pub.queryAll(statement, 32, 0);

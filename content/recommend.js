@@ -10,7 +10,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.MULTILINE_LIMIT = 3;
   pub.starttime = 0;
   pub.sqltime = {};
-  pub.MINTITLES = 5;
+  pub.MINTITLES = 15;
   
   pub.getOrig = function(word){  
     var orig = pub.mapOrigVerb[word];
@@ -284,7 +284,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       if(i==0)
         pidsWithWord = pidsWithWord.concat(children);
       else{
-        alert("not enough titles:"+numTitles.length);
+        alert("not enough titles:"+numTitles);
         pidsWithWord = children;
       }
       
@@ -295,7 +295,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //allRelated = allRelated.concat(relTitles);
       pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
       pub.tmp = (new Date()).getTime();
-      numTitles+=relTitles.length;
+      numTitles=relTitles.length;
       if(numTitles>pub.MINTITLES)
         break;
     }
@@ -359,6 +359,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
     pub.tmp = (new Date()).getTime();*/
     allRelated = allRelated.concat(pub.getAllTitlesFromChildrenOf(pidsWithWord));
+    pub.sqltime.historyTitles = allRelated;
     
     var relatedFromLocalNotes = pub.getLocal(allwords, pub.stopwords, pub.specials);
     allRelated=allRelated.concat(relatedFromLocalNotes);
@@ -423,6 +424,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
       pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
       pub.DEBUGINFO="dictionary size: "+pub.dictionary.length+" jp: "+pub.dictionary_jpn.length+"\n"+
+                  "No. of titles: "+pub.sqltime.historyTitles.length+"\n"+
                   "searchid: "+ pub.sqltime.searchid +
                   " getchild: "+pub.sqltime.getchild +" from " + pub.numberRefTitles +"\n"+
                   " gettitle: "+pub.sqltime.gettitle + " gettopic: "+pub.sqltime.gettopic +
