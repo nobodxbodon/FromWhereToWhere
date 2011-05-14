@@ -284,7 +284,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       if(i==0)
         pidsWithWord = pidsWithWord.concat(children);
       else{
-        alert("not enough titles:"+numTitles);
+        if(pub.DEBUG)
+          alert("not enough titles:"+numTitles);
         pidsWithWord = children;
       }
       
@@ -292,7 +293,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   
       pub.tmp = (new Date()).getTime();
       relTitles = relTitles.concat(pub.history.getAllTitlefromIds(pidsWithWord));
-      //allRelated = allRelated.concat(relTitles);
+      
       pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
       pub.tmp = (new Date()).getTime();
       numTitles=relTitles.length;
@@ -344,20 +345,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //remove dup titles for now
     var titles = [];
     
-    /*var children = pub.history.getAllChildrenfromAllPlaceId(pidsWithWord);
-    pidsWithWord = pidsWithWord.concat(children);
-    pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);
-    
-    pub.sqltime.getchild = (new Date()).getTime()-pub.tmp;
-    
-    
-    pub.numberRefTitles = pidsWithWord.length;
-
-    pub.tmp = (new Date()).getTime();
-    var relTitles = pub.history.getAllTitlefromIds(pidsWithWord);
-    allRelated = allRelated.concat(relTitles);
-    pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();*/
     allRelated = allRelated.concat(pub.getAllTitlesFromChildrenOf(pidsWithWord));
     pub.sqltime.historyTitles = allRelated;
     
