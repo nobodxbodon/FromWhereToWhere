@@ -10,6 +10,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.MULTILINE_LIMIT = 3;
   pub.starttime = 0;
   pub.sqltime = {};
+  pub.MINTITLES = 15;
   
   pub.getOrig = function(word){  
     var orig = pub.mapOrigVerb[word];
@@ -273,6 +274,35 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return recLinks;
   };
   
+  //get children (of children, etc) until qualified titles > MINTITLES
+  pub.getAllTitlesFromChildrenOf = function(pids){
+    var pidsWithWord = pids;
+    var relTitles = [];
+    var numTitles = 0;
+    for(var i=0;pidsWithWord.length>0;i++){
+      var children = pub.history.getAllChildrenfromAllPlaceId(pidsWithWord);
+      if(i==0)
+        pidsWithWord = pidsWithWord.concat(children);
+      else{
+        if(pub.DEBUG)
+          alert("not enough titles:"+numTitles);
+        pidsWithWord = children;
+      }
+      
+      pub.sqltime.getchild += (new Date()).getTime()-pub.tmp;
+  
+      pub.tmp = (new Date()).getTime();
+      relTitles = relTitles.concat(pub.history.getAllTitlefromIds(pidsWithWord));
+      
+      pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
+      pub.tmp = (new Date()).getTime();
+      numTitles=relTitles.length;
+      if(numTitles>pub.MINTITLES)
+        break;
+    }
+    return relTitles;
+  };
+  
   pub.recommend = function(pageDoc, allLinks){
     if(pub.DEBUG){
       pub.utils.sqltime.seg0 = 0;
@@ -311,22 +341,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.sqltime.searchid = (new Date()).getTime()-pub.tmp;
     pub.tmp = (new Date()).getTime();
     
-    var children = pub.history.getAllChildrenfromAllPlaceId(pidsWithWord);
-    pidsWithWord = pidsWithWord.concat(children);
-    pidsWithWord = pub.utils.uniqueArray(pidsWithWord, false);
-    
-    pub.sqltime.getchild = (new Date()).getTime()-pub.tmp;
-    
     var allRelated=[];
     //remove dup titles for now
     var titles = [];
-    pub.numberRefTitles = pidsWithWord.length;
-
-    pub.tmp = (new Date()).getTime();
-    var relTitles = pub.history.getAllTitlefromIds(pidsWithWord);
-    allRelated = allRelated.concat(relTitles);
-    pub.sqltime.gettitle += (new Date()).getTime() -pub.tmp;
-    pub.tmp = (new Date()).getTime();
+    
+    allRelated = allRelated.concat(pub.getAllTitlesFromChildrenOf(pidsWithWord));
+    pub.sqltime.historyTitles = allRelated;
     
     var relatedFromLocalNotes = pub.getLocal(allwords, pub.stopwords, pub.specials);
     allRelated=allRelated.concat(relatedFromLocalNotes);
@@ -391,6 +411,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       }
       pub.DEBUGINFO="sum of freq: "+allover+"\n"+pub.DEBUGINFO;
       pub.DEBUGINFO="dictionary size: "+pub.dictionary.length+" jp: "+pub.dictionary_jpn.length+"\n"+
+                  "No. of titles: "+pub.sqltime.historyTitles.length+"\n"+
                   "searchid: "+ pub.sqltime.searchid +
                   " getchild: "+pub.sqltime.getchild +" from " + pub.numberRefTitles +"\n"+
                   " gettitle: "+pub.sqltime.gettitle + " gettopic: "+pub.sqltime.gettopic +
