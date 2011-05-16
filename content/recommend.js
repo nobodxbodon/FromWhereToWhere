@@ -2,7 +2,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   var pub={};
  
   pub.DEBUG = true;
-  pub.ANCHOR = false;
   pub.DEBUGINFO = "";
   pub.debuginfo = {};
   pub.TOOFEWWORDS = 4;
@@ -539,19 +538,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
     var topbar, statsInfoLabel, vbox,debugtext,linkBox, testLink, divEle;
-    if(pub.ANCHOR && recLinks.length>0){
-    //for(var i=0;i<recLinks.length;i++){
-      testLink = document.createElement("label");
-      var anchURL = "#location";
-      testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+anchURL+"\')"});//recLinks[i].link.href+"\')"});
-      var anch = document.createElement("a");
-      anch = pub.setAttrDOMElement(anch, {"name":"location"});
-      //var currentDoc = document.commandDispatcher.focusedWindow.document;
-      alert("try insert before: "+recLinks[0].link.text);
-      alert(pub.pageDoc.links.length);
-      recLinks[0].link.parentNode.insertBefore(anch, recLinks[0].link);
-      alert("insert done");
-    }
+    
     //only reuse the panel for ff 4
     if(version>=4 && savePanel!=null){
       //alert("there's panel!");
@@ -600,10 +587,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //menus.parentNode.parentNode.appendChild(savePanel);
       document.documentElement.appendChild(savePanel);
     }
-    if(pub.ANCHOR){
-      savePanel.insertBefore(testLink, vbox);
-      alert("testlink append");
-    }
+    
     statsInfoLabel.setAttribute("value", outputText+pub.output(recLinks,allLinks));//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
     while(vbox.hasChildNodes()){
       vbox.removeChild(vbox.firstChild);
