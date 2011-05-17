@@ -10,10 +10,9 @@ com.wuxuan.fromwheretowhere.main = function(){
   };
   
   pub.getURLfromNode = function(treeView) {
-    var sel = treeView.selection;
-    var node = treeView.visibleData[sel.currentIndex];
-    if(node){
-      window.open(node.url);
+    var sel = pub.getCurrentSelected();
+		for(var i in sel){
+      window.open(sel[i].url);
     }
   };
   
@@ -21,7 +20,6 @@ com.wuxuan.fromwheretowhere.main = function(){
   // Utils functions finish
   pub.keywords = "";
   pub.currentURI = Application.storage.get("currentURI", false);
-  //pub.treeView = (function(){return Application.storage.get("fromwheretowhere.currentView", false);})();
 
 	//if a node's level==0, seen as start of a session
 	pub.isNewSession = function(item){
