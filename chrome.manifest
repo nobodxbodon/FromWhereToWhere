@@ -1,4 +1,6 @@
 content FromWhereToWhere content/
+style chrome://global/content/customizeToolbar.xul chrome://FromWhereToWhere/content/toolbar-button/button.css
+
 #Firefox/Flock
 overlay chrome://browser/content/browser.xul chrome://FromWhereToWhere/content/overlay.xul
 

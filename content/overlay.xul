@@ -1,7 +1,22 @@
 <?xml version="1.0"?>
+<?xml-stylesheet type="text/css"
+  href="chrome://FromWhereToWhere/content/toolbar-button/button.css"?>
+
 <!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
 <overlay id="FromWhereToWhereOverlay" onload="com.wuxuan.fromwheretowhere.recommend.init();"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+  <toolbarbutton id="custom-button-1"
+      label="FromWhereToWhere"
+      tooltiptext="FromWhereToWhere toolbar button"
+      oncommand="CustomButton[1]()"
+      class="toolbarbutton-1 chromeclass-toolbar-additional custombutton"
+      />
+  
+  <!-- Firefox -->
+  <toolbarpalette id="BrowserToolbarPalette">
+    <toolbarbutton id="custom-button-1"/>
+  </toolbarpalette>
 
   <broadcasterset id="mainBroadcasterSet"> 
     <broadcaster id="viewEmptySidebar" 
@@ -31,4 +46,5 @@
 <script src="recommend.js" />
 <script src="corpus_en.js" />
 <script src="utils.js" />
+<script src="toolbar-button/button.js" />
 </overlay>  

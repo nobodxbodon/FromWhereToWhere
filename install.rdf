@@ -14,7 +14,8 @@
     <!-- Name of extension's primary developer. Change to your name -->  
     <em:creator>Xuan Wu</em:creator>  
     <!-- Web page address through which extension is distributed -->  
-    <em:homepageURL>https://addons.mozilla.org/en-US/firefox/addon/181746/</em:homepageURL>  
+    <em:homepageURL>https://addons.mozilla.org/en-US/firefox/addon/181746/</em:homepageURL>
+    <em:iconURL>chrome://FromWhereToWhere/content/toolbar-button/icon.png</em:iconURL>
     <!-- This section gives details of the target application for the extension (in this case: Firefox 2) -->  
     
 		<!-- Firefox -->
