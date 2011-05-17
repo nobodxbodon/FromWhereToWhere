@@ -1,0 +1,31 @@
+
+HISTORY TREE BUILDING:
+inputs - placeids; outputs - ancesters of the inputs
+For now not the whole tree is built, so there are duplicates in outputs.
+Typical example: Anc1 may have a descendant which is Anc2.
+Reason: getAllChildrenfromPlaceId is expensive, so no such op is carried out until expanding a node.
+As the process of getting ancesters gets some parent-children information, it can be sped up IN THEORY.
+
+RECOMMEND:
+1. get topic from current title (recommend.getTopic)
+2. search for topic in browsing history (history.searchIdbyKeywords)
+3. get all pages that are related with the topic (history.getAllChildrenfromPlaceId)
+4. get all topics from the related pages (recommend.getTopic)
+5. select the links in current page that have any of the topics (recommend.getRelated)
+
+
+recommend.getTopic:
+English:
+split by space, remove all stopwords and non-words (numbers, special characters, etc)
+Chinese:
+split by special characters, segment (utils.segmentChn), add small words to dictionary for later use, remove numbers and 1 length word (this is controversial, as sometimes one character is meaning)
+
+
+Chinese Segmentation:
+while(){
+1. get short words in corpus, and put them aside as processed
+2. get common heads (partial n-gram, just the starts) (utils.getAllCommonHead)
+3. merge small words from 1 & 2 as dictionary
+4. use the dictionary to split the phrases (utils.getAllChnWords), and return the newly found words as corpus
+BREAK if common heads is empty (--this is weird now) OR the accumulated time exceeds 1s
+}

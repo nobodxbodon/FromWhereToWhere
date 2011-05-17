@@ -6,7 +6,11 @@
     <title>Description on Mozilla Addon Page</title>
 </head>
 <body>
-    <b>Everyday Use Case:</b>
+MakeUseOf review: <a href="http://www.makeuseof.com/tag/structure-firefox-browsing-history-fromwheretowhere/">Structure Your FireFox Browsing History With FromWhereToWhere</a>
+
+LifeHacker review: <a href="http://lifehacker.com/5801972/fromwheretowhere-threads-your-firefox-browsing-history">FromWhereToWhere Threads Your Firefox Browsing History</a>
+
+<b>Everyday Use Case:</b>
 
 1) I'm googling some terms, and opening some pages, but somehow after I find a relevant yet not perfect link, I can't find the searching result page that leads me there. Maybe I closed it, or replaced it with another page. Now I want to continue looking through "that" specific search with those exact search terms I used. Instead of trying all those "xxx search" in Firefox history having different keywords I've tried, I can open FromWhereToWhere based on this particular page, find out which searching result page got me here, and open it. <b>NOTE</b>: according to my experience there's some delay in Firefox updating its history record (up to 2 minutes).
 
@@ -34,7 +38,9 @@ From 0.12, if a link had been captured by the add-on Scrapbook, it'll be highlig
 
 From 0.14, "property" and "import" are added to the menu for sharing with other users. Select the nodes that you want to share, right click -> "property", select the property (all the text) in the opened dialog.  <b> NOTE: </b> the sub-nodes won't be included in the property of the node if the node hasn't been expanded ever, so please take this chance to examine if the sub-nodes are the exact content that you want to share. The last visited dates are not included in property for now. Send the text to whoever you want to share, and in their FromWhereToWhere view, select "import", paste the whole text, and the same nodes will be displayed in their view, with all the sub-nodes if you include them in the property.
 
-From 0.19 more accurate searching is supported as "key1 key2".  An extreme and potentially time-consuming example is "", which lists all the history in tree structure. Exclusion is supported too, in the form of -keyword3 or -"key4 key5".
+From 0.19 more accurate searching is supported as "key1 key2".  An extreme and potentially time-consuming example is "", which lists all the history in tree structure. Exclusion is supported too, in the form of -keyword3 or -"key4 key5". 
+
+From 0.21.1, those search terms that are not quoted are considered optional. A title matches if it has any (at least one) of the optional terms. If you want to make sure a term exists in the search results, you need to quote it.
 
 From 0.19.9, two more searching options are added. Below leads to results with url containing "mozilla.org":
     site:mozilla.org
@@ -48,7 +54,7 @@ NOTE: the "Last Visit" time shown may be later than the specified time interval,
 
 Also from 0.19.9, instead of copying the property of a node and saving to local file manually, now similar function is done through "save to local note" in the menu. All the saved notes can be shown in sidebar, and can be deleted one by one. Searching covers both local notes and history, and the results are shown together. The difference is that "time:" doesn't apply to local notes, as there's no visit date information saved. <b> NOTE: </b> the notes are saved in local database under your profile.
 
-From 0.21.0, link suggestion is added. Instead of sending any keywords to search engine APIs online, this suggestion is purely based on your local browsing history. From 0.21.3, suggestion also make use of saved local notes. It DOESN'T affect how FF maintains your browsing history. If "Link Suggestion" is selected, a panel will show related or interesting links on the page that's been loaded.
+From 0.21.0, link suggestion is added. Instead of sending any keywords to search engine APIs online, this suggestion is purely based on your local browsing history. From 0.21.3, suggestion also make use of saved local notes. It DOESN'T affect how FF maintains your browsing history. If "Link Suggestion" is selected, a panel will show related or interesting links on the page that's been loaded. 
 From 0.21.9, you can locate the link by clicking the button. In some cases the links are not visible on the page, and clicking the button will open the link in new tab.
 NOTE: the last screenshot is taken under FF4. As titlebar is only supported in FF4, in FF3 the panel is closed whenever you click outside it.
 </body>
