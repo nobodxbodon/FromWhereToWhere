@@ -8,14 +8,28 @@
 
   <toolbarbutton id="custom-button-1"
       label="FromWhereToWhere"
+      type="menu"
       tooltiptext="FromWhereToWhere toolbar button"
-      oncommand="CustomButton[1]()"
       class="toolbarbutton-1 chromeclass-toolbar-additional custombutton"
       />
   
+  <menuitem id="searchitem" label="&mainMenu.search;" accesskey="H"
+         oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
+  <menuitem id="recommend" label="&mainMenu.recommend;" accesskey="S" type="checkbox" autocheck="false"
+        oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event);"/>
+  <menuitem id="toolbar-searchitem" label="&mainMenu.search;" accesskey="H"
+         oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
+  <menuitem id="toolbar-recommend" label="&mainMenu.recommend;" accesskey="S" type="checkbox" autocheck="false"
+        oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event);"/>
+  
   <!-- Firefox -->
   <toolbarpalette id="BrowserToolbarPalette">
-    <toolbarbutton id="custom-button-1"/>
+    <toolbarbutton id="custom-button-1">
+      <menupopup id="toolbar-popup">
+        <menuitem id="toolbar-searchitem"/>
+        <menuitem id="toolbar-recommend"/>
+      </menupopup>
+    </toolbarbutton>
   </toolbarpalette>
 
   <broadcasterset id="mainBroadcasterSet"> 
@@ -30,10 +44,8 @@
   <menupopup id="menu_ToolsPopup">  
     <menu id="fwtwMenuitem" label="FromWhereToWhere" insertbefore="sanitizeSeparator">
       <menupopup id="new-popup">
-        <menuitem id="searchitem" label="&mainMenu.search;" accesskey="H"
-         oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
-        <menuitem id="recommend" label="&mainMenu.recommend;" accesskey="S" type="checkbox" autocheck="false"
-          oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event);"/>
+        <menuitem id="searchitem"/>
+        <menuitem id="recommend"/>
       </menupopup>
     </menu>
   </menupopup>
