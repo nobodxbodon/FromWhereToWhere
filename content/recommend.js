@@ -477,14 +477,20 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     // if the page was closed, open it first
     if (!found) {
-      var browserEnumerator = wm.getEnumerator("navigator:browser");
+      /*var browserEnumerator = wm.getEnumerator("navigator:browser");
       var tabbrowser = browserEnumerator.getNext().gBrowser;
       // Create tab
       var newTab = tabbrowser.addTab(pub.currLoc);
       // Focus tab
       tabbrowser.selectedTab = newTab;
+      tabbrowser.ownerDocument.defaultView.focus();*/
+      var recentWin = wm.getMostRecentWindow("navigator:browser");
+      var curBrowser = recentWin.gBrowser;
+      //alert(gBrowser==curBrowser);
+      var newTab = curBrowser.addTab(pub.currLoc);
+      curBrowser.selectedTab = newTab;
       // Focus *this* browser window in case another one is currently focused
-      tabbrowser.ownerDocument.defaultView.focus();
+      curBrowser.ownerDocument.defaultView.focus();
     }
     return found;
   };
@@ -596,8 +602,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       vbox.removeChild(vbox.firstChild);
     }
     
-    var thisWindow = getBrowser().selectedBrowser.contentWindow;
-          
     for(var i=0;i<recLinks.length;i++){
         var l = document.createElement("textbox");
         var t = recLinks[i].link.text;
