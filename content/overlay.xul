@@ -8,8 +8,8 @@
 
   <toolbarbutton id="custom-button-1"
       label="FromWhereToWhere"
-      type="menu"
-      tooltiptext="FromWhereToWhere toolbar button"
+      type="menu-button"
+      tooltiptext="FromWhereToWhere"
       class="toolbarbutton-1 chromeclass-toolbar-additional custombutton"
       />
   
