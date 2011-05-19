@@ -553,7 +553,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //alert("there's panel!");
       topbar = savePanel.firstChild;
       statsInfoLabel = topbar.firstChild.nextSibling;
-      //divEle = topbar.firstChild.nextSibling;
       vbox = savePanel.firstChild.nextSibling;
     }else{
       //alert("creating new panel");
@@ -603,7 +602,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     
     for(var i=0;i<recLinks.length;i++){
-        var l = document.createElement("textbox");
         var t = recLinks[i].link.text;
         var uri = recLinks[i].link.href;
         if(!t)
@@ -649,6 +647,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         link=pub.setAttrDOMElement(link, {"value":title,"href":"com.wuxuan.fromwheretowhere.recommendation.testOpen()"});
         divEle.appendChild(link);*/
       }
+    //reset scroll vbox to top
+    vbox.scrollTop = 0;
+    
     if(pub.DEBUG){
       debugtext = document.createElement("textbox");
       debugtext = pub.setAttrDOMElement(debugtext, {"readonly":"true", "multiline":"true", "rows":"10", "cols":"70"})
