@@ -489,8 +489,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.testOpen = function(){
     //get the tab that's the suggestions derive from
     var currDoc = getBrowser().selectedBrowser.contentDocument;
+    // switch tab when doc or url is the same, which is reused in switchToTab
     if(pub.pageDoc!= currDoc && pub.currLoc!=currDoc.location.href){
-      //alert("need to switch tab");
       var found = pub.switchToTab(pub.pageDoc);
       if(!found){
         return;
@@ -502,9 +502,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //get the first non-empty line of the link and search for it, but can mis-locate
     var found = false;
     for(var i in lines){
-      found = getBrowser().selectedBrowser.contentWindow.find(lines[i], false, false);
+      var curWin = getBrowser().selectedBrowser.contentWindow;
+      found = curWin.find(lines[i], false, false);
       if(!found)
-        found = getBrowser().selectedBrowser.contentWindow.find(lines[i], false, true);
+        found = curWin.find(lines[i], false, true);
       if(found)
         break;
     }
@@ -531,7 +532,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.popUp = function(origTitle, outputText, recLinks, allLinks){
-    //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
     var topbar, statsInfoLabel, vbox,debugtext,linkBox, testLink, divEle;
@@ -541,12 +541,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //if there's 0 recLinks, return
       if(recLinks.length==0)
         return;
-      //alert("there's panel!");
       topbar = savePanel.firstChild;
       statsInfoLabel = topbar.firstChild.nextSibling;
       vbox = savePanel.firstChild.nextSibling;
     }else{
-      //alert("creating new panel");
       var panelAttr = null;
       //close, label, titlebar only for ff 4
       if(version>=4)
@@ -657,8 +655,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       savePanel.setAttribute("label","Seemingly Related or Interesting Link Titles"+" - "+origTitle);
       savePanel.openPopup(null, "start_end", 60, 80, false, false);//document.documentElement
     }
-    //get all the links on current page, and their texts shown on page
-    //can't get from overlay, still wondering
   };
   
   pub.highlightKeywords = function(origtitle, keywords){
