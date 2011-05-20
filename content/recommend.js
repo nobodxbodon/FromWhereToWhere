@@ -477,20 +477,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     // if the page was closed, open it first
     if (!found) {
-      /*var browserEnumerator = wm.getEnumerator("navigator:browser");
-      var tabbrowser = browserEnumerator.getNext().gBrowser;
-      // Create tab
-      var newTab = tabbrowser.addTab(pub.currLoc);
-      // Focus tab
-      tabbrowser.selectedTab = newTab;
-      tabbrowser.ownerDocument.defaultView.focus();*/
-      var recentWin = wm.getMostRecentWindow("navigator:browser");
-      var curBrowser = recentWin.gBrowser;
-      //alert(gBrowser==curBrowser);
-      var newTab = curBrowser.addTab(pub.currLoc);
-      curBrowser.selectedTab = newTab;
+      // as the panel belongs to the browser, when clicking gbrowser is itself the current browser
+      var newTab = gBrowser.addTab(pub.currLoc);
+      gBrowser.selectedTab = newTab;
       // Focus *this* browser window in case another one is currently focused
-      curBrowser.ownerDocument.defaultView.focus();
+      gBrowser.ownerDocument.defaultView.focus();
     }
     return found;
   };
