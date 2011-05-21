@@ -58,5 +58,4 @@
 <script src="recommend.js" />
 <script src="corpus_en.js" />
 <script src="utils.js" />
-<script src="toolbar-button/button.js" />
 </overlay>  
