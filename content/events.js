@@ -76,13 +76,17 @@ com.wuxuan.fromwheretowhere.events = function(){
       com.wuxuan.fromwheretowhere.events.down();
       rec.removeAttribute("checked");
       //disable the other one
-      pub.getOtherMenuitem(rec).removeAttribute("checked");
+      var other = pub.getOtherMenuitem(rec);
+      if(other)
+        removeAttribute("checked");
     }
     else{
       com.wuxuan.fromwheretowhere.events.init();
       rec.setAttribute("checked", "true");
       //enable the other one
-      pub.getOtherMenuitem(rec).setAttribute("checked", "true");
+      var other = pub.getOtherMenuitem(rec);
+      if(other)
+        other.setAttribute("checked", "true");
     }
   };
   
