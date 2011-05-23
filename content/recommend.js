@@ -235,8 +235,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           if(t.indexOf(allRelated[j])>-1){
             if(text.length==1 && text[0]==allRelated[j])
               break;
-            keywords.push(allRelated[j]);
-            oF=oF*freq[allRelated[j]];
+            //only if allRelated[j] isn't substring of existing keywords, add to keywords (work around strict segmentation only)
+            if(keywords.every(function(x){return x.indexOf(allRelated[j])==-1;})){
+              keywords.push(allRelated[j]);
+              oF=oF*freq[allRelated[j]];
+            }
           }
         }
         //TBD: could be more than 2, but 2 is more likely, those with only those keywords are likely to be catagories
