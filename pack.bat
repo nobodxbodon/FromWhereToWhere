@@ -1,1 +1,1 @@
-7z a -tzip FromWhereToWhere.xpi chrome.manifest install.rdf content/*.xul content/*.js content/toolbar-button/*.png content/toolbar-button/*.css content/toolbar-button/*.js locale/en-US/*.dtd skin/*.css 
+7z a -tzip FromWhereToWhere.xpi chrome.manifest install.rdf content/*.xul content/*.js content/toolbar-button/*.jpg content/toolbar-button/*.css locale/en-US/*.dtd skin/*.css 
