@@ -3,7 +3,7 @@ com.wuxuan.fromwheretowhere.events = function(){
   
   var lasttitle = "";
   var eventNum = 0;
-
+  
   pub.recommendThread = function(threadID, doc) {
     this.threadID = threadID;
     this.doc = doc;
@@ -61,18 +61,33 @@ com.wuxuan.fromwheretowhere.events = function(){
       .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
       .getInterface(Components.interfaces.nsIDOMWindow);
   
+  pub.getOtherMenuitem = function(ele){
+    if(ele.getAttribute("id")==="recommend"){
+      return document.getElementById("toolbar-recommend");
+    }else{
+      return document.getElementById("recommend");
+    }
+  };
+  
   pub.toggleRecommend = function(event){
     //alert("in toggle");
     var rec = event.target;
-    if (rec.getAttribute("checked") == "true"){
+    if (rec.getAttribute("checked")=="true"){
       com.wuxuan.fromwheretowhere.events.down();
       rec.removeAttribute("checked");
+      //disable the other one
+      var other = pub.getOtherMenuitem(rec);
+      if(other)
+        removeAttribute("checked");
     }
     else{
       com.wuxuan.fromwheretowhere.events.init();
       rec.setAttribute("checked", "true");
+      //enable the other one
+      var other = pub.getOtherMenuitem(rec);
+      if(other)
+        other.setAttribute("checked", "true");
     }
-    //alert("toggle exit");
   };
   
   pub.closePanel = function(event){

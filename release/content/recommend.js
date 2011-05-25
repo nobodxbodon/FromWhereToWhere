@@ -2,7 +2,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   var pub={};
  
   pub.DEBUG = false;
-  pub.ANCHOR = false;
   pub.DEBUGINFO = "";
   pub.debuginfo = {};
   pub.TOOFEWWORDS = 4;
@@ -478,14 +477,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     // if the page was closed, open it first
     if (!found) {
-      var browserEnumerator = wm.getEnumerator("navigator:browser");
-      var tabbrowser = browserEnumerator.getNext().gBrowser;
-      // Create tab
-      var newTab = tabbrowser.addTab(pub.currLoc);
-      // Focus tab
-      tabbrowser.selectedTab = newTab;
+      // as the panel belongs to the browser, when clicking gbrowser is itself the current browser
+      var newTab = gBrowser.addTab(pub.currLoc);
+      gBrowser.selectedTab = newTab;
       // Focus *this* browser window in case another one is currently focused
-      tabbrowser.ownerDocument.defaultView.focus();
+      gBrowser.ownerDocument.defaultView.focus();
     }
     return found;
   };
@@ -493,8 +489,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   pub.testOpen = function(){
     //get the tab that's the suggestions derive from
     var currDoc = getBrowser().selectedBrowser.contentDocument;
+    // switch tab when doc or url is the same, which is reused in switchToTab
     if(pub.pageDoc!= currDoc && pub.currLoc!=currDoc.location.href){
-      //alert("need to switch tab");
       var found = pub.switchToTab(pub.pageDoc);
       if(!found){
         return;
@@ -506,9 +502,10 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //get the first non-empty line of the link and search for it, but can mis-locate
     var found = false;
     for(var i in lines){
-      found = getBrowser().selectedBrowser.contentWindow.find(lines[i], false, false);
+      var curWin = getBrowser().selectedBrowser.contentWindow;
+      found = curWin.find(lines[i], false, false);
       if(!found)
-        found = getBrowser().selectedBrowser.contentWindow.find(lines[i], false, true);
+        found = curWin.find(lines[i], false, true);
       if(found)
         break;
     }
@@ -535,32 +532,19 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.popUp = function(origTitle, outputText, recLinks, allLinks){
-    //const nm = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
     var topbar, statsInfoLabel, vbox,debugtext,linkBox, testLink, divEle;
-    if(pub.ANCHOR && recLinks.length>0){
-    //for(var i=0;i<recLinks.length;i++){
-      testLink = document.createElement("label");
-      var anchURL = "#location";
-      testLink = pub.setAttrDOMElement(testLink, {"value":recLinks[0].link.text.trim(),"onclick":"com.wuxuan.fromwheretowhere.recommendation.testOpen(\'"+anchURL+"\')"});//recLinks[i].link.href+"\')"});
-      var anch = document.createElement("a");
-      anch = pub.setAttrDOMElement(anch, {"name":"location"});
-      //var currentDoc = document.commandDispatcher.focusedWindow.document;
-      alert("try insert before: "+recLinks[0].link.text);
-      alert(pub.pageDoc.links.length);
-      recLinks[0].link.parentNode.insertBefore(anch, recLinks[0].link);
-      alert("insert done");
-    }
+    
     //only reuse the panel for ff 4
     if(version>=4 && savePanel!=null){
-      //alert("there's panel!");
+      //if there's 0 recLinks, return
+      if(recLinks.length==0)
+        return;
       topbar = savePanel.firstChild;
       statsInfoLabel = topbar.firstChild.nextSibling;
-      //divEle = topbar.firstChild.nextSibling;
       vbox = savePanel.firstChild.nextSibling;
     }else{
-      //alert("creating new panel");
       var panelAttr = null;
       //close, label, titlebar only for ff 4
       if(version>=4)
@@ -600,19 +584,13 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       //menus.parentNode.parentNode.appendChild(savePanel);
       document.documentElement.appendChild(savePanel);
     }
-    if(pub.ANCHOR){
-      savePanel.insertBefore(testLink, vbox);
-      alert("testlink append");
-    }
+    
     statsInfoLabel.setAttribute("value", outputText+pub.output(recLinks,allLinks));//"It\r\nWorks!\r\n\r\nThanks for the point\r\nin the right direction.";
     while(vbox.hasChildNodes()){
       vbox.removeChild(vbox.firstChild);
     }
     
-    var thisWindow = getBrowser().selectedBrowser.contentWindow;
-          
     for(var i=0;i<recLinks.length;i++){
-        var l = document.createElement("textbox");
         var t = recLinks[i].link.text;
         var uri = recLinks[i].link.href;
         if(!t)
@@ -658,6 +636,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         link=pub.setAttrDOMElement(link, {"value":title,"href":"com.wuxuan.fromwheretowhere.recommendation.testOpen()"});
         divEle.appendChild(link);*/
       }
+    //reset scroll vbox to top
+    vbox.scrollTop = 0;
+    
     if(pub.DEBUG){
       debugtext = document.createElement("textbox");
       debugtext = pub.setAttrDOMElement(debugtext, {"readonly":"true", "multiline":"true", "rows":"10", "cols":"70"})
@@ -674,8 +655,6 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       savePanel.setAttribute("label","Seemingly Related or Interesting Link Titles"+" - "+origTitle);
       savePanel.openPopup(null, "start_end", 60, 80, false, false);//document.documentElement
     }
-    //get all the links on current page, and their texts shown on page
-    //can't get from overlay, still wondering
   };
   
   pub.highlightKeywords = function(origtitle, keywords){
