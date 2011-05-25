@@ -504,8 +504,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var lines = link.split("\n");
     //get the first non-empty line of the link and search for it, but can mis-locate
     var found = false;
+    
+    var curWin = getBrowser().selectedBrowser.contentWindow;
     for(var i in lines){
-      var curWin = getBrowser().selectedBrowser.contentWindow;
       found = curWin.find(lines[i], false, false);
       if(!found)
         found = curWin.find(lines[i], false, true);
@@ -514,8 +515,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     //some links can not be found...invisble, then just open it
     if(!found){
-      if(link!=pub.lastSearchTitle)
+      if(link!=pub.lastSearchTitle){
         gBrowser.addTab(this.getAttribute("href"));
+      }
     }else{
       pub.lastSearchTitle=link;
     }
@@ -529,8 +531,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       spendtime = (0.0+((new Date()).getTime()-pub.starttime))/1000;
       ratio = (0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10;
     }
-    outputText += "Time: "+spendtime+"s      ";
-    outputText += "Ratio(Num. of suggested/all links found): "+ratio+"%\n";
+    outputText += "Time: "+spendtime+"s    ";
+    outputText += "Ratio(No. of suggested/all links): "+ratio+"%\n";
     return outputText;
   };
   

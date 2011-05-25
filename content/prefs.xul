@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+ 
+<prefwindow id="fwtw-prefs"
+     title="FromWhereToWhere Options"
+     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+ 
+<prefpane id="sw2-stock-pane" label="General Settings">
+  <preferences>
+    <preference id="pref_button_action" name="extensions.fromwheretowhere.buttonAction" type="string"/>
+  </preferences>
+ 
+  <vbox align="center">
+    <label control="button_action" align="start" value="Button Action: "/>
+    <textbox preference="pref_button_action" id="button_action" maxlength="4"/>
+    <radiogroup>
+      <radio id="action_none" align="start" label="None" selected="true"/>
+      <radio id="action_history" align="start" label="History Searching"/>
+      <radio id="action_openSuggestion" align="start" label="Open Suggestion Panel"/>
+    </radiogroup>
+  </vbox>
+</prefpane>
+ 
+</prefwindow>
