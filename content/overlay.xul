@@ -7,9 +7,10 @@
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <toolbarbutton id="custom-button-1"
-      label="FromWhereToWhere"
+      label="FWTW"
       type="menu-button"
       tooltiptext="FromWhereToWhere"
+      oncommand="com.wuxuan.fromwheretowhere.openWindow.action();"
       class="toolbarbutton-1 chromeclass-toolbar-additional custombutton"
       />
   

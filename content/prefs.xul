@@ -6,20 +6,47 @@
      title="FromWhereToWhere Options"
      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
  
-<prefpane id="sw2-stock-pane" label="General Settings">
+<prefpane id="general-pane" label="General Settings">
   <preferences>
-    <preference id="pref_button_action" name="extensions.fromwheretowhere.buttonAction" type="string"/>
+    <!--<preference id="pref_button_no_action" name="extensions.fromwheretowhere.buttonNoAction" type="bool"/>-->
+    <preference id="extensions.fromwheretowhere.buttonAction" name="extensions.fromwheretowhere.buttonAction" type="int"/>
   </preferences>
  
   <vbox align="center">
-    <label control="button_action" align="start" value="Button Action: "/>
-    <textbox preference="pref_button_action" id="button_action" maxlength="4"/>
-    <radiogroup>
-      <radio id="action_none" align="start" label="None" selected="true"/>
-      <radio id="action_history" align="start" label="History Searching"/>
-      <radio id="action_openSuggestion" align="start" label="Open Suggestion Panel"/>
-    </radiogroup>
+    <!--<checkbox control="button_action" align="start" value="Button Action: "/>
+    <textbox preference="pref_button_action" id="button_action" maxlength="4"/>-->
+    <groupbox>
+			<caption id="button_action_cap" label="Button Action:" />
+      <radiogroup preference="extensions.fromwheretowhere.buttonAction">
+        <radio value="0" align="start" label="None"/>
+        <radio value="1" align="start" label="History Searching"/>
+        <radio value="2" align="start" label="Toggle Suggestion Panel"/>
+      </radiogroup>
+      <!--<radiogroup id="button_has_action"
+                  preference="pref_button_no_action">
+        <radio label="No action" value="true" />
+        <hbox>
+          <radio label="Assign Action" value="false" />
+          <radiogroup id="button_action"
+                      preference="pref_button_action">
+            <radio id="history_action" onsyncfrompreference="return extensions_fromwheretowhere_prefs.updateDataUI();" label="History Searching"/>
+            <radio id="suggest_action" onsyncfrompreference="return extensions_fromwheretowhere_prefs.updateDataUI();" label="Toggle Suggestion Panel"/>
+          </radiogroup>
+          <filefield id="sbDataPath" flex="1" />
+          <button id="sbDataButton"
+                  label="&sb.button.browse;..." label2="&sb.prefs.data.tips;"
+                  oncommand="sbPrefWindow.selectFolder(this.getAttribute('label2'));" />
+        </hbox>
+      </radiogroup>-->
+      
+			<!--<separator />
+			<checkbox id="sbMultiBookEnabled"
+			          preference="scrapbook.multibook.enabled"
+			          label="&sb.prefs.multibook.enabled;"
+			          onsyncfrompreference="sbPrefWindow.updateDataUI();" />
+			<description class="indent">&sb.prefs.multibook.tips;</description>-->
+		</groupbox>
   </vbox>
 </prefpane>
- 
+
 </prefwindow>
