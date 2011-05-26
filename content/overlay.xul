@@ -15,13 +15,13 @@
       />
   
   <menuitem id="searchitem" label="&mainMenu.search;" accesskey="H"
-         oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
+         oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory(); event.stopPropagation()" />
   <menuitem id="recommend" label="&mainMenu.recommend;" accesskey="S" type="checkbox" autocheck="false"
-        oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event);"/>
+        oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event); event.stopPropagation()"/>
   <menuitem id="toolbar-searchitem" label="&mainMenu.search;" accesskey="H"
-         oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
+         oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory(); event.stopPropagation()" />
   <menuitem id="toolbar-recommend" label="&mainMenu.recommend;" accesskey="S" type="checkbox" autocheck="false"
-        oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event);"/>
+        oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event); event.stopPropagation()"/>
   
   <!-- Firefox -->
   <toolbarpalette id="BrowserToolbarPalette">
