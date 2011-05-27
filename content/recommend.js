@@ -543,8 +543,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     
     //only reuse the panel for ff 4
     if(version>=4 && savePanel!=null){
-      //if there's 0 recLinks, return
-      if(recLinks.length==0)
+      //if there's 0 recLinks && panel is open, return
+      if(recLinks.length==0 && savePanel.state=="open")
         return;
       topbar = savePanel.firstChild;
       statsInfoLabel = topbar.firstChild.nextSibling;

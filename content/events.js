@@ -73,15 +73,15 @@ com.wuxuan.fromwheretowhere.events = function(){
     //alert("in toggle");
     var rec = event.target;
     if (rec.getAttribute("checked")=="true"){
-      com.wuxuan.fromwheretowhere.events.down();
+      pub.down();
       rec.removeAttribute("checked");
       //disable the other one
       var other = pub.getOtherMenuitem(rec);
       if(other)
-        removeAttribute("checked");
+        other.removeAttribute("checked");
     }
     else{
-      com.wuxuan.fromwheretowhere.events.init();
+      pub.init();
       rec.setAttribute("checked", "true");
       //enable the other one
       var other = pub.getOtherMenuitem(rec);
