@@ -497,5 +497,43 @@ com.wuxuan.fromwheretowhere.utils = function(){
       return null;
   };
   
+  //if branch, wrap <ol> to get indent
+  //same level wrap by package <ol>
+  pub.exportHTML = function(nodes){
+    var src="";
+    //get src for each node in the array
+    for(var i=0;i<nodes.length;i++){
+      src+=pub.exportHTMLforNode(nodes[i]);
+      if(i!=nodes.length-1)
+        src+="\n";
+    }
+    return pub.exportHelperWrap(src, "ol", "", "");
+  };
+  
+  pub.exportHTMLforNode = function(node){
+    var src="";
+    //if branch, type=circle, else type=disc
+    if(node.children.length!=0){
+      src = pub.exportHTML(node.children);
+    }
+    var link = pub.exportHelperWrap(node.label,"a","href",node.url);
+    if(node.children.length==0){
+      src = pub.exportHelperWrap(link,"li","type","disc");
+    }else{
+      src = pub.exportHelperWrap(link+src,"li","type","circle");
+    }
+    return src;
+  };
+  
+  //TODO: more general (setAttribute)
+  pub.exportHelperWrap = function(orig, tag, attr, value){
+    var src="";
+    if(attr=="")
+      src="<"+tag+">"+orig+"</"+tag+">";
+    else
+      src="<"+tag+" "+attr+"="+value+">"+orig+"</"+tag+">";
+    return src;
+  };
+  
   return pub;
 }();

@@ -279,6 +279,8 @@ pub.mainThread.prototype = {
   //For now have to manually open it first to get all the children, and then "export the whole trace"
   pub.property = function() {
 		var tosave = pub.getCurrentSelected();
+		var htmlSrc = pub.utils.exportHTML(tosave);
+		alert(htmlSrc);
     var json = pub.nativeJSON.encode(tosave);
     var params = {inn:{property:json}, out:null};       
     window.openDialog("chrome://FromWhereToWhere/content/propdialog.xul", "",
