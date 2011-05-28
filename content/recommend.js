@@ -537,6 +537,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.popUp = function(origTitle, outputText, recLinks, allLinks){
+    //call it from outside to create panel
+    if(pub.utils==null)
+      pub.utils = com.wuxuan.fromwheretowhere.utils;
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
     var topbar, statsInfoLabel, vbox,debugtext,linkBox, testLink, divEle;

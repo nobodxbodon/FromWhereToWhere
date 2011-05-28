@@ -3,7 +3,7 @@
   href="chrome://FromWhereToWhere/content/toolbar-button/button.css"?>
 
 <!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
-<overlay id="FromWhereToWhereOverlay" onload="com.wuxuan.fromwheretowhere.recommend.init();"
+<overlay id="FromWhereToWhereOverlay"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <toolbarbutton id="custom-button-1"
