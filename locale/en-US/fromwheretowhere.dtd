@@ -18,3 +18,8 @@
 <!ENTITY table.url "URL">
 <!ENTITY table.date "Last Visit">
 <!ENTITY note.savedate "Save Date">
+
+<!ENTITY option.tbButtonAction "Toolbar Button Action">
+<!ENTITY option.none "None">
+<!ENTITY option.searchHistory "Search History">
+<!ENTITY option.toggleSugPanel "Open/close Suggestion Panel">
