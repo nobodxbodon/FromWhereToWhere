@@ -15,7 +15,7 @@
     <em:creator>Xuan Wu</em:creator>  
     <!-- Web page address through which extension is distributed -->  
     <em:homepageURL>https://addons.mozilla.org/en-US/firefox/addon/181746/</em:homepageURL>
-    <em:iconURL>chrome://FromWhereToWhere/content/toolbar-button/icon.jpg</em:iconURL>
+    <em:iconURL>chrome://FromWhereToWhere/content/toolbar-button/icon.png</em:iconURL>
     <em:optionsURL>chrome://FromWhereToWhere/content/prefs.xul</em:optionsURL>
     <!-- This section gives details of the target application for the extension (in this case: Firefox 2) -->  
     
