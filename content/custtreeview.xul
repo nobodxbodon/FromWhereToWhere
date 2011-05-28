@@ -3,15 +3,37 @@
 <?xml-stylesheet href="chrome://FromWhereToWhere/skin/treedec.css" type="text/css"?>  
 
 <window onload="com.wuxuan.fromwheretowhere.mainView.init(com.wuxuan.fromwheretowhere.main);"  
-        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">  
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        xmlns:html="http://www.w3.org/1999/xhtml">  
+
+<popupset id="tipPopupSet">
+  <tooltip id="tip.JSON">
+    <html>Property</html>
+  </tooltip>
+  <tooltip id="tip.exportHTML">
+    <html>HTML tags: a li ol</html>
+  </tooltip>
+</popupset>
 
 <popupset>
   <menupopup id="clipmenu" onpopupshowing="com.wuxuan.fromwheretowhere.main.showMenuItems()">
     <menuitem id="openinnewtab" label="&contextMenu.openinnewtab;" oncommand="com.wuxuan.fromwheretowhere.main.openlink()"/>
     <menuitem id="local" label="&contextMenu.openlocalcopy;" oncommand="com.wuxuan.fromwheretowhere.main.openlocal()"/>
     <menuseparator/>
-    <menuitem id="property" label="&contextMenu.property;" oncommand="com.wuxuan.fromwheretowhere.main.property()"/>
-    <menuitem id="importNodes" label="&contextMenu.importNodes;" oncommand="com.wuxuan.fromwheretowhere.main.importNodes()"/>
+    <menu id="export-menu" label="&contextMenu.export;">
+      <menupopup>
+        <menuitem id="exportJSON" label="&contextMenu.formatJSON;" tooltip="tip.JSON"
+          oncommand="com.wuxuan.fromwheretowhere.main.exportJSON()"/>
+        <menuitem id="exportHTML" label="&contextMenu.formatHTML;" tooltip="tip.exportHTML"
+          oncommand="com.wuxuan.fromwheretowhere.main.exportHTML()"/>
+      </menupopup>
+    </menu>
+    <menu id="import-menu" label="&contextMenu.import;">
+      <menupopup>
+        <menuitem id="importJSON" label="&contextMenu.formatJSON;" tooltip="tip.JSON"
+          oncommand="com.wuxuan.fromwheretowhere.main.importNodes()"/>
+      </menupopup>
+    </menu>
     <menuitem id="saveNodetoLocal" label="&contextMenu.saveNodetoLocal;" oncommand="com.wuxuan.fromwheretowhere.main.saveNodetoLocal()"/>
     <menuitem id="opensidebar" label="&contextMenu.showLocalNotes;" oncommand="com.wuxuan.fromwheretowhere.main.showLocalNotes()"/>
     <menuseparator/>

@@ -214,7 +214,7 @@ pub.mainThread.prototype = {
     openinnewtab.hidden = (node==null);
     
     var selectedIndex = pub.getAllSelectedIndex();
-    var propertyItem = document.getElementById("property");
+    var propertyItem = document.getElementById("exportJSON");
     propertyItem.hidden = (selectedIndex.length==0);
   };
   
@@ -273,20 +273,28 @@ pub.mainThread.prototype = {
     return selected;
   };
   
+	pub.openPropertyDialog = function(prop){
+		var params = {inn:{property:prop}, out:null};       
+    window.openDialog("chrome://FromWhereToWhere/content/propdialog.xul", "",
+      "chrome, centerscreen, dialog, resizable=yes", params).focus();
+	};
+	
   /* for now there's no circular reference within nodes, so JSON has no problem.
     TOIMPROVE until there's built-in support, as it should make loop detection more elegant? */
   //if it's a container, but never opened before, then it has no children.
   //For now have to manually open it first to get all the children, and then "export the whole trace"
-  pub.property = function() {
+  pub.exportJSON = function() {
 		var tosave = pub.getCurrentSelected();
-		var htmlSrc = pub.utils.exportHTML(tosave);
-		alert(htmlSrc);
     var json = pub.nativeJSON.encode(tosave);
-    var params = {inn:{property:json}, out:null};       
-    window.openDialog("chrome://FromWhereToWhere/content/propdialog.xul", "",
-      "chrome, centerscreen, dialog, resizable=yes", params).focus();
+    pub.openPropertyDialog(json);
   };
   
+	pub.exportHTML = function() {
+		var tosave = pub.getCurrentSelected();
+		var htmlSrc = pub.utils.exportHTML(tosave);
+		pub.openPropertyDialog(htmlSrc);
+	};
+	
 	pub.isSidebarFWTW = function(){
 		var sidebarWindow = pub.mainWindow.document.getElementById("sidebar").contentWindow;
 		var sidebarRef = "chrome://FromWhereToWhere/content/sidebar.xul".toLowerCase();
@@ -348,13 +356,13 @@ pub.mainThread.prototype = {
   
   //when the first node is "no result found", remove it first, otherwise FF freezes when the next node is collapsed
   pub.importNodes = function(){
-    var json = window.prompt("Please paste the nodes' property:", "[]");
+    var json = window.prompt("Please paste the nodes' property (JSON format):", "[]");
     var newNodes = [];
     try{
       newNodes = pub.nativeJSON.decode(json);
     }catch(err){
       if(json && json!="[]"){
-	alert("Input properties incomplete or corrupted:\n" + json);
+	alert("Input incomplete or corrupted:\n" + json);
       }
     }
     if(newNodes.length>0){
