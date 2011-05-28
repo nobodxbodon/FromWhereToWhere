@@ -18,17 +18,7 @@ com.wuxuan.fromwheretowhere.openWindow = function(){
     else if(act==1)
       pub.searchhistory();
     else if(act==2){
-      var recPanel = document.getElementById("fwtwRelPanel");
-      if(recPanel==null){
-        com.wuxuan.fromwheretowhere.recommendation.init();
-        com.wuxuan.fromwheretowhere.recommendation.popUp("","",[],[]);
-      }else{
-        if(recPanel.state=="open"){
-          recPanel.hidePopup();
-        }else{
-          recPanel.openPopup(null, "start_end", 60, 80, false, false);
-        }
-      }
+      com.wuxuan.fromwheretowhere.events.toggleSugPanel(true);
     }
   };
   
