@@ -214,7 +214,7 @@ pub.mainThread.prototype = {
     openinnewtab.hidden = (node==null);
     
     var selectedIndex = pub.getAllSelectedIndex();
-    var propertyItem = document.getElementById("exportJSON");
+    var propertyItem = document.getElementById("export-menu");
     propertyItem.hidden = (selectedIndex.length==0);
   };
   
