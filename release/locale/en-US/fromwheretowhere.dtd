@@ -1,10 +1,12 @@
 <!ENTITY mainMenu.search "Search History">
-<!ENTITY mainMenu.recommend "Link Suggestion">
+<!ENTITY mainMenu.recommend "Auto-refresh Link Suggestion">
 
 <!ENTITY contextMenu.openinnewtab "Open Page in New Tab">
 <!ENTITY contextMenu.openlocalcopy "Open Local Copy">
-<!ENTITY contextMenu.property "Property">
-<!ENTITY contextMenu.importNodes "Import">
+<!ENTITY contextMenu.export "Export as ...">
+<!ENTITY contextMenu.formatJSON "JSON">
+<!ENTITY contextMenu.formatHTML "HTML">
+<!ENTITY contextMenu.import "Import from ...">
 <!ENTITY contextMenu.saveNodetoLocal "Save to Local Notes">
 <!ENTITY contextMenu.showLocalNotes "Open/close Notes Sidebar">
 <!ENTITY contextMenu.openlocalnote "Open Note">
@@ -16,3 +18,8 @@
 <!ENTITY table.url "URL">
 <!ENTITY table.date "Last Visit">
 <!ENTITY note.savedate "Save Date">
+
+<!ENTITY option.tbButtonAction "Toolbar Button Action">
+<!ENTITY option.none "None">
+<!ENTITY option.searchHistory "Search History">
+<!ENTITY option.toggleSugPanel "Open/close Suggestion Panel">

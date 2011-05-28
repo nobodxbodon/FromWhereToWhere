@@ -3,24 +3,25 @@
   href="chrome://FromWhereToWhere/content/toolbar-button/button.css"?>
 
 <!DOCTYPE overlay SYSTEM "chrome://FromWhereToWhere/locale/fromwheretowhere.dtd">
-<overlay id="FromWhereToWhereOverlay" onload="com.wuxuan.fromwheretowhere.recommend.init();"
+<overlay id="FromWhereToWhereOverlay"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
   <toolbarbutton id="custom-button-1"
-      label="FromWhereToWhere"
+      label="FWTW"
       type="menu-button"
       tooltiptext="FromWhereToWhere"
+      oncommand="com.wuxuan.fromwheretowhere.openWindow.action();"
       class="toolbarbutton-1 chromeclass-toolbar-additional custombutton"
       />
   
   <menuitem id="searchitem" label="&mainMenu.search;" accesskey="H"
-         oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
+        oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
   <menuitem id="recommend" label="&mainMenu.recommend;" accesskey="S" type="checkbox" autocheck="false"
         oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event);"/>
   <menuitem id="toolbar-searchitem" label="&mainMenu.search;" accesskey="H"
-         oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
+         oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory(); event.stopPropagation()" />
   <menuitem id="toolbar-recommend" label="&mainMenu.recommend;" accesskey="S" type="checkbox" autocheck="false"
-        oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event);"/>
+        oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event); event.stopPropagation()"/>
   
   <!-- Firefox -->
   <toolbarpalette id="BrowserToolbarPalette">

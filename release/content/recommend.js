@@ -235,8 +235,11 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           if(t.indexOf(allRelated[j])>-1){
             if(text.length==1 && text[0]==allRelated[j])
               break;
-            keywords.push(allRelated[j]);
-            oF=oF*freq[allRelated[j]];
+            //only if allRelated[j] isn't substring of existing keywords, add to keywords (work around strict segmentation only)
+            if(keywords.every(function(x){return x.indexOf(allRelated[j])==-1;})){
+              keywords.push(allRelated[j]);
+              oF=oF*freq[allRelated[j]];
+            }
           }
         }
         //TBD: could be more than 2, but 2 is more likely, those with only those keywords are likely to be catagories
@@ -501,8 +504,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     var lines = link.split("\n");
     //get the first non-empty line of the link and search for it, but can mis-locate
     var found = false;
+    
+    var curWin = getBrowser().selectedBrowser.contentWindow;
     for(var i in lines){
-      var curWin = getBrowser().selectedBrowser.contentWindow;
       found = curWin.find(lines[i], false, false);
       if(!found)
         found = curWin.find(lines[i], false, true);
@@ -511,8 +515,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     //some links can not be found...invisble, then just open it
     if(!found){
-      if(link!=pub.lastSearchTitle)
+      if(link!=pub.lastSearchTitle){
         gBrowser.addTab(this.getAttribute("href"));
+      }
     }else{
       pub.lastSearchTitle=link;
     }
@@ -526,20 +531,23 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       spendtime = (0.0+((new Date()).getTime()-pub.starttime))/1000;
       ratio = (0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10;
     }
-    outputText += "Time: "+spendtime+"s      ";
-    outputText += "Ratio(Num. of suggested/all links found): "+ratio+"%\n";
+    outputText += "Time: "+spendtime+"s    ";
+    outputText += "Ratio(No. of suggested/all links): "+ratio+"%\n";
     return outputText;
   };
   
   pub.popUp = function(origTitle, outputText, recLinks, allLinks){
+    //call it from outside to create panel
+    if(pub.utils==null)
+      pub.utils = com.wuxuan.fromwheretowhere.utils;
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
     var topbar, statsInfoLabel, vbox,debugtext,linkBox, testLink, divEle;
     
     //only reuse the panel for ff 4
     if(version>=4 && savePanel!=null){
-      //if there's 0 recLinks, return
-      if(recLinks.length==0)
+      //if there's 0 recLinks && panel is open, return
+      if(recLinks.length==0 && savePanel.state=="open")
         return;
       topbar = savePanel.firstChild;
       statsInfoLabel = topbar.firstChild.nextSibling;

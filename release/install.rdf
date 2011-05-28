@@ -8,7 +8,7 @@
     <!-- Extension name displayed in Add-on Manager -->  
     <em:name>FromWhereToWhere</em:name>  
     <!-- Extension version number. There is a version numbering scheme you must follow -->  
-    <em:version>0.23.3</em:version>  
+    <em:version>0.23.4</em:version>  
     <!-- Brief description displayed in Add-on Manager -->  
     <em:description>List the pages from where you visit one page, and all the other pages you visited from those pages. Link suggestion based on current page title and browsing history.</em:description>  
     <!-- Name of extension's primary developer. Change to your name -->  
@@ -16,6 +16,7 @@
     <!-- Web page address through which extension is distributed -->  
     <em:homepageURL>https://addons.mozilla.org/en-US/firefox/addon/181746/</em:homepageURL>
     <em:iconURL>chrome://FromWhereToWhere/content/toolbar-button/icon.jpg</em:iconURL>
+    <em:optionsURL>chrome://FromWhereToWhere/content/prefs.xul</em:optionsURL>
     <!-- This section gives details of the target application for the extension (in this case: Firefox 2) -->  
     
 		<!-- Firefox -->
@@ -30,7 +31,7 @@
     <em:targetApplication>
 			<Description>
 				<em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
-				<em:minVersion>2.0</em:minVersion>
+				<em:minVersion>2.0a3</em:minVersion>
 				<em:maxVersion>2.2a1pre</em:maxVersion>
 			</Description>
 		</em:targetApplication>
