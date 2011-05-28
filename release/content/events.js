@@ -99,14 +99,29 @@ com.wuxuan.fromwheretowhere.events = function(){
     }
   };
   
+  pub.toggleSugPanel = function(closeWhenOpen){
+    var recPanel = document.getElementById("fwtwRelPanel");
+    if(recPanel==null){
+      com.wuxuan.fromwheretowhere.recommendation.init();
+      com.wuxuan.fromwheretowhere.recommendation.popUp("","",[],[]);
+    }else{
+      if(recPanel.state=="open" && closeWhenOpen){
+        recPanel.hidePopup();
+      }else{
+        recPanel.openPopup(null, "start_end", 60, 80, false, false);
+      }
+    }
+  };
+  
   pub.init = function(){
     //TODO: document.? gbrowser.? difference?
     pub.mainWindow.addEventListener("DOMContentLoaded", pub.onPageLoad, false);
     //TODO: when current document is closed, the current suggestion should be closed too
     //pub.mainWindow.addEventListener("close", pub.closePanel, false);
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
-    com.wuxuan.fromwheretowhere.recommendation.init();
-    com.wuxuan.fromwheretowhere.recommendation.popUp("","",[],[]);
+    //com.wuxuan.fromwheretowhere.recommendation.init();
+    //com.wuxuan.fromwheretowhere.recommendation.popUp("","",[],[]);
+    pub.toggleSugPanel(false);
   };
   
   pub.down = function(){

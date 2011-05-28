@@ -1,5 +1,5 @@
 <!ENTITY mainMenu.search "Search History">
-<!ENTITY mainMenu.recommend "Auto-refresh Link Suggestion">
+<!ENTITY mainMenu.recommend "Auto-refresh Suggestion">
 
 <!ENTITY contextMenu.openinnewtab "Open Page in New Tab">
 <!ENTITY contextMenu.openlocalcopy "Open Local Copy">
@@ -22,4 +22,4 @@
 <!ENTITY option.tbButtonAction "Toolbar Button Action">
 <!ENTITY option.none "None">
 <!ENTITY option.searchHistory "Search History">
-<!ENTITY option.toggleSugPanel "Open/close Suggestion Panel">
+<!ENTITY option.toggleSugPanel "Show/hide Suggestion Panel">
