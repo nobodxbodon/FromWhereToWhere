@@ -530,6 +530,12 @@ pub.mainThread.prototype = {
       
   };
   
+	pub.findNext = function(){
+		alert("find next");
+		pub.treeView.toggleOpenState(0);
+		pub.treeView.findNext();
+	};
+	
   pub.keypress = function(event) {
     if(!event){
       alert("no event!");

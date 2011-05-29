@@ -147,6 +147,32 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     this.treeBox.rowCountChanged(idx + 1, -1);
   },
   
+  //search from selection, get the one with keywords or the src page (blue or red)
+  findNext: function(){
+    var idx = -1;
+    if(pub.selection!=null)
+      idx = this.selection.currentIndex;
+    alert(idx);
+    for(var i=idx+1; ;i++){
+      var node = this.visibleData[i];
+      if(node==null){
+        alert("end of data");
+        break;
+      }
+      var pid = node.placeId;
+      var haveKeywords = main.pidwithKeywords.indexOf(pid);
+      if(pid && pid==main.retrievedId){
+        //alert(i);
+        this.selection.select(i);
+        break;
+      }else if(haveKeywords!=-1 || (node.placeId==null && node.haveKeywords)){
+        //alert(i);
+        this.selection.select(i);
+        break;
+      }
+    }
+  },
+  
   toggleOpenState: function(idx) {  
     var item = this.visibleData[idx];  
     if (!item.isContainer) return;  

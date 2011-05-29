@@ -43,7 +43,13 @@
 
 <hbox>
   <textbox id="keywords" multiline="false" flex="1" onkeypress="com.wuxuan.fromwheretowhere.main.keypress(event)"/>
-  <button id="bsearch" label="&button.searchallwords;" oncommand="com.wuxuan.fromwheretowhere.main.search()"/>
+  <button id="bsearch" label="&button.searchallwords;"
+      type="menu-button"
+      oncommand="com.wuxuan.fromwheretowhere.main.search()">
+    <menupopup>
+      <menuitem label="Find Next" oncommand="com.wuxuan.fromwheretowhere.main.findNext(); event.stopPropagation();"/>
+    </menupopup>
+  </button>
 </hbox>
 
 <tree id="elementList" flex="1">  
