@@ -52,3 +52,4 @@ Feature below (all about link suggestion) is tested in 4.0 under Vista, and 3.6 
 2) if select 'none' -> 'OK', clicking toolbar button have no effects.
 3) if select 'search history' -> 'OK', clicking toolbar button will open history searching view.
 4) if select 'show/hide suggestion panel' -> 'OK', clicking toolbar button will show the panel if it's hidden, and hide it if it's open.
+5) configured option will be kept after restarting ff
