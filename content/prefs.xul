@@ -8,13 +8,10 @@
  
 <prefpane id="general-pane" label="General Settings">
   <preferences>
-    <!--<preference id="pref_button_no_action" name="extensions.fromwheretowhere.buttonNoAction" type="bool"/>-->
     <preference id="extensions.fromwheretowhere.buttonAction" name="extensions.fromwheretowhere.buttonAction" type="int"/>
   </preferences>
  
   <vbox align="center">
-    <!--<checkbox control="button_action" align="start" value="Button Action: "/>
-    <textbox preference="pref_button_action" id="button_action" maxlength="4"/>-->
     <groupbox>
 			<caption id="button_action_cap" label="&option.tbButtonAction;" />
       <radiogroup preference="extensions.fromwheretowhere.buttonAction">

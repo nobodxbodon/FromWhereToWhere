@@ -661,7 +661,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       savePanel.openPopup(null, "start_end", 60, 80, false, false);
     }else{
       savePanel.setAttribute("label","Seemingly Related or Interesting Link Titles"+" - "+origTitle);
-      savePanel.openPopup(null, "start_end", 60, 80, false, false);//document.documentElement
+      savePanel.openPopup(null, "start_end", 60, 80, false, false);
     }
   };
   
