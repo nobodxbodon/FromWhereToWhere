@@ -153,9 +153,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       idx = this.selection.currentIndex;
     if(idx==-1)
       idx=0;
-    //alert("in function findNext "+idx);
     for(var i=idx; ;i++){
-      //alert(i);
       var node = this.visibleData[i];
       if(node==null){
         alert("End of data.");
@@ -163,18 +161,11 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       }
       var pid = node.placeId;
       var haveKeywords = main.pidwithKeywords.indexOf(pid);
-      if(i!=idx && pid && pid==main.retrievedId){
-        //alert("pid eq "+i);
-        //if(i!=idx){
-          this.selection.select(i);
-          break;
-        
-      }else if(i!=idx && (haveKeywords!=-1 || (pid==null && node.haveKeywords))){
-        //alert("kw "+i);
-        
-          this.selection.select(i);
-          break;
-        
+      if(i!=idx && ((pid && pid==main.retrievedId)
+                  || (haveKeywords!=-1 || (pid==null && node.haveKeywords)))) {
+        this.selection.select(i);
+        this.treeBox.ensureRowIsVisible(i);
+        break; 
       }else{
         //if it's folded, expand first
         if(node.isContainer && !node.isFolded){
