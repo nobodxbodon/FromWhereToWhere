@@ -148,32 +148,45 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   },
   
   //search from selection, get the one with keywords or the src page (blue or red)
-  findNext: function(){
-    var idx = -1;
-    if(pub.selection!=null)
+  findNext: function(idx){
+    if(idx==null &&this.selection!=null)
       idx = this.selection.currentIndex;
-    alert(idx);
-    for(var i=idx+1; ;i++){
+    if(idx==-1)
+      idx=0;
+    //alert("in function findNext "+idx);
+    for(var i=idx; ;i++){
+      //alert(i);
       var node = this.visibleData[i];
       if(node==null){
-        alert("end of data");
+        alert("End of data.");
         break;
       }
       var pid = node.placeId;
       var haveKeywords = main.pidwithKeywords.indexOf(pid);
-      if(pid && pid==main.retrievedId){
-        //alert(i);
-        this.selection.select(i);
-        break;
-      }else if(haveKeywords!=-1 || (node.placeId==null && node.haveKeywords)){
-        //alert(i);
-        this.selection.select(i);
-        break;
+      if(i!=idx && pid && pid==main.retrievedId){
+        //alert("pid eq "+i);
+        //if(i!=idx){
+          this.selection.select(i);
+          break;
+        
+      }else if(i!=idx && (haveKeywords!=-1 || (pid==null && node.haveKeywords))){
+        //alert("kw "+i);
+        
+          this.selection.select(i);
+          break;
+        
+      }else{
+        //if it's folded, expand first
+        if(node.isContainer && !node.isFolded){
+          this.toggleOpenState(i, true);
+          //break here or it'll open the following nodes because of threads
+          break;
+        }
       }
     }
   },
   
-  toggleOpenState: function(idx) {  
+  toggleOpenState: function(idx, findNext) {  
     var item = this.visibleData[idx];  
     if (!item.isContainer) return;  
   
@@ -195,9 +208,9 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       com.wuxuan.fromwheretowhere.sb.urlInit();
       //FIX: Warning: reference to undefined property main.main.query
       if(main.query)
-        main.main.dispatch(new main.mainThread(1, item, idx, main.query), main.main.DISPATCH_NORMAL);
+        main.main.dispatch(new main.mainThread(1, item, idx, main.query, findNext), main.main.DISPATCH_NORMAL);
       else
-        main.main.dispatch(new main.mainThread(1, item, idx, null), main.main.DISPATCH_NORMAL);
+        main.main.dispatch(new main.mainThread(1, item, idx, null, findNext), main.main.DISPATCH_NORMAL);
       this.addSuspensionPoints(item.level, idx);
       
     }  

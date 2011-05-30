@@ -26,11 +26,12 @@ com.wuxuan.fromwheretowhere.main = function(){
 		return item.level==0;
 	};
 	
-pub.mainThread = function(threadID, item, idx, query) {
+pub.mainThread = function(threadID, item, idx, query, findNext) {
   this.threadID = threadID;
   this.item = item;
   this.idx = idx;
 	this.query = query;
+	this.findNext = findNext;
 };
 
 pub.mainThread.prototype = {
@@ -64,6 +65,10 @@ pub.mainThread.prototype = {
       // This is where we react to the completion of the working thread.
       pub.treeView.delSuspensionPoints(this.idx);
       pub.treeView.expandFromNodeInTree(this.item, this.idx);
+			if(this.findNext){
+				//alert("find Next");
+				pub.treeView.findNext(this.idx);
+			}
     } catch(err) {
       Components.utils.reportError(err);
     }
@@ -531,8 +536,7 @@ pub.mainThread.prototype = {
   };
   
 	pub.findNext = function(){
-		alert("find next");
-		pub.treeView.toggleOpenState(0);
+		//pub.treeView.toggleOpenState(0);
 		pub.treeView.findNext();
 	};
 	
