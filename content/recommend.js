@@ -248,7 +248,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           for(var i=0;i<keywords.length;i++){
             allKeyLen+=keywords[i].length;
           }
-          if(t.length==allKeyLen)
+          //seg can be wrong, and < is possible
+          if(t.length<=allKeyLen)
             continue;
         }
       }else{
