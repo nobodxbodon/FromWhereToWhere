@@ -118,17 +118,9 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   };
   
   pub.deleteNotes = function(){
-    //var recordIds = pub.treeView.selection.currentIndex;
-    //alert("delete: "+recordIds)
     var selectedIndex = com.wuxuan.fromwheretowhere.UIutils.getAllSelectedIndex(pub.treeView);
     selectedIndex = selectedIndex.map(function(x){return pub.treeView.visibleData[x].id;});
     com.wuxuan.fromwheretowhere.localmanager.deleteRecords(selectedIndex);
-    /*var ele = pub.mainWindow.document.getElementById("sidebar").contentDocument.getElementById("recordList");
-		var treeView = ele.view;
-		if(treeView==null){
-		  //for 3.6.x
-		  treeView = ele.wrappedJSObject.view;
-		}*/
     pub.treeView.setTree(null);
   };
   
