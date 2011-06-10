@@ -47,7 +47,7 @@
       type="menu-button"
       oncommand="com.wuxuan.fromwheretowhere.main.search()">
     <menupopup>
-      <menuitem label="Find Next" oncommand="com.wuxuan.fromwheretowhere.main.findNext(); event.stopPropagation();"/>
+      <menuitem label="&button.findNext;" oncommand="com.wuxuan.fromwheretowhere.main.findNext(); event.stopPropagation();"/>
     </menupopup>
   </button>
 </hbox>
@@ -75,6 +75,7 @@
 
 <script src="namespace.js" />
 <script src="sbconnect.js" />
+<script src="UIutils.js" />
 <script src="utils.js" />
 <script src="treeview.js" />
 <script src="topicTracker.js" />

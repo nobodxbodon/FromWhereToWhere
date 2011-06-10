@@ -25,4 +25,5 @@
 <script src="namespace.js" />
 <script src="localmanager.js" />
 <script src="noteSidebar.js" />
+<script src="UIutils.js" />
 </page>

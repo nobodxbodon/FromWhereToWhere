@@ -218,7 +218,7 @@ pub.mainThread.prototype = {
     }
     openinnewtab.hidden = (node==null);
     
-    var selectedIndex = pub.getAllSelectedIndex();
+    var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
     var propertyItem = document.getElementById("export-menu");
     propertyItem.hidden = (selectedIndex.length==0);
   };
@@ -232,19 +232,6 @@ pub.mainThread.prototype = {
     pub.getURLfromNode(pub.treeView);
   };
   
-  pub.getAllSelectedIndex = function(){
-    var start = new Object();
-    var end = new Object();
-    var numRanges = pub.treeView.selection.getRangeCount();
-    var index = [];
-    for (var t = 0; t < numRanges; t++){
-      pub.treeView.selection.getRangeAt(t,start,end);
-      for (var v = start.value; v <= end.value; v++){
-        index.push(v);
-      }
-    }
-    return index;
-  };
   
   pub.decreaseLevelandCollapse = function(node, levels){
     var children = node.children;
@@ -264,7 +251,7 @@ pub.mainThread.prototype = {
   
   pub.getCurrentSelected = function(){
     var selectCount = pub.treeView.selection.count;
-    var selectedIndex = pub.getAllSelectedIndex();
+    var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
     //verify 
     if(selectCount!=selectedIndex.length){
       alert("Error when getting selected rows");
@@ -573,6 +560,7 @@ pub.mainThread.prototype = {
 		pub.history = com.wuxuan.fromwheretowhere.historyQuery;
 		pub.history.init();
 		pub.retrievedId = pub.history.getIdfromUrl(pub.currentURI);
+		pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
 		if(pub.topicTracker)
 			pub.topicTracker.init();
     //document.getElementById("elementList").addEventListener("click", function (){getURLfromNode(treeView);}, false);

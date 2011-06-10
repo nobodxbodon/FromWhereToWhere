@@ -59,8 +59,8 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     }
   };
   
-  //one for now
-  pub.deleteRecords = function(recordIds){
+  //delete one
+  pub.deleteRecord = function(recordIds){
     var statement = pub.localRecord.createStatement("DELETE FROM " + pub.RECORDTABLENAME + " WHERE rowid=:recordIds")
     statement.params.recordIds = recordIds;
     
@@ -73,6 +73,30 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
       statement.reset();
     }
   };
+  
+  //delete >1
+  pub.deleteRecords = function(recordIds){
+  	var pids="";
+    var lastIdx=recordIds.length-1;
+		for(var i=0;i<recordIds.length;i++){
+			pids+= recordIds[i];
+			if(i!=lastIdx){
+				pids+=",";
+			}
+		}
+    var str = "DELETE FROM " + pub.RECORDTABLENAME + " WHERE rowid IN ("+pids+")";
+    //alert(str);
+    var statement = pub.localRecord.createStatement(str);
+    try {
+      statement.executeStep();
+      //alert("saved");
+    } 
+    catch (e) {
+      alert("delete record exception!");
+      statement.reset();
+    }
+  };
+		
   
   pub.queryAll = function(){
     var statement = pub.localRecord.createStatement("SELECT rowid,* from " + pub.RECORDTABLENAME);

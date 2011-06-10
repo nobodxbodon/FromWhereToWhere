@@ -14,6 +14,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
   
   pub.localManager = com.wuxuan.fromwheretowhere.localmanager;
+  //pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
   
   pub.initView = function(){
     document.getElementById("recordList").view = pub.treeView;
@@ -117,14 +118,20 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   };
   
   pub.deleteNotes = function(){
-    var recordIds = pub.treeView.selection.currentIndex;
+    //var recordIds = pub.treeView.selection.currentIndex;
     //alert("delete: "+recordIds)
-    com.wuxuan.fromwheretowhere.localmanager.deleteRecords(pub.treeView.visibleData[recordIds].id);
-    //rowCountChange for all ids
-    //alert("remove row: "+recordIds)
-    pub.treeView.visibleData.splice(recordIds, 1);
-    pub.treeView.treeBox.rowCountChanged(recordIds, -1);
-  }
+    var selectedIndex = com.wuxuan.fromwheretowhere.UIutils.getAllSelectedIndex(pub.treeView);
+    selectedIndex = selectedIndex.map(function(x){return pub.treeView.visibleData[x].id;});
+    com.wuxuan.fromwheretowhere.localmanager.deleteRecords(selectedIndex);
+    /*var ele = pub.mainWindow.document.getElementById("sidebar").contentDocument.getElementById("recordList");
+		var treeView = ele.view;
+		if(treeView==null){
+		  //for 3.6.x
+		  treeView = ele.wrappedJSObject.view;
+		}*/
+    pub.treeView.setTree(null);
+  };
+  
   //TODO: merge the code with ImportNode in main
   pub.openNode = function(){
     //get nodes content first
