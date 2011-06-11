@@ -11,16 +11,17 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
  .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
  .getInterface(Components.interfaces.nsIDOMWindow);
  
-  pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
-  
-  pub.localManager = com.wuxuan.fromwheretowhere.localmanager;
-  //pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
-  
-  pub.initView = function(){
+  pub.init = function(){
+    pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
+    pub.localManager = com.wuxuan.fromwheretowhere.localmanager;
+    pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
+    //use function or there'll be 'not found' issue
+    pub.treeView = pub.createView();
     document.getElementById("recordList").view = pub.treeView;
   };
-    
-  pub.treeView = {
+  
+  pub.createView = function(){
+    return {
   // have to separate the looks of node from the content!!!!!!
   
     visibleData : function(){
@@ -106,6 +107,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     getColumnProperties: function(column, element, prop) {},
     click: function() {}
   };
+  };
   
   pub.showMenuItems = function(){
     var node = null;
@@ -118,9 +120,9 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   };
   
   pub.deleteNotes = function(){
-    var selectedIndex = com.wuxuan.fromwheretowhere.UIutils.getAllSelectedIndex(pub.treeView);
+    var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
     selectedIndex = selectedIndex.map(function(x){return pub.treeView.visibleData[x].id;});
-    com.wuxuan.fromwheretowhere.localmanager.deleteRecords(selectedIndex);
+    pub.localManager.deleteRecords(selectedIndex);
     pub.treeView.setTree(null);
   };
   
@@ -133,7 +135,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     if(node==null){
       return;
     }
-    var json = com.wuxuan.fromwheretowhere.localmanager.getNodeContent(node.id);
+    var json = pub.localManager.getNodeContent(node.id);
 
     var newNodes = [];
     try{
