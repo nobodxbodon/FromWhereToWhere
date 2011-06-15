@@ -223,6 +223,11 @@ pub.mainThread.prototype = {
     propertyItem.hidden = (selectedIndex.length==0);
   };
   
+  pub.showSearchMenuItems = function(){
+    var findNextItem = document.getElementById("findNext");
+    findNextItem.hidden = (pub.keywords=="" && Application.storage.get("currentURI", "")=="");
+  };
+	
   pub.openlocal = function(){
     var uri = com.wuxuan.fromwheretowhere.sb.getLocalURIfromId(com.wuxuan.fromwheretowhere.sb.ids[pub.selectNodeLocal]);
     window.open(uri);
@@ -519,7 +524,7 @@ pub.mainThread.prototype = {
     pub.keywords = document.getElementById("keywords").value;
 		pub.query = pub.utils.getIncludeExcluded(pub.keywords);
     pub.main.dispatch(new pub.searchThread(1, pub.query), pub.main.DISPATCH_NORMAL);
-      
+    Application.storage.set("currentURI", "");
   };
   
 	pub.findNext = function(){

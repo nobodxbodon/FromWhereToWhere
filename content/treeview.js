@@ -36,7 +36,9 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     //always make sure this "global" currentData is reset every time after the treeview.js loads visibleData from it
     Application.storage.set("fromwheretowhere.currentData", false);
     if(treeBox!=null){
-        this.treeBox = treeBox;
+      this.treeBox = treeBox;
+    }else{
+      Application.storage.set("currentURI", "");
     }
     //refresh the tree
     //what's this for??

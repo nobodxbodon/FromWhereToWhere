@@ -46,8 +46,8 @@
   <button id="bsearch" label="&button.searchallwords;"
       type="menu-button"
       oncommand="com.wuxuan.fromwheretowhere.main.search()">
-    <menupopup>
-      <menuitem label="&button.findNext;" oncommand="com.wuxuan.fromwheretowhere.main.findNext(); event.stopPropagation();"/>
+    <menupopup onpopupshowing="com.wuxuan.fromwheretowhere.main.showSearchMenuItems()">
+      <menuitem id="findNext" label="&button.findNext;" oncommand="com.wuxuan.fromwheretowhere.main.findNext(); event.stopPropagation();"/>
     </menupopup>
   </button>
 </hbox>
