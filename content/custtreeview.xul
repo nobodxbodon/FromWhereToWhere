@@ -47,7 +47,7 @@
       type="menu-button"
       oncommand="com.wuxuan.fromwheretowhere.main.search()">
     <menupopup onpopupshowing="com.wuxuan.fromwheretowhere.main.showSearchMenuItems()">
-      <menuitem id="findNext" label="&button.findNext;" oncommand="com.wuxuan.fromwheretowhere.main.findNext(); event.stopPropagation();"/>
+      <menuitem id="findNext" label="&button.findNext;" accesskey="F" oncommand="com.wuxuan.fromwheretowhere.main.findNext(); event.stopPropagation();"/>
     </menupopup>
   </button>
 </hbox>
