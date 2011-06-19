@@ -41,7 +41,13 @@
 
 <hbox>
   <textbox id="keywords" multiline="false" flex="1" onkeypress="com.wuxuan.fromwheretowhere.main.keypress(event)"/>
-  <button id="bsearch" label="&button.searchallwords;" oncommand="com.wuxuan.fromwheretowhere.main.search()"/>
+  <button id="bsearch" label="&button.searchallwords;"
+      type="menu-button"
+      oncommand="com.wuxuan.fromwheretowhere.main.search()">
+    <menupopup onpopupshowing="com.wuxuan.fromwheretowhere.main.showSearchMenuItems()">
+      <menuitem id="findNext" label="&button.findNext;" accesskey="F" oncommand="com.wuxuan.fromwheretowhere.main.findNext(); event.stopPropagation();"/>
+    </menupopup>
+  </button>
 </hbox>
 
 <tree id="elementList" flex="1">  
@@ -67,6 +73,7 @@
 
 <script src="namespace.js" />
 <script src="sbconnect.js" />
+<script src="UIutils.js" />
 <script src="utils.js" />
 <script src="treeview.js" />
 <script src="topicTracker.js" />

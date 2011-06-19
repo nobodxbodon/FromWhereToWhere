@@ -248,7 +248,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
           for(var i=0;i<keywords.length;i++){
             allKeyLen+=keywords[i].length;
           }
-          if(t.length==allKeyLen)
+          //seg can be wrong, and < is possible
+          if(t.length<=allKeyLen)
             continue;
         }
       }else{
@@ -661,7 +662,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       savePanel.openPopup(null, "start_end", 60, 80, false, false);
     }else{
       savePanel.setAttribute("label","Seemingly Related or Interesting Link Titles"+" - "+origTitle);
-      savePanel.openPopup(null, "start_end", 60, 80, false, false);//document.documentElement
+      savePanel.openPopup(null, "start_end", 60, 80, false, false);
     }
   };
   

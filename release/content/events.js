@@ -119,8 +119,6 @@ com.wuxuan.fromwheretowhere.events = function(){
     //TODO: when current document is closed, the current suggestion should be closed too
     //pub.mainWindow.addEventListener("close", pub.closePanel, false);
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
-    //com.wuxuan.fromwheretowhere.recommendation.init();
-    //com.wuxuan.fromwheretowhere.recommendation.popUp("","",[],[]);
     pub.toggleSugPanel(false);
   };
   

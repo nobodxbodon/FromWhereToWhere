@@ -36,7 +36,9 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     //always make sure this "global" currentData is reset every time after the treeview.js loads visibleData from it
     Application.storage.set("fromwheretowhere.currentData", false);
     if(treeBox!=null){
-        this.treeBox = treeBox;
+      this.treeBox = treeBox;
+    }else{
+      Application.storage.set("currentURI", "");
     }
     //refresh the tree
     //what's this for??
@@ -147,7 +149,37 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     this.treeBox.rowCountChanged(idx + 1, -1);
   },
   
-  toggleOpenState: function(idx) {  
+  //search from selection, get the one with keywords or the src page (blue or red)
+  findNext: function(idx){
+    if(idx==null &&this.selection!=null)
+      idx = this.selection.currentIndex;
+    if(idx==-1)
+      idx=0;
+    for(var i=idx; ;i++){
+      var node = this.visibleData[i];
+      if(node==null){
+        alert("End of data.");
+        break;
+      }
+      var pid = node.placeId;
+      var haveKeywords = main.pidwithKeywords.indexOf(pid);
+      if(i!=idx && ((pid && pid==main.retrievedId)
+                  || (haveKeywords!=-1 || (pid==null && node.haveKeywords)))) {
+        this.selection.select(i);
+        this.treeBox.ensureRowIsVisible(i);
+        break; 
+      }else{
+        //if it's folded, expand first
+        if(node.isContainer && !node.isFolded){
+          this.toggleOpenState(i, true);
+          //break here or it'll open the following nodes because of threads
+          break;
+        }
+      }
+    }
+  },
+  
+  toggleOpenState: function(idx, findNext) {  
     var item = this.visibleData[idx];  
     if (!item.isContainer) return;  
   
@@ -169,9 +201,9 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       com.wuxuan.fromwheretowhere.sb.urlInit();
       //FIX: Warning: reference to undefined property main.main.query
       if(main.query)
-        main.main.dispatch(new main.mainThread(1, item, idx, main.query), main.main.DISPATCH_NORMAL);
+        main.main.dispatch(new main.mainThread(1, item, idx, main.query, findNext), main.main.DISPATCH_NORMAL);
       else
-        main.main.dispatch(new main.mainThread(1, item, idx, null), main.main.DISPATCH_NORMAL);
+        main.main.dispatch(new main.mainThread(1, item, idx, null, findNext), main.main.DISPATCH_NORMAL);
       this.addSuspensionPoints(item.level, idx);
       
     }  

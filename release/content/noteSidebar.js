@@ -11,15 +11,17 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
  .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
  .getInterface(Components.interfaces.nsIDOMWindow);
  
-  pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
-  
-  pub.localManager = com.wuxuan.fromwheretowhere.localmanager;
-  
-  pub.initView = function(){
+  pub.init = function(){
+    pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
+    pub.localManager = com.wuxuan.fromwheretowhere.localmanager;
+    pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
+    //use function or there'll be 'not found' issue
+    pub.treeView = pub.createView();
     document.getElementById("recordList").view = pub.treeView;
   };
-    
-  pub.treeView = {
+  
+  pub.createView = function(){
+    return {
   // have to separate the looks of node from the content!!!!!!
   
     visibleData : function(){
@@ -105,6 +107,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     getColumnProperties: function(column, element, prop) {},
     click: function() {}
   };
+  };
   
   pub.showMenuItems = function(){
     var node = null;
@@ -117,14 +120,12 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
   };
   
   pub.deleteNotes = function(){
-    var recordIds = pub.treeView.selection.currentIndex;
-    //alert("delete: "+recordIds)
-    com.wuxuan.fromwheretowhere.localmanager.deleteRecords(pub.treeView.visibleData[recordIds].id);
-    //rowCountChange for all ids
-    //alert("remove row: "+recordIds)
-    pub.treeView.visibleData.splice(recordIds, 1);
-    pub.treeView.treeBox.rowCountChanged(recordIds, -1);
-  }
+    var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
+    selectedIndex = selectedIndex.map(function(x){return pub.treeView.visibleData[x].id;});
+    pub.localManager.deleteRecords(selectedIndex);
+    pub.treeView.setTree(null);
+  };
+  
   //TODO: merge the code with ImportNode in main
   pub.openNode = function(){
     //get nodes content first
@@ -134,7 +135,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     if(node==null){
       return;
     }
-    var json = com.wuxuan.fromwheretowhere.localmanager.getNodeContent(node.id);
+    var json = pub.localManager.getNodeContent(node.id);
 
     var newNodes = [];
     try{

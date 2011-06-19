@@ -26,11 +26,12 @@ com.wuxuan.fromwheretowhere.main = function(){
 		return item.level==0;
 	};
 	
-pub.mainThread = function(threadID, item, idx, query) {
+pub.mainThread = function(threadID, item, idx, query, findNext) {
   this.threadID = threadID;
   this.item = item;
   this.idx = idx;
 	this.query = query;
+	this.findNext = findNext;
 };
 
 pub.mainThread.prototype = {
@@ -64,6 +65,10 @@ pub.mainThread.prototype = {
       // This is where we react to the completion of the working thread.
       pub.treeView.delSuspensionPoints(this.idx);
       pub.treeView.expandFromNodeInTree(this.item, this.idx);
+			if(this.findNext){
+				//alert("find Next");
+				pub.treeView.findNext(this.idx);
+			}
     } catch(err) {
       Components.utils.reportError(err);
     }
@@ -213,11 +218,16 @@ pub.mainThread.prototype = {
     }
     openinnewtab.hidden = (node==null);
     
-    var selectedIndex = pub.getAllSelectedIndex();
+    var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
     var propertyItem = document.getElementById("export-menu");
     propertyItem.hidden = (selectedIndex.length==0);
   };
   
+  pub.showSearchMenuItems = function(){
+    var findNextItem = document.getElementById("findNext");
+    findNextItem.hidden = (pub.keywords=="" && Application.storage.get("currentURI", "")=="");
+  };
+	
   pub.openlocal = function(){
     var uri = com.wuxuan.fromwheretowhere.sb.getLocalURIfromId(com.wuxuan.fromwheretowhere.sb.ids[pub.selectNodeLocal]);
     window.open(uri);
@@ -227,19 +237,6 @@ pub.mainThread.prototype = {
     pub.getURLfromNode(pub.treeView);
   };
   
-  pub.getAllSelectedIndex = function(){
-    var start = new Object();
-    var end = new Object();
-    var numRanges = pub.treeView.selection.getRangeCount();
-    var index = [];
-    for (var t = 0; t < numRanges; t++){
-      pub.treeView.selection.getRangeAt(t,start,end);
-      for (var v = start.value; v <= end.value; v++){
-        index.push(v);
-      }
-    }
-    return index;
-  };
   
   pub.decreaseLevelandCollapse = function(node, levels){
     var children = node.children;
@@ -259,7 +256,7 @@ pub.mainThread.prototype = {
   
   pub.getCurrentSelected = function(){
     var selectCount = pub.treeView.selection.count;
-    var selectedIndex = pub.getAllSelectedIndex();
+    var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
     //verify 
     if(selectCount!=selectedIndex.length){
       alert("Error when getting selected rows");
@@ -527,9 +524,14 @@ pub.mainThread.prototype = {
     pub.keywords = document.getElementById("keywords").value;
 		pub.query = pub.utils.getIncludeExcluded(pub.keywords);
     pub.main.dispatch(new pub.searchThread(1, pub.query), pub.main.DISPATCH_NORMAL);
-      
+    Application.storage.set("currentURI", "");
   };
   
+	pub.findNext = function(){
+		//pub.treeView.toggleOpenState(0);
+		pub.treeView.findNext();
+	};
+	
   pub.keypress = function(event) {
     if(!event){
       alert("no event!");
@@ -563,6 +565,7 @@ pub.mainThread.prototype = {
 		pub.history = com.wuxuan.fromwheretowhere.historyQuery;
 		pub.history.init();
 		pub.retrievedId = pub.history.getIdfromUrl(pub.currentURI);
+		pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
 		if(pub.topicTracker)
 			pub.topicTracker.init();
     //document.getElementById("elementList").addEventListener("click", function (){getURLfromNode(treeView);}, false);
