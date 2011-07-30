@@ -12,7 +12,6 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
  .getInterface(Components.interfaces.nsIDOMWindow);
  
   pub.init = function(){
-    pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
     pub.localManager = com.wuxuan.fromwheretowhere.localmanager;
     pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
     //use function or there'll be 'not found' issue
@@ -139,7 +138,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
 
     var newNodes = [];
     try{
-      newNodes = pub.nativeJSON.decode(json);
+      newNodes = JSON.parse(json);
     }catch(err){
       if(json && json!="[]"){
         alert("record corrupted:\n" + json + " " + err);

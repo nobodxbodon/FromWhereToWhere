@@ -158,7 +158,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     for(var i=idx; ;i++){
       var node = this.visibleData[i];
       if(node==null){
-        alert("End of data.");
+        alert("Reached end");
         break;
       }
       var pid = node.placeId;

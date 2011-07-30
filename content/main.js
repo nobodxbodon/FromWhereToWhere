@@ -184,7 +184,7 @@ pub.mainThread.prototype = {
 			for(var i in rawLocalNotes){
 				var localNodes = []
 				try{
-					localNodes = pub.nativeJSON.decode(rawLocalNotes[i]);
+					localNodes = JSON.parse(rawLocalNotes[i]);
 				}catch(err){
 					//if(json && json!="[]"){
 						alert("record corrupted:\n" + json + " " + err);
@@ -282,7 +282,7 @@ pub.mainThread.prototype = {
   //For now have to manually open it first to get all the children, and then "export the whole trace"
   pub.exportJSON = function() {
 		var tosave = pub.getCurrentSelected();
-    var json = pub.nativeJSON.encode(tosave);
+    var json = JSON.stringify(tosave);
     pub.openPropertyDialog(json);
   };
   
@@ -302,7 +302,7 @@ pub.mainThread.prototype = {
   // TODO: make constants!
   pub.saveNodetoLocal = function() {
     var select = pub.getCurrentSelected();
-    var json = pub.nativeJSON.encode(select);
+    var json = JSON.stringify(select);
     var recordName = "";
     var recordType = -1;
     var recordUrl = "";
@@ -356,7 +356,7 @@ pub.mainThread.prototype = {
     var json = window.prompt("Please paste the nodes' property (JSON format):", "[]");
     var newNodes = [];
     try{
-      newNodes = pub.nativeJSON.decode(json);
+      newNodes = JSON.parse(json);
     }catch(err){
       if(json && json!="[]"){
 	alert("Input incomplete or corrupted:\n" + json);
@@ -552,7 +552,6 @@ pub.mainThread.prototype = {
  
   pub.init = function() {
       
-    pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
     pub.aserv=Components.classes["@mozilla.org/atom-service;1"].
                 getService(Components.interfaces.nsIAtomService);
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
