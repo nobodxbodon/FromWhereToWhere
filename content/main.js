@@ -11,9 +11,22 @@ com.wuxuan.fromwheretowhere.main = function(){
   
   pub.getURLfromNode = function(treeView) {
     var sel = pub.getCurrentSelected();
-		for(var i in sel){
-      window.open(sel[i].url);
-    }
+		//only when 1 selected, may switch to current tab
+		if(sel.length==1){
+			var switchToTab = document.getElementById("switchToTab");
+			var foundTab = switchToTab.fromwheretowhere.foundTab;
+			if(foundTab.tab){
+				// The URL is already opened. Select this tab.
+				foundTab.browser.selectedTab = foundTab.tab;
+				// Focus *this* browser-window
+				foundTab.window.focus();
+			}else
+				window.open(sel[0].url);
+		}else{
+			for(var i in sel){
+				window.open(sel[i].url);
+			}
+		}
   };
   
 	pub.DEBUG = false;
@@ -209,6 +222,7 @@ pub.mainThread.prototype = {
   pub.selectNodeLocal = null;
   pub.showMenuItems = function(){
     var localItem = document.getElementById("local");
+		var switchToTab = document.getElementById("switchToTab");
     var openinnewtab = document.getElementById("openinnewtab");
     var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
     if(node){
@@ -216,8 +230,13 @@ pub.mainThread.prototype = {
       pub.selectNodeLocal = exists;
       localItem.hidden = (exists == -1);
     }
-    openinnewtab.hidden = (node==null);
-    
+		//check if the tab is opened already
+		var foundTab = findTabByDocUrl(null, node.url);
+    openinnewtab.hidden = (node==null || foundTab.tab!=null);
+		switchToTab.hidden = (foundTab.tab==null);
+		switchToTab.fromwheretowhere = {};
+		switchToTab.fromwheretowhere.foundTab = foundTab;
+		
     var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
     var propertyItem = document.getElementById("export-menu");
     propertyItem.hidden = (selectedIndex.length==0);

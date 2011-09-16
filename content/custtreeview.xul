@@ -17,6 +17,7 @@
 
 <popupset>
   <menupopup id="clipmenu" onpopupshowing="com.wuxuan.fromwheretowhere.main.showMenuItems()">
+    <menuitem id="switchToTab" label="&contextMenu.switchToTab;" oncommand="com.wuxuan.fromwheretowhere.main.openlink()"/>
     <menuitem id="openinnewtab" label="&contextMenu.openinnewtab;" oncommand="com.wuxuan.fromwheretowhere.main.openlink()"/>
     <menuitem id="local" label="&contextMenu.openlocalcopy;" oncommand="com.wuxuan.fromwheretowhere.main.openlocal()"/>
     <menuseparator/>

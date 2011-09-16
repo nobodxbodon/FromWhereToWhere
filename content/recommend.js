@@ -451,51 +451,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return ele;
   };
   
-  //return true if found a tab, false if not
-  pub.switchToTab = function(doc){
-    var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                     .getService(Components.interfaces.nsIWindowMediator);
-    var browserEnumerator = wm.getEnumerator("navigator:browser");
-
-    // Check each browser instance for our URL
-    // TODO: as the panel is bound to one browser instance, it's not necessary to search all
-    var found = false;
-    while (!found && browserEnumerator.hasMoreElements()) {
-      var browserWin = browserEnumerator.getNext();
-      var tabbrowser = browserWin.gBrowser;
-  
-      // Check each tab of this browser instance
-      var numTabs = tabbrowser.browsers.length;
-      for (var index = 0; index < numTabs; index++) {
-        var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-        if (doc == currentBrowser.contentDocument || pub.currLoc==currentBrowser.currentURI.spec) {
-          // The URL is already opened. Select this tab.
-          tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
-          // Focus *this* browser-window
-          browserWin.focus();
-          found = true;
-          break;
-        }
-      }
-    }
-    
-    // if the page was closed, open it first
-    if (!found) {
-      // as the panel belongs to the browser, when clicking gbrowser is itself the current browser
-      var newTab = gBrowser.addTab(pub.currLoc);
-      gBrowser.selectedTab = newTab;
-      // Focus *this* browser window in case another one is currently focused
-      gBrowser.ownerDocument.defaultView.focus();
-    }
-    return found;
-  };
-  
   pub.testOpen = function(){
     //get the tab that's the suggestions derive from
     var currDoc = getBrowser().selectedBrowser.contentDocument;
     // switch tab when doc or url is the same, which is reused in switchToTab
     if(pub.pageDoc!= currDoc && pub.currLoc!=currDoc.location.href){
-      var found = pub.switchToTab(pub.pageDoc);
+      var found = pub.UIutils.switchToTab(pub.pageDoc, pub.currLoc);
       if(!found){
         return;
       }
@@ -541,6 +502,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //call it from outside to create panel
     if(pub.utils==null)
       pub.utils = com.wuxuan.fromwheretowhere.utils;
+    if(pub.UIutils==null)
+      pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
     var topbar, statsInfoLabel, vbox,debugtext,linkBox, testLink, divEle;

@@ -1,6 +1,7 @@
 <!ENTITY mainMenu.search "Search History">
 <!ENTITY mainMenu.recommend "Auto-refresh Suggestion">
 
+<!ENTITY contextMenu.switchToTab "Switch to Tab">
 <!ENTITY contextMenu.openinnewtab "Open Page in New Tab">
 <!ENTITY contextMenu.openlocalcopy "Open Local Copy">
 <!ENTITY contextMenu.export "Export as ...">
