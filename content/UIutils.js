@@ -10,16 +10,15 @@ com.wuxuan.fromwheretowhere.UIutils = function(){
       // Focus *this* browser-window
       foundTab.window.focus();
     }
-    
     // if the page was closed, open it first
-    if (!found) {
+    else{
       // as the panel belongs to the browser, when clicking gbrowser is itself the current browser
       var newTab = gBrowser.addTab(pub.currLoc);
       gBrowser.selectedTab = newTab;
       // Focus *this* browser window in case another one is currently focused
       gBrowser.ownerDocument.defaultView.focus();
     }
-    return found;
+    return (foundTab.tab!=null);
   };
 
   pub.findTabByDocUrl = function(doc, url){

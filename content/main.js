@@ -231,7 +231,7 @@ pub.mainThread.prototype = {
       localItem.hidden = (exists == -1);
     }
 		//check if the tab is opened already
-		var foundTab = findTabByDocUrl(null, node.url);
+		var foundTab = pub.UIutils.findTabByDocUrl(null, node.url);
     openinnewtab.hidden = (node==null || foundTab.tab!=null);
 		switchToTab.hidden = (foundTab.tab==null);
 		switchToTab.fromwheretowhere = {};
