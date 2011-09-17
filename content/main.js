@@ -473,7 +473,7 @@ pub.mainThread.prototype = {
 						querytime.tmp = (new Date()).getTime();
 					var idAndTitlesByKeywords = pub.history.searchIdbyKeywords(this.words, this.optional, this.excluded, this.site, this.time);
 					allpids = idAndTitlesByKeywords.ids;
-					alert(idAndTitlesByKeywords.titles);
+					pub.showKeywords(idAndTitlesByKeywords.titles);
 					if(pub.DEBUG){
 						querytime.search = ((new Date()).getTime() - querytime.tmp);
 						querytime.tmp = (new Date()).getTime();
@@ -555,6 +555,39 @@ pub.mainThread.prototype = {
     Application.storage.set("currentURI", "");
   };
   
+	pub.showKeywords = function(titles){
+		//alert("show keywords");
+		var keywords = [];
+		for(var i=0;i<titles.length;i++){
+			keywords = keywords.concat(titles[i].split(" "));
+		}
+		var keywordBlock = document.getElementById("suggestKeywords").firstChild;
+		alert(keywordBlock.childElementCount);
+		for(var k=0;k<keywords.length;k++){
+			var kw = document.createElementNS("http://www.w3.org/1999/xhtml","a");
+			kw.onclick = pub.addKeywordToSearchTerm;
+			kw.text = keywords[k]+" ";
+			if(keywordBlock){
+				//alert(keywords[k]);
+				keywordBlock.appendChild(kw);
+			}
+			else{
+				alert("why block null??")
+				break;
+			}
+		}
+		alert(keywordBlock.childElementCount);
+	};
+	
+	pub.addKeywordToSearchTerm = function(){
+    var input = document.getElementById("keywords")
+		var keyword = this.text;
+		if(keyword)
+			input.value += " "+"\""+keyword.substring(0,keyword.length-1)+"\"";
+		else
+			input.value += " "+"\"keyword2\"";
+	};
+	
 	pub.findNext = function(){
 		//pub.treeView.toggleOpenState(0);
 		pub.treeView.findNext();

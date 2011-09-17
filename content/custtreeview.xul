@@ -52,6 +52,11 @@
     </menupopup>
   </button>
 </hbox>
+<hbox id="suggestKeywords" style="display: block">
+  <html:p>
+    <html:a onclick="com.wuxuan.fromwheretowhere.main.addKeywordToSearchTerm()">keyword1</html:a>
+  </html:p>
+</hbox>
 
 <tree id="elementList" flex="1">  
   <treecols>  
