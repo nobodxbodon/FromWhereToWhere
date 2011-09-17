@@ -242,11 +242,11 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 	
 	pub.sqlStMustFilter = function(term, words){
 		if(words.length==0){
-			term = "SELECT id FROM (" + term + ")";
+			term = "SELECT id,title FROM (" + term + ")";
 		}
     else if(words.length==1){
 			var partTerm = pub.utils.getRightQuote(words[0]);
-      term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[0] + "%'";
+      term = "SELECT id,title FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[0] + "%'";
     } else {
 			var titleLike = "";
       for(var i = words.length-1; i>=0; i--){
@@ -256,7 +256,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
         } else if(i!=0){
           term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         } else {
-          term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
+          term = "SELECT id,title FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         }
 				// no proof to be faster to use conjunction (AND)
       }
@@ -291,7 +291,18 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 		}
 		//alert(term);
     var statement = pub.mDBConn.createStatement(term);
-    return pub.queryAll(statement, 32, 0);
+		var rtn = {ids:[],titles:[]};
+    try {
+      while (statement.executeStep()) {
+				rtn.ids.push(statement.getInt32(0));
+				rtn.titles.push(statement.getString(1));
+      }
+      statement.reset();
+    } 
+    catch (e) {
+      statement.reset();
+    }
+    return rtn;  
   };
 	
 	pub.oldsearchIdbyKeywords = function(words, optional, excluded, site, time){
@@ -340,11 +351,11 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 		//alert(optionalTerm);
 		
 		if(words.length==0){
-			term = "SELECT id FROM (" + optionalTerm + ")";
+			term = "SELECT id,title FROM (" + optionalTerm + ")";
 		}
     else if(words.length==1){
 			var partTerm = pub.utils.getRightQuote(words[0]);
-      term = "SELECT id FROM (" + optionalTerm + ") WHERE TITLE LIKE "+partTerm;//'%" + words[0] + "%'";
+      term = "SELECT id,title FROM (" + optionalTerm + ") WHERE TITLE LIKE "+partTerm;//'%" + words[0] + "%'";
     } else {
 			var titleLike = "";
       for(var i = words.length-1; i>=0; i--){
@@ -354,7 +365,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
         } else if(i!=0){
           term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         } else {
-          term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
+          term = "SELECT id,title FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         }
 				// no proof to be faster
 				/*if(i!=0){

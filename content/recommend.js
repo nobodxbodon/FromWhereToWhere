@@ -340,7 +340,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     pub.tmp = (new Date()).getTime();
     
-    pidsWithWord = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
+    var idAndTitlesByKeywords = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
+    pidsWithWord = idAndTitlesByKeywords.ids;
     pub.sqltime.searchid = (new Date()).getTime()-pub.tmp;
     pub.tmp = (new Date()).getTime();
     

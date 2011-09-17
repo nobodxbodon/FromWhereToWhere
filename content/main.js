@@ -14,7 +14,14 @@ com.wuxuan.fromwheretowhere.main = function(){
 		//only when 1 selected, may switch to current tab
 		if(sel.length==1){
 			var switchToTab = document.getElementById("switchToTab");
-			var foundTab = switchToTab.fromwheretowhere.foundTab;
+			var foundTab = null;
+			if(!switchToTab.fromwheretowhere || !switchToTab.fromwheretowhere.foundTab){
+				var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
+				//check if the tab is opened already
+				foundTab = pub.UIutils.findTabByDocUrl(null, node.url);
+			}else{
+				foundTab = switchToTab.fromwheretowhere.foundTab;
+			}
 			if(foundTab.tab){
 				// The URL is already opened. Select this tab.
 				foundTab.browser.selectedTab = foundTab.tab;
@@ -464,7 +471,9 @@ pub.mainThread.prototype = {
           // improve by search id from keywords directly instead of getting urls first
 					if(pub.DEBUG)
 						querytime.tmp = (new Date()).getTime();
-					allpids = pub.history.searchIdbyKeywords(this.words, this.optional, this.excluded, this.site, this.time);
+					var idAndTitlesByKeywords = pub.history.searchIdbyKeywords(this.words, this.optional, this.excluded, this.site, this.time);
+					allpids = idAndTitlesByKeywords.ids;
+					alert(idAndTitlesByKeywords.titles);
 					if(pub.DEBUG){
 						querytime.search = ((new Date()).getTime() - querytime.tmp);
 						querytime.tmp = (new Date()).getTime();

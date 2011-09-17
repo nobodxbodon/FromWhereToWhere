@@ -143,7 +143,8 @@ com.wuxuan.fromwheretowhere.stats = function(){
         pub.history = com.wuxuan.fromwheretowhere.historyQuery;
 				pub.mapOrigVerb = com.wuxuan.fromwheretowhere.corpus.mapOrigVerb();
 				pub.history.init();
-				var allPid = pub.history.searchIdbyKeywords("", [],[],[],[]);
+				var idAndTitlesByKeywords = pub.history.searchIdbyKeywords("", [],[],[],[]);
+				var allPid = idAndTitlesByKeywords.ids;
 				var pats = [];
 				for(var i in allPid){
 					var pTitle = pub.history.getTitlefromId(allPid[i]);
