@@ -558,11 +558,26 @@ pub.mainThread.prototype = {
 	pub.showKeywords = function(titles){
 		//alert("show keywords");
 		var keywords = [];
-		for(var i=0;i<titles.length;i++){
+		/*for(var i=0;i<titles.length;i++){
 			keywords = keywords.concat(titles[i].split(" "));
-		}
+		}*/
+		//TODO: pick proper keyword to suggest, not sure if all lowercase
+		var allRelated=pub.recommend.getTopic(titles, " ", pub.recommend.stopwords, pub.recommend.specials);
+    //sort the string array by string length, can speed up later processing
+    //allRelated is sorted before, but <, uniqueArray should still work
+    allRelated.sort(function(a,b){return a<b});
+    var len = allRelated.length;
+    var a = pub.utils.uniqueArray(allRelated, true);
+		keywords = a.arr;
+		var freq = a.freq;
+		keywords.sort(function(a,b){return freq[a]<freq[b]});
+		
 		var keywordBlock = document.getElementById("suggestKeywords").firstChild;
-		alert(keywordBlock.childElementCount);
+		var len = keywordBlock.childNodes.length;
+		for( var i=len - 1; i > -1; i-- ){
+			keywordBlock.removeChild(keywordBlock.childNodes[i]);
+		}
+		//alert(keywordBlock.childElementCount);
 		for(var k=0;k<keywords.length;k++){
 			var kw = document.createElementNS("http://www.w3.org/1999/xhtml","a");
 			kw.onclick = pub.addKeywordToSearchTerm;
@@ -576,7 +591,7 @@ pub.mainThread.prototype = {
 				break;
 			}
 		}
-		alert(keywordBlock.childElementCount);
+		//alert(keywordBlock.childElementCount);
 	};
 	
 	pub.addKeywordToSearchTerm = function(){
@@ -626,6 +641,8 @@ pub.mainThread.prototype = {
 		pub.history.init();
 		pub.retrievedId = pub.history.getIdfromUrl(pub.currentURI);
 		pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
+		pub.recommend = com.wuxuan.fromwheretowhere.recommendation;
+		pub.recommend.init();
 		if(pub.topicTracker)
 			pub.topicTracker.init();
     //document.getElementById("elementList").addEventListener("click", function (){getURLfromNode(treeView);}, false);

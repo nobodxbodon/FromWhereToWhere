@@ -54,7 +54,7 @@
 </hbox>
 <hbox id="suggestKeywords" style="display: block">
   <html:p>
-    <html:a onclick="com.wuxuan.fromwheretowhere.main.addKeywordToSearchTerm()">keyword1</html:a>
+    <!--<html:a onclick="com.wuxuan.fromwheretowhere.main.addKeywordToSearchTerm()">keyword1</html:a>-->
   </html:p>
 </hbox>
 
@@ -81,6 +81,8 @@
 
 <script src="namespace.js" />
 <script src="sbconnect.js" />
+<script src="recommend.js" />
+<script src="corpus_en.js" />
 <script src="UIutils.js" />
 <script src="utils.js" />
 <script src="treeview.js" />
