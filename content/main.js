@@ -578,10 +578,15 @@ pub.mainThread.prototype = {
 			keywordBlock.removeChild(keywordBlock.childNodes[i]);
 		}
 		//alert(keywordBlock.childElementCount);
+		var firstFreq = Math.sqrt(freq[keywords[0]]);
+		//sort by alphabetic order
+		keywords.sort(function(a,b){return b<a});
 		for(var k=0;k<keywords.length;k++){
 			var kw = document.createElementNS("http://www.w3.org/1999/xhtml","a");
 			kw.onclick = pub.addKeywordToSearchTerm;
-			kw.text = keywords[k]+" ";
+			var fontSize = 20*Math.sqrt(freq[keywords[k]])/firstFreq;
+			kw.text = keywords[k]+" ";//fontSize+
+			kw.setAttribute('style', 'font-size:'+fontSize+'px;')
 			if(keywordBlock){
 				//alert(keywords[k]);
 				keywordBlock.appendChild(kw);
