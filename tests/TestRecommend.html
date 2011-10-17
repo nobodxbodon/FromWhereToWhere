@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>JsUnit Assertion Tests</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="../css/jsUnitStyle.css">
+<script type="text/javascript" src="../app/jsUnitCore.js"></script>
+
+<script type="text/javascript" src="../../../content/namespace.js"></script>
+<script type="text/javascript" src="../../../content/utils.js"></script>
+<script type="text/javascript" src="../../../content/recommend.js"></script>
+<script type="text/javascript" src="../../../content/corpus_en.js"></script>
+<script type="text/javascript" src="../../../content/historyQuery.js"></script>
+<script type="text/javascript" src="../../../content/localmanager.js"></script>
+<script type="text/javascript">
+
+function testRecommendGetTopic() {
+    com.wuxuan.fromwheretowhere.recommendation.initCorp();
+    assertArrayEquals(com.wuxuan.fromwheretowhere.recommendation.getTopic(["game info", "play games"],
+                                                                          " ",
+                                                                          com.wuxuan.fromwheretowhere.recommendation.stopwords,
+                                                                          com.wuxuan.fromwheretowhere.recommendation.specials),
+                      ["game","info","play","games"]);
+        
+}
+
+</script>
+</head>
+
+<body>
+<h1>JsUnit Assertion Tests</h1>
+
+<p>This page contains tests for the JsUnit Assertion functions. To see them, take a look at the source.</p>
+</body>
+</html>
