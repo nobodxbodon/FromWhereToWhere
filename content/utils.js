@@ -347,6 +347,10 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return rs;
   };
   
+  pub.removeNonWord = function(str){
+	return str.replace(/\W*(\S+\w+)(\W*)$/,"$1");
+  };
+  
   //remove all string that contain one other element, str is with freq
   //NOTE: a.arr is sorted by string length (ascend) already, and have no dup
   //this is very naive form of stemming
