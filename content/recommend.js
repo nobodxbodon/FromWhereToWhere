@@ -68,7 +68,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         //stopwords only for English
         //only get the first part here
         //TODO: should get more words out, split them with the recognized words, expensive though (keep those with special words, and then indexof the recog, split with those, then recurrent)
-        allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
+        allwords[i] = orig.replace(/\W*(\S+\w+)(\W+)$/,"$1");
         //only for English
         allwords[i] = pub.getOrig(allwords[i]);
         if(allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null || stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 ){
