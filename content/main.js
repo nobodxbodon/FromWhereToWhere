@@ -577,6 +577,8 @@ pub.mainThread.prototype = {
 		//alert(a.repeated);
         //only show the repeated keywords (significant?)
         //keywords = pub.utils.replaceByPhrase(a.repeated, splitedTitles);
+        //remove those in search terms
+        keywords=keywords.filter(function(element, index, array){return pub.query.words.indexOf(element)==-1 && pub.query.optional.indexOf(element)==-1;});
         //most frequent first
         keywords.sort(function(a,b){return freq[a]<freq[b]});
 		var firstFreq = Math.sqrt(freq[keywords[0]]);
@@ -588,7 +590,7 @@ pub.mainThread.prototype = {
 		//alert(keywordBlock.childElementCount);
 		var LARGEST = 25;
 		var SMALLEST = 10;
-        var MAXNUMBER = 20;
+        var MAXNUMBER = 25;
 		//sort by alphabetic order
         keywords = keywords.splice(0,MAXNUMBER);
 		keywords.sort(function(a,b){return b<a});
