@@ -562,7 +562,9 @@ pub.mainThread.prototype = {
 			keywords = keywords.concat(titles[i].split(" "));
 		}*/
 		//TODO: pick proper keyword to suggest, not sure if all lowercase
-		var allRelated=pub.recommend.getTopic(titles, " ", pub.recommend.stopwords, pub.recommend.specials);
+		var topics=pub.recommend.getTopic(titles, " ", pub.recommend.stopwords, pub.recommend.specials);
+        allRelated = topics.keywords;
+        var splitedTitles = topics.splited;
     //sort the string array by string length, can speed up later processing
     //allRelated is sorted before, but <, uniqueArray should still work
     allRelated.sort(function(a,b){return a<b});
@@ -570,21 +572,30 @@ pub.mainThread.prototype = {
     var a = pub.utils.uniqueArray(allRelated, true);
 		keywords = a.arr;
 		var freq = a.freq;
-		keywords.sort(function(a,b){return freq[a]<freq[b]});
-		
+		//keywords.sort(function(a,b){return freq[a]<freq[b]});
+        //TODO: get all the keywords with >1 occurrence, get possible repeated 'phrases'
+		//alert(a.repeated);
+        //only show the repeated keywords (significant?)
+        //keywords = pub.utils.replaceByPhrase(a.repeated, splitedTitles);
+        //most frequent first
+        keywords.sort(function(a,b){return freq[a]<freq[b]});
+		var firstFreq = Math.sqrt(freq[keywords[0]]);
 		var keywordBlock = document.getElementById("suggestKeywords").firstChild;
 		var len = keywordBlock.childNodes.length;
 		for( var i=len - 1; i > -1; i-- ){
 			keywordBlock.removeChild(keywordBlock.childNodes[i]);
 		}
 		//alert(keywordBlock.childElementCount);
-		var firstFreq = Math.sqrt(freq[keywords[0]]);
+		var LARGEST = 25;
+		var SMALLEST = 10;
+        var MAXNUMBER = 20;
 		//sort by alphabetic order
+        keywords = keywords.splice(0,MAXNUMBER);
 		keywords.sort(function(a,b){return b<a});
 		for(var k=0;k<keywords.length;k++){
 			var kw = document.createElementNS("http://www.w3.org/1999/xhtml","a");
 			kw.onclick = pub.addKeywordToSearchTerm;
-			var fontSize = 20*Math.sqrt(freq[keywords[k]])/firstFreq;
+			var fontSize = (LARGEST-SMALLEST)*(Math.sqrt(freq[keywords[k]])/firstFreq)+SMALLEST;
 			kw.text = keywords[k]+" ";//fontSize+
 			kw.setAttribute('style', 'font-size:'+fontSize+'px;')
 			if(keywordBlock){

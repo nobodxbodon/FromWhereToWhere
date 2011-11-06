@@ -19,7 +19,7 @@ function testRecommendGetTopic() {
     assertArrayEquals(com.wuxuan.fromwheretowhere.recommendation.getTopic(["game info", "play games"],
                                                                           " ",
                                                                           com.wuxuan.fromwheretowhere.recommendation.stopwords,
-                                                                          com.wuxuan.fromwheretowhere.recommendation.specials),
+                                                                          com.wuxuan.fromwheretowhere.recommendation.specials).keywords,
                       ["game","info","play","games"]);
         
 }

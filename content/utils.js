@@ -48,19 +48,23 @@ com.wuxuan.fromwheretowhere.utils = function(){
         a.splice(i--, 1);
         }
     }
+	var repeated = [];
     if(freq){
       //if the last isn't add to freq list, add it now
       if(!allfreq[a[a.length-1]]||isNaN(allfreq[a[a.length-1]]))
         allfreq[a[a.length-1]]=1;
       //allfreq.length always 0, can only get through word index
       for(var i in allfreq){
+		if(allfreq[i]>1){
+		  repeated.push(i);
+		}
         allfreq[i]=(allfreq[i]+0.0)/origLen;
       }
-      return {arr:a,freq:allfreq};
+      return {arr:a,freq:allfreq,repeated:repeated};
     }
     return a;
   };
-      
+
   //remove all spaces \n in front and at end of a string
   pub.trimString = function (str) {
     return str.replace(/^\s*/, "").replace(/\s*$/, "");

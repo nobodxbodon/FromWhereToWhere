@@ -106,18 +106,22 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       return [];
     }
     var allwords = [];
+    var splitedTitles = [];
     //if titles is array
     if((titles.constructor.name=="Array")){
       for(var i=0;i<titles.length;i++){
         if(titles[i])
           //TODO: should be special char?
-          allwords = allwords.concat(titles[i].split(sp));//(" ");/\W/
+          var splited = titles[i].split(sp);
+          splitedTitles.push(splited)
+          allwords = allwords.concat(splited);//(" ");/\W/
       }
     }else{
       allwords = titles.split(sp);
+      splitedTitles.push(splited)
     }
     var ws = pub.filter(allwords, stopwords, specials);
-    return ws;
+    return {keywords:ws, splited:splitedTitles};
   };
   
   /*if the title has too few words (including stopwords), consider as non-informatic*/
@@ -221,7 +225,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       if(processed.exist)
         continue;
       var topicStart = (new Date()).getTime();
-      var text=pub.getTopic(t, " ", pub.stopwords, pub.specials);
+      var text=pub.getTopic(t, " ", pub.stopwords, pub.specials).keywords;
       pub.sqltime.gettopic += (new Date()).getTime() -topicStart;
       //remove dup word in the title, for freq mult
       //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
@@ -329,7 +333,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.DEBUGINFO = "";
     pub.starttime = (new Date()).getTime();
     //TODO: put in topicTracker
-    var allwords = pub.getTopic(title, " ", pub.stopwords, pub.specials);
+    var allwords = pub.getTopic(title, " ", pub.stopwords, pub.specials).keywords;
     //without any history tracking
     //TODO: only pick the words related to interest, not every non-stopword
     //search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
@@ -359,7 +363,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //store the small words for future segmentation
     //TODO: add size limit to dictionary, use it for all seg, including for future allRelated titles
     pub.tmp = (new Date()).getTime();
-    allRelated=pub.getTopic(allRelated, " ", pub.stopwords, pub.specials);
+    allRelated=pub.getTopic(allRelated, " ", pub.stopwords, pub.specials).keywords;
     pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
     
 		pub.sqltime.sortUnique = (new Date()).getTime();
@@ -659,18 +663,25 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.init = function(){
-    pub.utils = com.wuxuan.fromwheretowhere.utils;
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
+    pub.initCorp();
+    pub.initHistory();
+  };
+  
+  pub.initCorp = function(){
+    pub.utils = com.wuxuan.fromwheretowhere.utils;
     pub.mapOrigVerb = com.wuxuan.fromwheretowhere.corpus.mapOrigVerb();
     pub.stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     pub.specials = com.wuxuan.fromwheretowhere.corpus.special;
+    pub.dictionary = [];
+    pub.dictionary_jpn = [];
+  };
+  
+  pub.initHistory = function(){
     pub.history = com.wuxuan.fromwheretowhere.historyQuery;
     pub.history.init();
     pub.localmanager = com.wuxuan.fromwheretowhere.localmanager;
     pub.localmanager.init();
-    pub.dictionary = [];
-    pub.dictionary_jpn = [];
   };
-    
   return pub;
 }();

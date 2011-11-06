@@ -125,7 +125,7 @@ com.wuxuan.fromwheretowhere.stats = function(){
 	pub.getPattern = function(pTitle, cTitles){
 		var stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     var specials = com.wuxuan.fromwheretowhere.corpus.special;
-    var keywords = pub.getTopic(pTitle, " ", stopwords, specials);
+    var keywords = pub.getTopic(pTitle, " ", stopwords, specials).keywords;
 		for(var t in cTitles){
 			for(var i in keywords){
 				//var p = cTitles[i].replace(/w+)
