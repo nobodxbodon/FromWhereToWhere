@@ -9,7 +9,7 @@
   <body>
     <pre id="test">
       <script type="text/javascript">
-      	plan({ tests: 83 });
+      	plan({ tests: 94 });
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("  ").words, [], "getIncludeExcluded words 0");
         isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite").words, [], "getIncludeExcluded words 1");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.getIncludeExcluded("sqlite firefox").words, [], "getIncludeExcluded words 2");
@@ -94,6 +94,16 @@
 	isDeeply(com.wuxuan.fromwheretowhere.utils.divInsert(5,[1,2,4]),{exist:false,arr:[1,2,4,5]},"divInsert non-exist large in len3");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.divInsert(1,[1,2]),{exist:true,arr:[1,2]},"divInsert exist small in len2");
 	isDeeply(com.wuxuan.fromwheretowhere.utils.divInsert(2,[1,2]),{exist:true,arr:[1,2]},"divInsert exist in len2");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.removeNonWord("\"sqlite"),"sqlite","removeNonWord 0");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.removeNonWord("\"sqlite\""),"sqlite","removeNonWord 1");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.removeNonWord("sqlite,"),"sqlite","removeNonWord 2");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.removeNonWord("\"sqlite\"!"),"sqlite","removeNonWord 3");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.removeNonWord("sqlite\',"),"sqlite","removeNonWord 4");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.removeNonWord("sql@it.et"),"sql@it.et","removeNonWord keep 0");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.removeNonWord("it.et"),"it.et","removeNonWord keep 1");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.removeNonWord("sql@it.et\',"),"sql@it.et","removeNonWord complex 0");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.removeNonWord("\"sql@it.et\',"),"sql@it.et","removeNonWord complex 1");
+	isDeeply(com.wuxuan.fromwheretowhere.utils.removeNonWord("!sql@it.et"),"sql@it.et","removeNonWord complex 2");
         //isDeeply([1,2].concat([3,4]), [1,2,3,4], "concat");
       </script>
     </pre>
