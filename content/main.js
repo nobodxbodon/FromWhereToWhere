@@ -488,7 +488,10 @@ pub.mainThread.prototype = {
 						pub.history.querytime.getParentHard=0;
 						pub.history.sugKeywords=(new Date()).getTime();
 					}
-					pub.showKeywords(idAndTitlesByKeywords.titles);
+                    var relTitles = idAndTitlesByKeywords.titles;
+                    relTitles.sort(function(a,b){return a<b});
+                    relTitles = pub.utils.uniqueArray(relTitles, false);
+					pub.showKeywords(relTitles);
 					if(pub.DEBUG){
 						pub.history.sugKeywords = (new Date()).getTime()-pub.history.sugKeywords;
 					}

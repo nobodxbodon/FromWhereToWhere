@@ -89,6 +89,6 @@
 <script src="topicTracker.js" />
 <script src="historyQuery.js" />
 <script src="main.js" />
-<script src="stats.js" />
+<script src="debug/stats.js" />
 <script src="localmanager.js" />
 </window>  
