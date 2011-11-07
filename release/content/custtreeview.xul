@@ -17,6 +17,7 @@
 
 <popupset>
   <menupopup id="clipmenu" onpopupshowing="com.wuxuan.fromwheretowhere.main.showMenuItems()">
+    <menuitem id="switchToTab" label="&contextMenu.switchToTab;" oncommand="com.wuxuan.fromwheretowhere.main.openlink()"/>
     <menuitem id="openinnewtab" label="&contextMenu.openinnewtab;" oncommand="com.wuxuan.fromwheretowhere.main.openlink()"/>
     <menuitem id="local" label="&contextMenu.openlocalcopy;" oncommand="com.wuxuan.fromwheretowhere.main.openlocal()"/>
     <menuseparator/>
@@ -49,6 +50,11 @@
     </menupopup>
   </button>
 </hbox>
+<hbox id="suggestKeywords" style="display: block">
+  <html:p>
+    <!--<html:a onclick="com.wuxuan.fromwheretowhere.main.addKeywordToSearchTerm()">keyword1</html:a>-->
+  </html:p>
+</hbox>
 
 <tree id="elementList" flex="1">  
   <treecols>  
@@ -73,6 +79,8 @@
 
 <script src="namespace.js" />
 <script src="sbconnect.js" />
+<script src="recommend.js" />
+<script src="corpus_en.js" />
 <script src="UIutils.js" />
 <script src="utils.js" />
 <script src="treeview.js" />

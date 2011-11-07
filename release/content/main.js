@@ -11,9 +11,29 @@ com.wuxuan.fromwheretowhere.main = function(){
   
   pub.getURLfromNode = function(treeView) {
     var sel = pub.getCurrentSelected();
-		for(var i in sel){
-      window.open(sel[i].url);
-    }
+		//only when 1 selected, may switch to current tab
+		if(sel.length==1){
+			var switchToTab = document.getElementById("switchToTab");
+			var foundTab = null;
+			if(!switchToTab.fromwheretowhere || !switchToTab.fromwheretowhere.foundTab){
+				var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
+				//check if the tab is opened already
+				foundTab = pub.UIutils.findTabByDocUrl(null, node.url);
+			}else{
+				foundTab = switchToTab.fromwheretowhere.foundTab;
+			}
+			if(foundTab.tab){
+				// The URL is already opened. Select this tab.
+				foundTab.browser.selectedTab = foundTab.tab;
+				// Focus *this* browser-window
+				foundTab.window.focus();
+			}else
+				window.open(sel[0].url);
+		}else{
+			for(var i in sel){
+				window.open(sel[i].url);
+			}
+		}
   };
   
 	pub.DEBUG = false;
@@ -184,7 +204,7 @@ pub.mainThread.prototype = {
 			for(var i in rawLocalNotes){
 				var localNodes = []
 				try{
-					localNodes = pub.nativeJSON.decode(rawLocalNotes[i]);
+					localNodes = JSON.parse(rawLocalNotes[i]);
 				}catch(err){
 					//if(json && json!="[]"){
 						alert("record corrupted:\n" + json + " " + err);
@@ -209,6 +229,7 @@ pub.mainThread.prototype = {
   pub.selectNodeLocal = null;
   pub.showMenuItems = function(){
     var localItem = document.getElementById("local");
+		var switchToTab = document.getElementById("switchToTab");
     var openinnewtab = document.getElementById("openinnewtab");
     var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
     if(node){
@@ -216,8 +237,13 @@ pub.mainThread.prototype = {
       pub.selectNodeLocal = exists;
       localItem.hidden = (exists == -1);
     }
-    openinnewtab.hidden = (node==null);
-    
+		//check if the tab is opened already
+		var foundTab = pub.UIutils.findTabByDocUrl(null, node.url);
+    openinnewtab.hidden = (node==null || foundTab.tab!=null);
+		switchToTab.hidden = (foundTab.tab==null);
+		switchToTab.fromwheretowhere = {};
+		switchToTab.fromwheretowhere.foundTab = foundTab;
+		
     var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
     var propertyItem = document.getElementById("export-menu");
     propertyItem.hidden = (selectedIndex.length==0);
@@ -282,7 +308,7 @@ pub.mainThread.prototype = {
   //For now have to manually open it first to get all the children, and then "export the whole trace"
   pub.exportJSON = function() {
 		var tosave = pub.getCurrentSelected();
-    var json = pub.nativeJSON.encode(tosave);
+    var json = JSON.stringify(tosave);
     pub.openPropertyDialog(json);
   };
   
@@ -302,7 +328,7 @@ pub.mainThread.prototype = {
   // TODO: make constants!
   pub.saveNodetoLocal = function() {
     var select = pub.getCurrentSelected();
-    var json = pub.nativeJSON.encode(select);
+    var json = JSON.stringify(select);
     var recordName = "";
     var recordType = -1;
     var recordUrl = "";
@@ -356,7 +382,7 @@ pub.mainThread.prototype = {
     var json = window.prompt("Please paste the nodes' property (JSON format):", "[]");
     var newNodes = [];
     try{
-      newNodes = pub.nativeJSON.decode(json);
+      newNodes = JSON.parse(json);
     }catch(err){
       if(json && json!="[]"){
 	alert("Input incomplete or corrupted:\n" + json);
@@ -445,7 +471,8 @@ pub.mainThread.prototype = {
           // improve by search id from keywords directly instead of getting urls first
 					if(pub.DEBUG)
 						querytime.tmp = (new Date()).getTime();
-					allpids = pub.history.searchIdbyKeywords(this.words, this.optional, this.excluded, this.site, this.time);
+					var idAndTitlesByKeywords = pub.history.searchIdbyKeywords(this.words, this.optional, this.excluded, this.site, this.time);
+					allpids = idAndTitlesByKeywords.ids;
 					if(pub.DEBUG){
 						querytime.search = ((new Date()).getTime() - querytime.tmp);
 						querytime.tmp = (new Date()).getTime();
@@ -459,6 +486,14 @@ pub.mainThread.prototype = {
 						pub.history.querytime.getParentEasy=0;
 						pub.history.querytime.getParentHardTime=0;
 						pub.history.querytime.getParentHard=0;
+						pub.history.sugKeywords=(new Date()).getTime();
+					}
+                    var relTitles = idAndTitlesByKeywords.titles;
+                    relTitles.sort(function(a,b){return a<b});
+                    relTitles = pub.utils.uniqueArray(relTitles, false);
+					pub.showKeywords(relTitles);
+					if(pub.DEBUG){
+						pub.history.sugKeywords = (new Date()).getTime()-pub.history.sugKeywords;
 					}
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.history.createParentNodesCheckDup(allpids, this.query);
@@ -482,7 +517,8 @@ pub.mainThread.prototype = {
 									"\n"+pub.history.querytime.bindexof + " in " + pub.history.querytime.bindextime+
 									"\n"+pub.history.allKnownParentPids.length+
 									"\nEasy parent: "+pub.history.querytime.getParentEasy+" in "+pub.history.querytime.getParentEasyTime+
-									"\nHard parent: "+pub.history.querytime.getParentHard+" in "+pub.history.querytime.getParentHardTime);
+									"\nHard parent: "+pub.history.querytime.getParentHard+" in "+pub.history.querytime.getParentHardTime+
+									"\nsuggest keywords: "+pub.history.sugKeywords);
 					}
 				}
 				
@@ -527,6 +563,75 @@ pub.mainThread.prototype = {
     Application.storage.set("currentURI", "");
   };
   
+	pub.showKeywords = function(titles){
+		//alert("show keywords");
+		var keywords = [];
+		/*for(var i=0;i<titles.length;i++){
+			keywords = keywords.concat(titles[i].split(" "));
+		}*/
+		//TODO: pick proper keyword to suggest, not sure if all lowercase
+		var topics=pub.recommend.getTopic(titles, " ", pub.recommend.stopwords, pub.recommend.specials);
+        allRelated = topics.keywords;
+        var splitedTitles = topics.splited;
+    //sort the string array by string length, can speed up later processing
+    //allRelated is sorted before, but <, uniqueArray should still work
+    allRelated.sort(function(a,b){return a<b});
+    var len = allRelated.length;
+    var a = pub.utils.uniqueArray(allRelated, true);
+		keywords = a.arr;
+		var freq = a.freq;
+		//keywords.sort(function(a,b){return freq[a]<freq[b]});
+        //TODO: get all the keywords with >1 occurrence, get possible repeated 'phrases'
+		//alert(a.repeated);
+        //only show the repeated keywords (significant?)
+        //keywords = pub.utils.replaceByPhrase(a.repeated, splitedTitles);
+        //remove those in search terms
+        keywords=keywords.filter(function(element, index, array){return pub.query.words.indexOf(element)==-1 && pub.query.optional.indexOf(element)==-1;});
+        //most frequent first
+        keywords.sort(function(a,b){return freq[a]<freq[b]});
+		var firstFreq = Math.sqrt(freq[keywords[0]]);
+		var keywordBlock = document.getElementById("suggestKeywords").firstChild;
+		var len = keywordBlock.childNodes.length;
+		for( var i=len - 1; i > -1; i-- ){
+			keywordBlock.removeChild(keywordBlock.childNodes[i]);
+		}
+		//alert(keywordBlock.childElementCount);
+		var LARGEST = 25;
+		var SMALLEST = 10;
+        var MAXNUMBER = 25;
+		//sort by alphabetic order
+        keywords = keywords.splice(0,MAXNUMBER);
+		keywords.sort(function(a,b){return b<a});
+		for(var k=0;k<keywords.length;k++){
+			var kw = document.createElementNS("http://www.w3.org/1999/xhtml","a");
+			kw.onclick = pub.addKeywordToSearchTerm;
+			var fontSize = (LARGEST-SMALLEST)*(Math.sqrt(freq[keywords[k]])/firstFreq)+SMALLEST;
+			kw.text = keywords[k]+" ";//fontSize+
+			//kw.setAttribute('href', keywords[k]); this makes underline but bad looking
+			kw.setAttribute('onmouseover',"event.target.style.cursor='pointer'");
+			kw.setAttribute('style', 'font-size:'+fontSize+'px;')
+			kw.setAttribute('title', keywords[k]);
+			if(keywordBlock){
+				//alert(keywords[k]);
+				keywordBlock.appendChild(kw);
+			}
+			else{
+				alert("why block null??")
+				break;
+			}
+		}
+		//alert(keywordBlock.childElementCount);
+	};
+	
+	pub.addKeywordToSearchTerm = function(){
+    var input = document.getElementById("keywords")
+		var keyword = this.text;
+		if(keyword)
+			input.value += " "+"\""+keyword.substring(0,keyword.length-1)+"\"";
+		else
+			input.value += " "+"\"keyword2\"";
+	};
+	
 	pub.findNext = function(){
 		//pub.treeView.toggleOpenState(0);
 		pub.treeView.findNext();
@@ -552,7 +657,6 @@ pub.mainThread.prototype = {
  
   pub.init = function() {
       
-    pub.nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
     pub.aserv=Components.classes["@mozilla.org/atom-service;1"].
                 getService(Components.interfaces.nsIAtomService);
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
@@ -566,6 +670,8 @@ pub.mainThread.prototype = {
 		pub.history.init();
 		pub.retrievedId = pub.history.getIdfromUrl(pub.currentURI);
 		pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
+		pub.recommend = com.wuxuan.fromwheretowhere.recommendation;
+		pub.recommend.init();
 		if(pub.topicTracker)
 			pub.topicTracker.init();
     //document.getElementById("elementList").addEventListener("click", function (){getURLfromNode(treeView);}, false);

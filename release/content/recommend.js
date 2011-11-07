@@ -68,7 +68,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
         //stopwords only for English
         //only get the first part here
         //TODO: should get more words out, split them with the recognized words, expensive though (keep those with special words, and then indexof the recog, split with those, then recurrent)
-        allwords[i] = orig.replace(/\W*(\w+)\W*/,"$1");
+        allwords[i] = pub.utils.removeNonWord(orig);
         //only for English
         allwords[i] = pub.getOrig(allwords[i]);
         if(allwords[i]=="" || allwords[i].length<=1 || allwords[i].match(/[0-9]/)!=null || stopwords.indexOf(allwords[i])>-1 || specials.indexOf(allwords[i])>-1 ){
@@ -106,18 +106,22 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       return [];
     }
     var allwords = [];
+    var splitedTitles = [];
     //if titles is array
     if((titles.constructor.name=="Array")){
       for(var i=0;i<titles.length;i++){
         if(titles[i])
           //TODO: should be special char?
-          allwords = allwords.concat(titles[i].split(sp));//(" ");/\W/
+          var splited = titles[i].split(sp);
+          splitedTitles.push(splited)
+          allwords = allwords.concat(splited);//(" ");/\W/
       }
     }else{
       allwords = titles.split(sp);
+      splitedTitles.push(splited)
     }
     var ws = pub.filter(allwords, stopwords, specials);
-    return ws;
+    return {keywords:ws, splited:splitedTitles};
   };
   
   /*if the title has too few words (including stopwords), consider as non-informatic*/
@@ -221,7 +225,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       if(processed.exist)
         continue;
       var topicStart = (new Date()).getTime();
-      var text=pub.getTopic(t, " ", pub.stopwords, pub.specials);
+      var text=pub.getTopic(t, " ", pub.stopwords, pub.specials).keywords;
       pub.sqltime.gettopic += (new Date()).getTime() -topicStart;
       //remove dup word in the title, for freq mult
       //TODO: less syntax, and maybe shouldn't remove dup, as more repetition may mean sth...
@@ -329,7 +333,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.DEBUGINFO = "";
     pub.starttime = (new Date()).getTime();
     //TODO: put in topicTracker
-    var allwords = pub.getTopic(title, " ", pub.stopwords, pub.specials);
+    var allwords = pub.getTopic(title, " ", pub.stopwords, pub.specials).keywords;
     //without any history tracking
     //TODO: only pick the words related to interest, not every non-stopword
     //search for allwords in history, get the direct children, get all words from them, and choose the link that have those words.
@@ -340,7 +344,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     pub.tmp = (new Date()).getTime();
     
-    pidsWithWord = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
+    var idAndTitlesByKeywords = pub.history.searchIdbyKeywords([], allwords,[],[],[]);
+    pidsWithWord = idAndTitlesByKeywords.ids;
     pub.sqltime.searchid = (new Date()).getTime()-pub.tmp;
     pub.tmp = (new Date()).getTime();
     
@@ -358,7 +363,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //store the small words for future segmentation
     //TODO: add size limit to dictionary, use it for all seg, including for future allRelated titles
     pub.tmp = (new Date()).getTime();
-    allRelated=pub.getTopic(allRelated, " ", pub.stopwords, pub.specials);
+    allRelated=pub.getTopic(allRelated, " ", pub.stopwords, pub.specials).keywords;
     pub.sqltime.segmentChn += (new Date()).getTime() -pub.tmp;
     
 		pub.sqltime.sortUnique = (new Date()).getTime();
@@ -451,51 +456,12 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     return ele;
   };
   
-  //return true if found a tab, false if not
-  pub.switchToTab = function(doc){
-    var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                     .getService(Components.interfaces.nsIWindowMediator);
-    var browserEnumerator = wm.getEnumerator("navigator:browser");
-
-    // Check each browser instance for our URL
-    // TODO: as the panel is bound to one browser instance, it's not necessary to search all
-    var found = false;
-    while (!found && browserEnumerator.hasMoreElements()) {
-      var browserWin = browserEnumerator.getNext();
-      var tabbrowser = browserWin.gBrowser;
-  
-      // Check each tab of this browser instance
-      var numTabs = tabbrowser.browsers.length;
-      for (var index = 0; index < numTabs; index++) {
-        var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-        if (doc == currentBrowser.contentDocument || pub.currLoc==currentBrowser.currentURI.spec) {
-          // The URL is already opened. Select this tab.
-          tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
-          // Focus *this* browser-window
-          browserWin.focus();
-          found = true;
-          break;
-        }
-      }
-    }
-    
-    // if the page was closed, open it first
-    if (!found) {
-      // as the panel belongs to the browser, when clicking gbrowser is itself the current browser
-      var newTab = gBrowser.addTab(pub.currLoc);
-      gBrowser.selectedTab = newTab;
-      // Focus *this* browser window in case another one is currently focused
-      gBrowser.ownerDocument.defaultView.focus();
-    }
-    return found;
-  };
-  
   pub.testOpen = function(){
     //get the tab that's the suggestions derive from
     var currDoc = getBrowser().selectedBrowser.contentDocument;
     // switch tab when doc or url is the same, which is reused in switchToTab
     if(pub.pageDoc!= currDoc && pub.currLoc!=currDoc.location.href){
-      var found = pub.switchToTab(pub.pageDoc);
+      var found = pub.UIutils.switchToTab(pub.pageDoc, pub.currLoc);
       if(!found){
         return;
       }
@@ -541,6 +507,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     //call it from outside to create panel
     if(pub.utils==null)
       pub.utils = com.wuxuan.fromwheretowhere.utils;
+    if(pub.UIutils==null)
+      pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
     var version = pub.utils.getFFVersion();
     var savePanel = document.getElementById("fwtwRelPanel");
     var topbar, statsInfoLabel, vbox,debugtext,linkBox, testLink, divEle;
@@ -695,18 +663,25 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
   };
   
   pub.init = function(){
-    pub.utils = com.wuxuan.fromwheretowhere.utils;
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
+    pub.initCorp();
+    pub.initHistory();
+  };
+  
+  pub.initCorp = function(){
+    pub.utils = com.wuxuan.fromwheretowhere.utils;
     pub.mapOrigVerb = com.wuxuan.fromwheretowhere.corpus.mapOrigVerb();
     pub.stopwords = com.wuxuan.fromwheretowhere.corpus.stopwords_en_NLTK;
     pub.specials = com.wuxuan.fromwheretowhere.corpus.special;
+    pub.dictionary = [];
+    pub.dictionary_jpn = [];
+  };
+  
+  pub.initHistory = function(){
     pub.history = com.wuxuan.fromwheretowhere.historyQuery;
     pub.history.init();
     pub.localmanager = com.wuxuan.fromwheretowhere.localmanager;
     pub.localmanager.init();
-    pub.dictionary = [];
-    pub.dictionary_jpn = [];
   };
-    
   return pub;
 }();
