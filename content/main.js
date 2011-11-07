@@ -36,7 +36,7 @@ com.wuxuan.fromwheretowhere.main = function(){
 		}
   };
   
-	pub.DEBUG = false;
+	pub.DEBUG = true;
   // Utils functions finish
   pub.keywords = "";
   pub.currentURI = Application.storage.get("currentURI", false);
@@ -473,7 +473,6 @@ pub.mainThread.prototype = {
 						querytime.tmp = (new Date()).getTime();
 					var idAndTitlesByKeywords = pub.history.searchIdbyKeywords(this.words, this.optional, this.excluded, this.site, this.time);
 					allpids = idAndTitlesByKeywords.ids;
-					pub.showKeywords(idAndTitlesByKeywords.titles);
 					if(pub.DEBUG){
 						querytime.search = ((new Date()).getTime() - querytime.tmp);
 						querytime.tmp = (new Date()).getTime();
@@ -487,6 +486,11 @@ pub.mainThread.prototype = {
 						pub.history.querytime.getParentEasy=0;
 						pub.history.querytime.getParentHardTime=0;
 						pub.history.querytime.getParentHard=0;
+						pub.history.sugKeywords=(new Date()).getTime();
+					}
+					pub.showKeywords(idAndTitlesByKeywords.titles);
+					if(pub.DEBUG){
+						pub.history.sugKeywords = (new Date()).getTime()-pub.history.sugKeywords;
 					}
           pub.pidwithKeywords = [].concat(allpids);
           topNodes = pub.history.createParentNodesCheckDup(allpids, this.query);
@@ -510,7 +514,8 @@ pub.mainThread.prototype = {
 									"\n"+pub.history.querytime.bindexof + " in " + pub.history.querytime.bindextime+
 									"\n"+pub.history.allKnownParentPids.length+
 									"\nEasy parent: "+pub.history.querytime.getParentEasy+" in "+pub.history.querytime.getParentEasyTime+
-									"\nHard parent: "+pub.history.querytime.getParentHard+" in "+pub.history.querytime.getParentHardTime);
+									"\nHard parent: "+pub.history.querytime.getParentHard+" in "+pub.history.querytime.getParentHardTime+
+									"\nsuggest keywords: "+pub.history.sugKeywords);
 					}
 				}
 				
@@ -599,7 +604,10 @@ pub.mainThread.prototype = {
 			kw.onclick = pub.addKeywordToSearchTerm;
 			var fontSize = (LARGEST-SMALLEST)*(Math.sqrt(freq[keywords[k]])/firstFreq)+SMALLEST;
 			kw.text = keywords[k]+" ";//fontSize+
+			//kw.setAttribute('href', keywords[k]); this makes underline but bad looking
+			kw.setAttribute('onmouseover',"event.target.style.cursor='pointer'");
 			kw.setAttribute('style', 'font-size:'+fontSize+'px;')
+			kw.setAttribute('title', keywords[k]);
 			if(keywordBlock){
 				//alert(keywords[k]);
 				keywordBlock.appendChild(kw);
