@@ -4,7 +4,8 @@
  
 <prefwindow id="fwtw-prefs"
      title="FromWhereToWhere Options"
-     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+     onload="com.wuxuan.fromwheretowhere.prefs.init();">
  
 <prefpane id="general-pane" label="&option.pane.general;">
   <preferences>
@@ -39,4 +40,6 @@
   </vbox>
 </prefpane>
 
+<script src="namespace.js" />
+<script src="prefs.js" />
 </prefwindow>
