@@ -13,6 +13,9 @@
 <!ENTITY contextMenu.openlocalnote "Open Note">
 <!ENTITY contextMenu.delete "Delete">
 
+<!ENTITY related.contextMenu.reverse "Reverse Order in Frequency">
+<!ENTITY related.contextMenu.more "More...">
+
 <!ENTITY button.searchallwords "Search">
 <!ENTITY button.findNext "Find Next">
 
