@@ -23,6 +23,20 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return clone;
   };
 
+	pub.subArray = function(arr, start, end){
+		var sub = [];
+		if(start<0){
+			start=0;
+		}
+		if(arr.length<end){
+			end = arr.length;
+		}
+		for(var i=start;i<end;i++){
+			sub.push(arr[i]);
+		}
+		return sub;
+	};
+	
   pub.formatDate = function(intDate) {
     var myDate = new Date(intDate/1000);
     var formated = myDate.toLocaleString();
