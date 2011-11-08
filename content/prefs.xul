@@ -6,19 +6,35 @@
      title="FromWhereToWhere Options"
      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
  
-<prefpane id="general-pane" label="General Settings">
+<prefpane id="general-pane" label="&option.pane.general;">
   <preferences>
     <preference id="extensions.fromwheretowhere.buttonAction" name="extensions.fromwheretowhere.buttonAction" type="int"/>
   </preferences>
  
   <vbox align="center">
     <groupbox>
-			<caption id="button_action_cap" label="&option.tbButtonAction;" />
+      <caption id="button_action_cap" label="&option.tbButtonAction;" />
       <radiogroup preference="extensions.fromwheretowhere.buttonAction">
         <radio value="0" align="start" label="&option.none;"/>
         <radio value="1" align="start" label="&option.searchHistory;"/>
         <radio value="2" align="start" label="&option.toggleSugPanel;"/>
       </radiogroup>
+    </groupbox>
+  </vbox>
+</prefpane>
+
+<prefpane id="search-pane" label="&option.pane.search;">
+  <preferences>
+    <preference id="extensions.fromwheretowhere.showRelatedKeywords" name="extensions.fromwheretowhere.showRelatedKeywords" type="bool"/>
+    <preference id="extensions.fromwheretowhere.frequencyOrder" name="extensions.fromwheretowhere.frequencyOrder" type="bool"/>
+  </preferences>
+ 
+  <vbox align="center">
+    <groupbox>
+      <caption>
+        <checkbox id="option.related.showRelatedKeywords" label="&option.related.showRelatedKeywords;" preference="extensions.fromwheretowhere.showRelatedKeywords"/>
+      </caption>
+      <checkbox id="option.related.highFrequency" label="&option.related.highFrequency;" preference="extensions.fromwheretowhere.frequencyOrder"/>
     </groupbox>
   </vbox>
 </prefpane>

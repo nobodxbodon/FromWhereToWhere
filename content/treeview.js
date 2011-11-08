@@ -257,7 +257,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   getColumnProperties: function(column, element, prop) {},
   click: function() {}
 }};
-
+	
   pub.init = function(main){
     main.init();
     var sb = com.wuxuan.fromwheretowhere.sb;
@@ -274,6 +274,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     main.treeView = pub.treeView;
     document.getElementById("elementList").view = pub.treeView;
     document.getElementById("keywords").focus();
+		document.getElementById("suggestKeywords").setAttribute("collapsed", !main.showRelated);
   };
   
   return pub;

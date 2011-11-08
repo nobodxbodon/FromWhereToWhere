@@ -491,7 +491,11 @@ pub.mainThread.prototype = {
                     var relTitles = idAndTitlesByKeywords.titles;
                     relTitles.sort(function(a,b){return a<b});
                     relTitles = pub.utils.uniqueArray(relTitles, false);
-					pub.showRelatedKeywords(relTitles);
+          if(pub.showRelated){
+            if(pub.DEBUG)
+              alert("show related");
+            pub.showRelatedKeywords(relTitles);
+          }
 					if(pub.DEBUG){
 						pub.history.sugKeywords = (new Date()).getTime()-pub.history.sugKeywords;
 					}
@@ -562,6 +566,12 @@ pub.mainThread.prototype = {
     pub.main.dispatch(new pub.searchThread(1, pub.query), pub.main.DISPATCH_NORMAL);
     Application.storage.set("currentURI", "");
   };
+  
+  pub.showRelated = function(){
+    pub.PREF = Components.classes['@mozilla.org/preferences;1'].getService(Components.interfaces.nsIPrefBranch);
+		var show = pub.PREF.getBoolPref("extensions.fromwheretowhere.showRelatedKeywords");
+    return show;
+  }();
   
 	pub.showRelatedKeywords = function(titles, more, reverse){
 		//alert("show keywords");
