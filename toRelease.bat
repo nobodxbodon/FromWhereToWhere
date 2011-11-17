@@ -5,4 +5,7 @@ copy content\*.js release\content\
 copy content\toolbar-button\*.css release\content\toolbar-button\
 copy content\toolbar-button\*.png release\content\toolbar-button\
 copy locale\en-US\*.dtd release\locale\en-US\
+copy locale\sv-SE\*.dtd release\locale\sv-SE\
+copy locale\zh-CN\*.dtd release\locale\zh-CN\
+copy defaults\preferences\*.js release\defaults\preferences\
 copy skin\*.css release\skin\ 

@@ -491,7 +491,11 @@ pub.mainThread.prototype = {
                     var relTitles = idAndTitlesByKeywords.titles;
                     relTitles.sort(function(a,b){return a<b});
                     relTitles = pub.utils.uniqueArray(relTitles, false);
-					pub.showKeywords(relTitles);
+          if(pub.showRelated){
+            if(pub.DEBUG)
+              alert("show related");
+            pub.showRelatedKeywords(relTitles, null, !pub.relatedOrder);
+          }
 					if(pub.DEBUG){
 						pub.history.sugKeywords = (new Date()).getTime()-pub.history.sugKeywords;
 					}
@@ -562,33 +566,71 @@ pub.mainThread.prototype = {
     pub.main.dispatch(new pub.searchThread(1, pub.query), pub.main.DISPATCH_NORMAL);
     Application.storage.set("currentURI", "");
   };
+
+	pub.showRelatedMenu = function(){
+		var topicsNull = (pub.query==null || pub.query.topics==null || pub.query.topics.keywords.arr.length==0);
+		if(pub.DEBUG){
+			if(!topicsNull)
+				alert(pub.query.topics.keywords.arr);
+			else
+				alert("topicsNull: "+topicsNull);
+		}
+		var reverseMenuItem = document.getElementById("related-reverse");
+		var moreMenuItem = document.getElementById("related-more");
+    reverseMenuItem.hidden = topicsNull;
+		moreMenuItem.hidden = topicsNull;
+	};
+	
+  pub.showRelated = function(){
+    pub.PREF = Components.classes['@mozilla.org/preferences;1'].getService(Components.interfaces.nsIPrefBranch);
+		var show = pub.PREF.getBoolPref("extensions.fromwheretowhere.showRelatedKeywords");
+    return show;
+  }();
+
+  pub.relatedOrder = function(){
+    pub.PREF = Components.classes['@mozilla.org/preferences;1'].getService(Components.interfaces.nsIPrefBranch);
+		var order = pub.PREF.getBoolPref("extensions.fromwheretowhere.frequencyOrder");
+    return order;
+  }();
   
-	pub.showKeywords = function(titles){
+	pub.showRelatedKeywords = function(titles, more, reverse){
 		//alert("show keywords");
 		var keywords = [];
 		/*for(var i=0;i<titles.length;i++){
 			keywords = keywords.concat(titles[i].split(" "));
 		}*/
 		//TODO: pick proper keyword to suggest, not sure if all lowercase
-		var topics=pub.recommend.getTopic(titles, " ", pub.recommend.stopwords, pub.recommend.specials);
-        allRelated = topics.keywords;
-        var splitedTitles = topics.splited;
-    //sort the string array by string length, can speed up later processing
-    //allRelated is sorted before, but <, uniqueArray should still work
-    allRelated.sort(function(a,b){return a<b});
-    var len = allRelated.length;
-    var a = pub.utils.uniqueArray(allRelated, true);
-		keywords = a.arr;
-		var freq = a.freq;
+    if(!pub.query.topics){
+        var topics=pub.recommend.getTopic(titles, " ", pub.recommend.stopwords, pub.recommend.specials);
+        //sort the string array by string length, can speed up later processing
+        //allRelated is sorted before, but <, uniqueArray should still work
+        topics.keywords.sort(function(a,b){return a<b});
+        topics.keywords = pub.utils.uniqueArray(topics.keywords, true);
+        //remove those in search terms
+        topics.keywords.arr=topics.keywords.arr.filter(function(element, index, array){return pub.query.words.indexOf(element)==-1 && pub.query.optional.indexOf(element)==-1;});
+        var freq = topics.keywords.freq;
+        topics.keywords.arr.sort(function(a,b){return freq[a]<freq[b]});
+        pub.query.topics = topics;
+        pub.query.shownNumber = 1;
+        pub.query.keywordsOrder = true;
+    }
+    var a = pub.query.topics.keywords;
+		var keywords = a.arr;
+    var freq = a.freq;
+    var occurrence = a.occurrence;
+    if(reverse){
+        pub.query.keywordsOrder = !pub.query.keywordsOrder;
+        keywords.reverse();
+    }
+    if(more){
+        pub.query.shownNumber+=1;
+    }
 		//keywords.sort(function(a,b){return freq[a]<freq[b]});
         //TODO: get all the keywords with >1 occurrence, get possible repeated 'phrases'
 		//alert(a.repeated);
         //only show the repeated keywords (significant?)
         //keywords = pub.utils.replaceByPhrase(a.repeated, splitedTitles);
-        //remove those in search terms
-        keywords=keywords.filter(function(element, index, array){return pub.query.words.indexOf(element)==-1 && pub.query.optional.indexOf(element)==-1;});
         //most frequent first
-        keywords.sort(function(a,b){return freq[a]<freq[b]});
 		var firstFreq = Math.sqrt(freq[keywords[0]]);
 		var keywordBlock = document.getElementById("suggestKeywords").firstChild;
 		var len = keywordBlock.childNodes.length;
@@ -600,17 +642,22 @@ pub.mainThread.prototype = {
 		var SMALLEST = 10;
         var MAXNUMBER = 25;
 		//sort by alphabetic order
-        keywords = keywords.splice(0,MAXNUMBER);
-		keywords.sort(function(a,b){return b<a});
-		for(var k=0;k<keywords.length;k++){
+    var pKeywords = pub.utils.subArray(keywords, 0, MAXNUMBER*pub.query.shownNumber);//keywords.splice(0,MAXNUMBER*pub.query.shownNumber);
+		pKeywords.sort(function(a,b){return b<a});
+		for(var k=0;k<pKeywords.length;k++){
 			var kw = document.createElementNS("http://www.w3.org/1999/xhtml","a");
 			kw.onclick = pub.addKeywordToSearchTerm;
-			var fontSize = (LARGEST-SMALLEST)*(Math.sqrt(freq[keywords[k]])/firstFreq)+SMALLEST;
-			kw.text = keywords[k]+" ";//fontSize+
+      var diff = 1;
+      if(pub.query.keywordsOrder)
+        diff = Math.sqrt(freq[pKeywords[k]])/firstFreq;
+      else
+        diff = firstFreq/Math.sqrt(freq[pKeywords[k]]);
+			var fontSize = (LARGEST-SMALLEST)*diff+SMALLEST;
+			kw.text = pKeywords[k]+" ";//fontSize+
 			//kw.setAttribute('href', keywords[k]); this makes underline but bad looking
 			kw.setAttribute('onmouseover',"event.target.style.cursor='pointer'");
 			kw.setAttribute('style', 'font-size:'+fontSize+'px;')
-			kw.setAttribute('title', keywords[k]);
+			kw.setAttribute('title', pKeywords[k]+": "+occurrence[pKeywords[k]]);
 			if(keywordBlock){
 				//alert(keywords[k]);
 				keywordBlock.appendChild(kw);
@@ -620,9 +667,16 @@ pub.mainThread.prototype = {
 				break;
 			}
 		}
-		//alert(keywordBlock.childElementCount);
 	};
 	
+  pub.reverseRelatedKeywords = function(){
+    pub.showRelatedKeywords(null, null, true);
+  };
+  
+  pub.moreRelatedKeywords = function(){
+    pub.showRelatedKeywords(null, true, false);
+  };
+  
 	pub.addKeywordToSearchTerm = function(){
     var input = document.getElementById("keywords")
 		var keyword = this.text;

@@ -13,6 +13,9 @@
 <!ENTITY contextMenu.openlocalnote "Open Note">
 <!ENTITY contextMenu.delete "Delete">
 
+<!ENTITY related.contextMenu.reverse "Reverse Order in Frequency">
+<!ENTITY related.contextMenu.more "More...">
+
 <!ENTITY button.searchallwords "Search">
 <!ENTITY button.findNext "Find Next">
 
@@ -22,7 +25,11 @@
 <!ENTITY table.date "Last Visit">
 <!ENTITY note.savedate "Save Date">
 
+<!ENTITY option.pane.general "General">
+<!ENTITY option.pane.search "Search">
 <!ENTITY option.tbButtonAction "Toolbar Button Action">
 <!ENTITY option.none "None">
 <!ENTITY option.searchHistory "Search History">
 <!ENTITY option.toggleSugPanel "Show/hide Suggestion Panel">
+<!ENTITY option.related.showRelatedKeywords "Show Related Keywords">
+<!ENTITY option.related.highFrequency "High Frequency Largest">

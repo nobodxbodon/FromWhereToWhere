@@ -38,6 +38,12 @@
     <menuitem id="saveNodetoLocal" label="&contextMenu.saveNodetoLocal;" oncommand="com.wuxuan.fromwheretowhere.main.saveNodetoLocal()"/>
     <menuitem id="opensidebar" label="&contextMenu.showLocalNotes;" oncommand="com.wuxuan.fromwheretowhere.main.showLocalNotes()"/>
   </menupopup>
+  <popupset>
+    <menupopup id="related-term-menu" onpopupshowing="com.wuxuan.fromwheretowhere.main.showRelatedMenu();">
+      <menuitem id="related-reverse" label="&related.contextMenu.reverse;" oncommand="com.wuxuan.fromwheretowhere.main.reverseRelatedKeywords()"/>
+      <menuitem id="related-more" label="&related.contextMenu.more;" oncommand="com.wuxuan.fromwheretowhere.main.moreRelatedKeywords()"/>
+    </menupopup>
+  </popupset>
 </popupset>
 
 <hbox>
@@ -50,7 +56,7 @@
     </menupopup>
   </button>
 </hbox>
-<hbox id="suggestKeywords" style="display: block">
+<hbox id="suggestKeywords" style="display: block" contextmenu="related-term-menu">
   <html:p>
     <!--<html:a onclick="com.wuxuan.fromwheretowhere.main.addKeywordToSearchTerm()">keyword1</html:a>-->
   </html:p>

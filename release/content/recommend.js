@@ -1,7 +1,7 @@
 com.wuxuan.fromwheretowhere.recommendation = function(){
   var pub={};
  
-  pub.DEBUG = false;
+  pub.DEBUG = true;
   pub.DEBUGINFO = "";
   pub.debuginfo = {};
   pub.TOOFEWWORDS = 4;

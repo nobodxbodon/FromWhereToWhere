@@ -23,6 +23,20 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return clone;
   };
 
+	pub.subArray = function(arr, start, end){
+		var sub = [];
+		if(start<0){
+			start=0;
+		}
+		if(arr.length<end){
+			end = arr.length;
+		}
+		for(var i=start;i<end;i++){
+			sub.push(arr[i]);
+		}
+		return sub;
+	};
+	
   pub.formatDate = function(intDate) {
     var myDate = new Date(intDate/1000);
     var formated = myDate.toLocaleString();
@@ -35,6 +49,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
     //only work for string type
     var origLen = a.length;
     var allfreq = [];
+		var finalFreq = [];
     for(var i=1; i<a.length; ++i) {
       if(freq){
         if(!allfreq[a[i-1]]||isNaN(allfreq[a[i-1]]))
@@ -58,9 +73,9 @@ com.wuxuan.fromwheretowhere.utils = function(){
 		if(allfreq[i]>1){
 		  repeated.push(i);
 		}
-        allfreq[i]=(allfreq[i]+0.0)/origLen;
+        finalFreq[i]=(allfreq[i]+0.0)/origLen;
       }
-      return {arr:a,freq:allfreq,repeated:repeated};
+      return {arr:a,freq:finalFreq,repeated:repeated,occurrence:allfreq};
     }
     return a;
   };
