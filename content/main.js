@@ -617,6 +617,7 @@ pub.mainThread.prototype = {
     var a = pub.query.topics.keywords;
 		var keywords = a.arr;
     var freq = a.freq;
+    var occurrence = a.occurrence;
     if(reverse){
         pub.query.keywordsOrder = !pub.query.keywordsOrder;
         keywords.reverse();
@@ -656,7 +657,7 @@ pub.mainThread.prototype = {
 			//kw.setAttribute('href', keywords[k]); this makes underline but bad looking
 			kw.setAttribute('onmouseover',"event.target.style.cursor='pointer'");
 			kw.setAttribute('style', 'font-size:'+fontSize+'px;')
-			kw.setAttribute('title', pKeywords[k]);
+			kw.setAttribute('title', pKeywords[k]+": "+occurrence[pKeywords[k]]);
 			if(keywordBlock){
 				//alert(keywords[k]);
 				keywordBlock.appendChild(kw);

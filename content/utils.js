@@ -49,6 +49,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
     //only work for string type
     var origLen = a.length;
     var allfreq = [];
+		var finalFreq = [];
     for(var i=1; i<a.length; ++i) {
       if(freq){
         if(!allfreq[a[i-1]]||isNaN(allfreq[a[i-1]]))
@@ -72,9 +73,9 @@ com.wuxuan.fromwheretowhere.utils = function(){
 		if(allfreq[i]>1){
 		  repeated.push(i);
 		}
-        allfreq[i]=(allfreq[i]+0.0)/origLen;
+        finalFreq[i]=(allfreq[i]+0.0)/origLen;
       }
-      return {arr:a,freq:allfreq,repeated:repeated};
+      return {arr:a,freq:finalFreq,repeated:repeated,occurrence:allfreq};
     }
     return a;
   };
