@@ -1,0 +1,35 @@
+<!ENTITY mainMenu.search "搜索浏览历史">
+<!ENTITY mainMenu.recommend "自动刷新推荐">
+
+<!ENTITY contextMenu.switchToTab "切换到标签">
+<!ENTITY contextMenu.openinnewtab "打开新标签">
+<!ENTITY contextMenu.openlocalcopy "打开本地存档">
+<!ENTITY contextMenu.export "导出为...">
+<!ENTITY contextMenu.formatJSON "JSON">
+<!ENTITY contextMenu.formatHTML "HTML">
+<!ENTITY contextMenu.import "导入">
+<!ENTITY contextMenu.saveNodetoLocal "保存到本地记录">
+<!ENTITY contextMenu.showLocalNotes "打开/关闭记录侧栏">
+<!ENTITY contextMenu.openlocalnote "打开记录">
+<!ENTITY contextMenu.delete "删除">
+
+<!ENTITY related.contextMenu.reverse "按词频反序">
+<!ENTITY related.contextMenu.more "更多...">
+
+<!ENTITY button.searchallwords "搜索">
+<!ENTITY button.findNext "下一个">
+
+<!ENTITY notesidebar.title "本地记录">
+<!ENTITY table.title "标题">
+<!ENTITY table.url "URL">
+<!ENTITY table.date "上次访问时间">
+<!ENTITY note.savedate "保存日期">
+
+<!ENTITY option.pane.general "常规">
+<!ENTITY option.pane.search "搜索">
+<!ENTITY option.tbButtonAction "工具栏按钮行为">
+<!ENTITY option.none "无">
+<!ENTITY option.searchHistory "搜索浏览历史">
+<!ENTITY option.toggleSugPanel "显示/隐藏推荐面板">
+<!ENTITY option.related.showRelatedKeywords "显示相关关键词">
+<!ENTITY option.related.highFrequency "词频最高字体最大">
