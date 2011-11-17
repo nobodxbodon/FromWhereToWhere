@@ -41,7 +41,7 @@
     <menuitem id="stats" label="stats" oncommand="com.wuxuan.fromwheretowhere.stats.all()"/>
   </menupopup>
   <popupset>
-    <menupopup id="related-term-menu">
+    <menupopup id="related-term-menu" onpopupshowing="com.wuxuan.fromwheretowhere.main.showRelatedMenu();">
       <menuitem id="related-reverse" label="&related.contextMenu.reverse;" oncommand="com.wuxuan.fromwheretowhere.main.reverseRelatedKeywords()"/>
       <menuitem id="related-more" label="&related.contextMenu.more;" oncommand="com.wuxuan.fromwheretowhere.main.moreRelatedKeywords()"/>
     </menupopup>

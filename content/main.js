@@ -36,7 +36,7 @@ com.wuxuan.fromwheretowhere.main = function(){
 		}
   };
   
-	pub.DEBUG = true;
+	pub.DEBUG = false;
   // Utils functions finish
   pub.keywords = "";
   pub.currentURI = Application.storage.get("currentURI", false);
@@ -566,7 +566,21 @@ pub.mainThread.prototype = {
     pub.main.dispatch(new pub.searchThread(1, pub.query), pub.main.DISPATCH_NORMAL);
     Application.storage.set("currentURI", "");
   };
-  
+
+	pub.showRelatedMenu = function(){
+		var topicsNull = (pub.query==null || pub.query.topics==null || pub.query.topics.keywords.arr.length==0);
+		if(pub.DEBUG){
+			if(!topicsNull)
+				alert(pub.query.topics.keywords.arr);
+			else
+				alert("topicsNull: "+topicsNull);
+		}
+		var reverseMenuItem = document.getElementById("related-reverse");
+		var moreMenuItem = document.getElementById("related-more");
+    reverseMenuItem.hidden = topicsNull;
+		moreMenuItem.hidden = topicsNull;
+	};
+	
   pub.showRelated = function(){
     pub.PREF = Components.classes['@mozilla.org/preferences;1'].getService(Components.interfaces.nsIPrefBranch);
 		var show = pub.PREF.getBoolPref("extensions.fromwheretowhere.showRelatedKeywords");
