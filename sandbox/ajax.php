@@ -32,7 +32,7 @@ try{
 	function sql_getNote($id){
 		if(!is_int($id)) throw new Exception("argument to " . 
 			__METHOD__ . " must be an int");
-		return "SELECT * FROM `threads` WHERE `thread_id`='" . $id . "'";
+		return "SELECT * FROM `" . TABLE_NAME . "` WHERE `" . COL_ID . "`='" . $id . "'";
 	}
 
 	// add a note to the DB
@@ -48,12 +48,12 @@ try{
 	function sql_searchNote($word){
 		//if(!is_array($words)) throw new Exception("argument to " . __METHOD__ . " must be an array");
 		if(!is_string($word)) throw new Exception("argument to " . __METHOD__ . " must be a string");
-		return "SELECT * FROM `threads` WHERE content LIKE '%" . $word . "%'";
+		return "SELECT * FROM `" . TABLE_NAME . "` WHERE " . COL_BODY . " LIKE '%" . $word . "%'";
 	}
 	
 	// get all notes from the DB
 	function sql_getAllNotes(){
-		return "SELECT * FROM `threads` ORDER BY savedate ASC";
+		return "SELECT * FROM `" . TABLE_NAME . "` ORDER BY " . COL_DT . " ASC";
 	}
 	
 	// delete a note from the DB
