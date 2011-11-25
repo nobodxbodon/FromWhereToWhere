@@ -51,8 +51,8 @@ jQuery.extend({
 		 * and keep an undo history
 		 */
 		this.setBody = function(body){
-			revert_actions.push(createRevertAction(function(val){ data.body = val; }, data.body));
-			data.body = body;
+			revert_actions.push(createRevertAction(function(val){ data.content = val; }, data.content));
+			data.content = body;
 		}
 		
 		/**
@@ -173,6 +173,27 @@ jQuery.extend({
 				success: function(data){
 					if(data.error) return that.notifyAddingFailed();
 					that.notifyAddingFinished(loadResponse(data));
+				}
+			});
+			return cache.toArray();
+		}
+		
+		this.searchNote = function(keywords){
+			that.notifySearchingNote(keywords);
+			//TODO: more options in searching, for now only the first 'included'
+			$.ajax({
+				url: 'ajax.php',
+				data : { search : true, 
+						 word : keywords.words[0] },
+				type: 'POST',
+				dataType: 'json',
+				timeout: 1000,
+				error: function(){
+					that.notifySearchFailed(keywords);
+				},
+				success: function(data){
+					if(data.error) return that.notifySearchFailed(keywords);
+					that.notifySearchFinished(loadResponse(data));
 				}
 			});
 			return cache.toArray();
@@ -307,6 +328,24 @@ jQuery.extend({
 			});
 		}
 		
+		this.notifySearchingNote = function(keywords){
+			$.each(listeners, function(i){
+				listeners[i].searchingNote(keywords);
+			});
+		}
+		
+		this.notifySearchFailed = function(keywords){
+			$.each(listeners, function(i){
+				listeners[i].searchNoteFailed(keywords);
+			});
+		}
+		
+		this.notifySearchFinished = function(notes){
+			$.each(listeners, function(i){
+				listeners[i].searchNoteFinished(notes);
+			});
+		}
+		
 		/**
 		 * notify everyone that we're starting
 		 * to delete a note
@@ -375,6 +414,7 @@ jQuery.extend({
 			loadNote : function() { },
 			loadFail : function() { },
 			addingNote : function() { },
+			searchingNote : function(keywords) { },
 			addingFailed : function() { },
 			addingFinished : function() { },
 			deletingNote : function() { },

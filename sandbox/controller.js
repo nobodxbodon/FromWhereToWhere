@@ -1,6 +1,7 @@
 jQuery.extend({
 
 	Controller: function(model, view){
+		var FWTWUtils = $.FWTWUtils();
 		/**
 		 * listen to the view
 		 */
@@ -10,6 +11,9 @@ jQuery.extend({
 			},
 			newNoteClicked : function(subj, body){
 				model.addNote(subj, body);
+			},
+			searchNoteClicked : function(keywords){
+				model.searchNote(keywords);
 			}
 		});
 		view.addListener(vlist);
@@ -46,6 +50,24 @@ jQuery.extend({
 			addingNote : function() {
 				view.log("adding new note...");
 				view.setAddFormEnabled(false);
+			},
+			searchingNote : function(keywords) {
+				view.log("searching");//FWTWUtils.buildFeedback(0, keywords.words, keywords.optional, keywords.excluded, keywords.site, keywords.time));
+				view.setSearchFormEnabled(false);
+			},
+			searchNoteFailed : function(keywords) {
+				view.log("search failed");//FWTWUtils.buildFeedback(-1, keywords.words, keywords.optional, keywords.excluded, keywords.site, keywords.time));
+				view.setSearchFormEnabled(true);
+			},
+			searchNoteFinished : function(notes) {
+				var ids = "";
+				view.log("in search finished");
+				$.each(notes, function(i){
+					ids += (ids.length ? ", " : "") + notes[i].getId();
+				});
+				view.log("just got search result via ajax: " + ids);
+				view.log("done.");
+				view.setSearchFormEnabled(true);
 			},
 			addingFailed : function() {
 				view.log("adding new note failed");

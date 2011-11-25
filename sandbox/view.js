@@ -27,7 +27,8 @@ jQuery.extend({
 	},
 
 	View: function(){
-	
+		var FWTWUtils = new $.FWTWUtils();
+		
 		// this will hold the dom nodes that
 		// we use to display notes in the
 		// list
@@ -56,6 +57,9 @@ jQuery.extend({
 		$about.find("input").click(function(){
 			$about.hide();
 		});
+		
+		// search part
+		$searchform = $("#searchPart #searchform");
 		
 		// a box to put our incoming messages
 		var $messages = $("<div style='height:130px; overflow: auto;'></div>");
@@ -102,17 +106,33 @@ jQuery.extend({
 		function submitAddForm(){
 			var subj = $addform.find(".subject").val();
 			var body = $addform.find(".body").val();
-			if(subj.length == 0){
+			/*if(subj.length == 0){
 				alert("Please enter a subject for your note");
-			}else{
+			}else{*/
 				that.notifyNewNote(subj, body);
-			}
+			//}
 			return false;
 		}
 		$addform.submit(submitAddForm);
 		$addform.find("#add").click(submitAddForm);
 	
-	
+		//search for a term in the notes
+		function submitSearchForm(){
+			//alert("in submit search");
+			var terms = $searchform.find(".terms").val();
+			alert(terms);
+			var keywords = FWTWUtils.getIncludeExcluded(terms);
+			alert(keywords.origkeywords+"\nwords:"+keywords.words+"\noptional"+keywords.optional+"\nexcluded:"+keywords.excluded+"\nsite:"+keywords.site+"\ntime:"+ keywords.time);
+			if(terms==""){
+				alert("Please enter some search terms (\"\" for all)");
+			}else{
+				that.notifySearchNote(keywords);
+			}
+			return false;
+		}
+		$searchform.submit(submitSearchForm);
+		$searchform.find("#searchButton").click(submitSearchForm);
+		
 		/**************************************
 		 *  The view is now set up,          *
 		 *  so let's flesh out functionality *
@@ -153,6 +173,13 @@ jQuery.extend({
 		 */
 		this.setAddFormEnabled = function(en){
 			enabledForm($addform, en);
+		}
+		
+		/**
+		 * set the search form's enabled state
+		 */
+		this.setSearchFormEnabled = function(en){
+			enabledForm($searchform, en);
 		}
 		
 		/**
@@ -249,6 +276,12 @@ jQuery.extend({
 			});
 		}
 		
+		this.notifySearchNote = function(keywords){
+			$.each(listeners, function(i){
+				listeners[i].searchNoteClicked(keywords);
+			});
+		}
+		
 		/**
 		 * notify that we're trying to delete a note
 		 */
@@ -268,6 +301,7 @@ jQuery.extend({
 		if(!list) list = {};
 		return $.extend({
 			newNoteClicked : function() { },
+			searchNoteClicked : function(keywords) { },
 			deleteNoteClicked : function() { }
 		}, list);
 	}

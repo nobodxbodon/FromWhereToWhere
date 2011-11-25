@@ -45,6 +45,12 @@ try{
 			. addslashes($dt) . "')";
 	}
 
+	function sql_searchNote($word){
+		//if(!is_array($words)) throw new Exception("argument to " . __METHOD__ . " must be an array");
+		if(!is_string($word)) throw new Exception("argument to " . __METHOD__ . " must be a string");
+		return "SELECT * FROM `threads` WHERE content LIKE '%" . $word . "%'";
+	}
+	
 	// get all notes from the DB
 	function sql_getAllNotes(){
 		return "SELECT * FROM `threads` ORDER BY savedate ASC";
@@ -109,6 +115,17 @@ try{
 		$ret["dt"] = gmdate("Y-m-d H:i:s");
 		$ret["threads"] = array();
 		$result = query(sql_getAllNotes());
+		while($row = mysql_fetch_array($result)){
+			$ret["threads"][] = $row;
+		}
+		echo json_encode($ret);
+	}else if(isset($_REQUEST["search"])){
+		// request to add search notes
+		$dt = gmdate("Y-m-d H:i:s");
+		//$keywords = $_REQUEST["keywords"];
+		$word = $_REQUEST["word"];
+		//$words = $subject["words"];
+		$result = query(sql_searchNote($word));
 		while($row = mysql_fetch_array($result)){
 			$ret["threads"][] = $row;
 		}
