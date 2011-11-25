@@ -21,11 +21,18 @@ jQuery.extend({
 			loadBegin : function() {
 				view.log("Fetching Data...");
 			},
-			loadFail : function() {
-				view.log("ajax error");
+			loadFail : function(data) {
+				var msg = "ajax error";
+				if(data!=null){
+					msg+=" "+data+"!";
+				}else{
+					msg+=".";
+				}
+				view.log(msg);
 			},
 			loadFinish : function(notes) {
 				var ids = "";
+				view.log("in loadFinish");
 				$.each(notes, function(i){
 					ids += (ids.length ? ", " : "") + notes[i].getId();
 				});

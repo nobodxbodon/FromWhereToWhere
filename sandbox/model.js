@@ -20,7 +20,7 @@ jQuery.extend({
 		 * return the Id of this Note
 		 */
 		this.getId = function(){
-			return data.note_id;
+			return data.thread_id;
 		}
 		
 		/**
@@ -34,7 +34,7 @@ jQuery.extend({
 		 * returns the body of this Note
 		 */
 		this.getBody = function(){
-			return data.body;
+			return data.content;
 		}
 		
 		/**
@@ -111,16 +111,16 @@ jQuery.extend({
 		function loadResponse(data){
 			lastLoad = data.dt;
 			var out = new Array();
-			$.each(data.notes, function(item){
-				var newNote = data.notes[item];
-				var cachedNote = cache.get(newNote.note_id);
+			$.each(data.threads, function(item){
+				var newNote = data.threads[item];
+				var cachedNote = cache.get(newNote.thread_id);
 				if(cachedNote){
 					 // already cached, just update it
 					cachedNote.update(newNote);
 				}else{
 					cachedNote = new $.Note(newNote, that);
 					// not yet in cache, add it
-					cache.put(newNote.note_id, cachedNote);
+					cache.put(newNote.thread_id, cachedNote);
 				}
 				out.push(cachedNote);
 				that.notifyNoteLoaded(cachedNote);
@@ -145,7 +145,7 @@ jQuery.extend({
 					that.notifyLoadFail();
 				},
 				success: function(data){
-					if(data.error) return that.notifyLoadFail();
+					if(data.error) return that.notifyLoadFail(data);
 					that.notifyLoadFinish(loadResponse(data));
 				}
 			});
@@ -263,9 +263,9 @@ jQuery.extend({
 		/**
 		 * we're done loading, tell everyone
 		 */
-		this.notifyLoadFail = function(){
+		this.notifyLoadFail = function(data){
 			$.each(listeners, function(i){
-				listeners[i].loadFail();
+				listeners[i].loadFail(data);
 			});
 		}
 		

@@ -11,6 +11,7 @@ function query($sql){
 	global $mysql;
 	$result = mysql_query($sql, $mysql);
 	if(mysql_error($mysql)){
+		//echo 'Caught exception when querying sql ',"\n";;
 		throw new Exception("mysql error");
 	}
 	return $result;
@@ -22,16 +23,16 @@ try{
 	 * how the UI recovers when the
 	 * server can't process a request
 	 */
-	if(!isset($_REQUEST["load"]) && rand(1, 100) < 10){
+	/*if(!isset($_REQUEST["load"]) && rand(1, 100) < 10){
 		throw new Exception("a fake error to show how the UI"
 			." does error correction when the server dies.");
-	}
+	}*/
 
 	// get one note from the DB
 	function sql_getNote($id){
 		if(!is_int($id)) throw new Exception("argument to " . 
 			__METHOD__ . " must be an int");
-		return "SELECT * FROM `notes` WHERE `note_id`='" . $id . "'";
+		return "SELECT * FROM `threads` WHERE `thread_id`='" . $id . "'";
 	}
 
 	// add a note to the DB
@@ -39,20 +40,20 @@ try{
 		if(!is_string($subj)) throw new Exception("argument to " . __METHOD__ . " must be a string");
 		if(!is_string($body)) throw new Exception("argument to " . __METHOD__ . " must be a string");
 		if(!is_string($dt)) throw new Exception("argument to " . __METHOD__ . " must be a string");
-		return "INSERT INTO `notes` (`subject`, `body`,`dt_added`,`dt_modified`) "
+		return "INSERT INTO `threads` (`subject`, `content`,`savedate`) "
 			. "VALUES ('" . addslashes($subj) . "','" . addslashes($body) . "','"
-			. addslashes($dt) . "','" . addslashes($dt) . "')";
+			. addslashes($dt) . "')";
 	}
 
 	// get all notes from the DB
 	function sql_getAllNotes(){
-		return "SELECT * FROM `notes` ORDER BY dt_added ASC";
+		return "SELECT * FROM `threads` ORDER BY savedate ASC";
 	}
 	
 	// delete a note from the DB
 	function sql_deleteNote($id){
 		if(!is_int($id)) throw new Exception("argument to " . __METHOD__ . " must be an int");
-		return "DELETE FROM `notes` WHERE `note_id`='" . $id . "'";
+		return "DELETE FROM `threads` WHERE `thread_id`='" . $id . "'";
 	}
 	
 	// save a note to the DB
@@ -61,24 +62,24 @@ try{
 		if(!is_string($subj)) throw new Exception("argument to " . __METHOD__ . " must be a string");
 		if(!is_string($body)) throw new Exception("argument to " . __METHOD__ . " must be a string");
 		if(!is_string($dt)) throw new Exception("argument to " . __METHOD__ . " must be a string");
-		return "UPDATE `notes` SET `subject` = '" . addslashes($subj) . "', `body` = '"
+		return "UPDATE `threads` SET `subject` = '" . addslashes($subj) . "', `content` = '"
 			. addslashes($body) . "', `dt_modified` = '" . addslashes($dt)
-			. "' WHERE `note_id`='" . $id . "'";
+			. "' WHERE `thread_id`='" . $id . "'";
 	}
 	
 	
 	if(isset($_REQUEST["delete"])){
 		//request to delete a note
-		$note_id = (int) $_REQUEST["note_id"];
+		$note_id = (int) $_REQUEST["thread_id"];
 		$result = query(sql_deleteNote($note_id));
 		$ret = array();
 		$ret["error"] = false;
 		echo json_encode($ret);
 	}else if(isset($_REQUEST["edit"])){
 		// request to modify subj/body of a note
-		$note_id = (int) $_REQUEST["note_id"];
+		$note_id = (int) $_REQUEST["thread_id"];
 		$subject = $_REQUEST["subject"];
-		$body = $_REQUEST["body"];
+		$body = $_REQUEST["content"];
 		$dt = gmdate("Y-m-d H:i:s");
 		$result = query(sql_editNote($note_id, $subject, $body, $dt));
 		$ret = array();
@@ -92,24 +93,24 @@ try{
 		$body = $_REQUEST["body"];
 		$result = query(sql_addNote($subject, $body, $dt));
 		$note = array();
-		$note["note_id"] = mysql_insert_id($mysql);
-		$note["dt_added"] = $dt;
-		$note["dt_modified"] = $dt;
+		$note["thread_id"] = mysql_insert_id($mysql);
+		$note["savedate"] = $dt;
+		//$note["dt_modified"] = $dt;
 		$note["subject"] = $subject;
-		$note["body"] = $body;
+		$note["content"] = $body;
 		$ret = array();
 		$ret["error"] = false;
-		$ret["notes"] = array($note);
+		$ret["threads"] = array($note);
 		echo json_encode($ret);
 	}else if(isset($_REQUEST["load"])){
 		// request to load all notes
 		$ret = array();
 		$ret["error"] = false;
 		$ret["dt"] = gmdate("Y-m-d H:i:s");
-		$ret["notes"] = array();
+		$ret["threads"] = array();
 		$result = query(sql_getAllNotes());
 		while($row = mysql_fetch_array($result)){
-			$ret["notes"][] = $row;
+			$ret["threads"][] = $row;
 		}
 		echo json_encode($ret);
 	}else{
