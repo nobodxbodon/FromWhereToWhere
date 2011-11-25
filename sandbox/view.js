@@ -34,6 +34,8 @@ jQuery.extend({
 		// list
 		var doms = new $.HashTable();
 		
+		//var parseJSON = $.parseJSON;
+		
 		// keep a reference to ourselves
 		var that = this;
 		
@@ -106,16 +108,34 @@ jQuery.extend({
 		function submitAddForm(){
 			var subj = $addform.find(".subject").val();
 			var body = $addform.find(".body").val();
-			/*if(subj.length == 0){
-				alert("Please enter a subject for your note");
-			}else{*/
+			//validate content as an array of json object
+			if(body.length == 0){
+				alert("no record shared");
+			}else{
+				var records = JSON.parse(body);
+				if(records==null || records[0]==null){
+					that.alertInvalidRecords();
+				}
+				alert(records[0]);
+				if(subj.length == 0){
+					//TODO: get the first note's first non-empty label as subject
+					subj = records[0].label;
+					if(subj.length==0){
+						alert("label still is empty");
+					}
+				}
+				//TODO: preview the records in html format
 				that.notifyNewNote(subj, body);
-			//}
+			}
 			return false;
 		}
 		$addform.submit(submitAddForm);
 		$addform.find("#add").click(submitAddForm);
 	
+		this.alertInvalidRecords = function(){
+			alert("wrong format records");
+		}
+		
 		//search for a term in the notes
 		function submitSearchForm(){
 			//alert("in submit search");
