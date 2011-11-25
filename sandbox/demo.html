@@ -1,0 +1,71 @@
+<html>
+<head>
+<link rel="stylesheet" href="demo.css" type="text/css" />
+<script src="jquery.js" type="text/javascript"></script>
+<script src="util.js" type="text/javascript"></script>
+<script src="model.js" type="text/javascript"></script>
+<script src="view.js" type="text/javascript"></script>
+<script src="controller.js" type="text/javascript"></script>
+<script type="text/javascript">
+	$(function(){
+		var model = new $.Model();
+		var view = new $.View();
+		var controller = new $.Controller(model, view);
+	});
+</script>
+</head>
+<body>
+	<div id="ui" class="flora">
+		<div id="instr" class='contain'>
+			<h3>About This Demo</h3>
+			<p>
+			This is a demo note application for the 
+			<a href="http://welcome.totheinter.net/tutorials/model-view-controller-in-jquery/">jQuery
+			Model-View-Controller Tutorial</a> (Phase 2)
+			by <a href="http://welcome.totheinter.net/">Adam Wulf</a>.
+			</p><p>
+			With this application, you can add, edit, and delete simple text notes. There is
+			no login, so anyone can see anything you post (and you can see what they post)
+			</p><p>
+			The server is set up to fail AJAX requests 10% of the time to demonstrate how the
+			UI can recover from such errors.
+			</p><p>
+			Try it out and have fun!
+			</p>
+			<p>
+			<input value="Close About Box" type="button"/></p>
+		</div>
+		<div id="notes" class='contain'>
+			<h3>List o' Notes</h3>
+			<ul>
+			</ul>
+		</div>
+		<form id="addform" class='contain'>
+			<h3>Add New Note</h3>
+			<label for="subject">Subject:</label>
+			<input name="subject" class="subject input" />
+			<br/>
+			<label for="subject">Body:</label>
+			<textarea name="body" class="body input" ></textarea>
+			<br/>
+			<input type="button" id="add" value="Add Note"/>
+		</form>
+		<form id="editform" class='contain'>
+			<h3>Edit Note</h3>
+			<label for="subject">Subject:</label>
+			<input type="hidden" id="noteId" />
+			<input name="subject" class="subject input" />
+			<br/>
+			<label for="subject">Body:</label>
+			<textarea name="body" class="body input" ></textarea>
+			<br/>
+			<input type="button" id="update" value="Update"/>
+			<input type="button" id="delete" value="Delete"/>
+			<input type="button" id="cancel" value="Cancel"/>
+		</form>
+		<div id="console" class='contain'>
+			<h3>Console</h3>
+		</div>
+	</div>
+</body>
+</html>

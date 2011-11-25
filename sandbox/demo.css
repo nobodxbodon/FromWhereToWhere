@@ -1,0 +1,53 @@
+#ui .contain{
+	margin: 20px;
+	padding: 20px;
+	width: 200px;
+	height: 300px;
+	overflow: auto;
+	float: left;
+	border: 1px solid #333333;
+}
+#ui #console{
+	clear:both;
+	width: 480px;
+}
+#ui #instr{
+	clear: both;
+	float: none;
+	height: auto;
+	width: 480px;
+	font-size: 12px;
+	font-family: verdana;
+}
+#ui form label{
+	display:block;
+	float:left;
+	width:58px;
+}
+#ui form .input{
+	border: 1px solid #333333;
+	margin-bottom: 10px;
+	width: 200px;
+}
+#ui form textarea{
+	height: 110px;
+}
+#ui form #add{
+	display:block;
+	margin-left:auto;
+	margin-right:auto;
+}
+#ui form #update{
+	margin-left: 25px;
+}
+#ui form #delete{
+	margin-left: 10px;
+}
+#ui form #delete:hover{
+	background: #CC0000;
+	color: white;
+}
+#ui form #cancel{
+	margin-left: 60px;
+	margin-top: 10px;
+}
