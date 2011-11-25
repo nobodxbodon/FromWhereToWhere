@@ -62,8 +62,12 @@ jQuery.extend({
 			searchNoteFinished : function(notes) {
 				var ids = "";
 				view.log("in search finished");
+				view.log("empty notes first");
+				view.cleanNotes();
 				$.each(notes, function(i){
 					ids += (ids.length ? ", " : "") + notes[i].getId();
+					//view.log("force loading single: " + notes[i].getId());
+					view.loadNote(notes[i], true);
 				});
 				view.log("just got search result via ajax: " + ids);
 				view.log("done.");

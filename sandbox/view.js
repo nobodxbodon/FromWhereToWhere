@@ -137,6 +137,7 @@ jQuery.extend({
 		}
 		
 		//search for a term in the notes
+		//TODO: if any exception happens, still make the page searchable (input enable!) at least after refreshing page
 		function submitSearchForm(){
 			//alert("in submit search");
 			var terms = $searchform.find(".terms").val();
@@ -232,16 +233,25 @@ jQuery.extend({
 			}
 		}
 		
+		this.cleanNotes = function(){
+			this.log("in clean notes")
+			$notes.empty();
+		}
+		
 		/**
 		 * a note was loaded/updated from the
 		 * cache, so let's build / update
 		 * the DOM
 		 */
-		this.loadNote = function(note){
+		this.loadNote = function(note,forceAdd){
 			var dom = doms.get(note.getId());
-			if(dom){
+			if(dom && !forceAdd){
 				dom.refresh();
+				
 			}else{
+				//TODO: may put >1 times the same dom into map?
+				if(forceAdd)
+					this.log("force add note "+note.getId());
 				// build a new note item
 				// and put it in the list
 				dom = new $.NoteLI(note, that.showEditForm);

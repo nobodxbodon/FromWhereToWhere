@@ -128,6 +128,25 @@ jQuery.extend({
 			return out;
 		}
 		
+		function returnResponse(data){
+			lastLoad = data.dt;
+			var out = new Array();
+			$.each(data.threads, function(item){
+				var newNote = data.threads[item];
+				var cachedNote = cache.get(newNote.thread_id);
+				if(cachedNote){
+					 // already cached, just update it
+					cachedNote.update(newNote);
+				}else{
+					cachedNote = new $.Note(newNote, that);
+					// not yet in cache, add it
+					cache.put(newNote.thread_id, cachedNote);
+				}
+				out.push(cachedNote);
+			});
+			return out;
+		}
+		
 		/**
 		 * load lots of data from the server
 		 * or return data from cache if it's already
@@ -193,7 +212,7 @@ jQuery.extend({
 				},
 				success: function(data){
 					if(data.error) return that.notifySearchFailed(keywords);
-					that.notifySearchFinished(loadResponse(data));
+					that.notifySearchFinished(returnResponse(data));
 				}
 			});
 			return cache.toArray();
@@ -287,6 +306,12 @@ jQuery.extend({
 		this.notifyLoadFail = function(data){
 			$.each(listeners, function(i){
 				listeners[i].loadFail(data);
+			});
+		}
+		
+		this.notifyCleanNotes = function(){
+			$.each(listeners, function(i){
+				listeners[i].cleanNotes();
 			});
 		}
 		
