@@ -1,7 +1,7 @@
 #ui .contain{
 	margin: 20px;
 	padding: 20px;
-	width: 200px;
+	width: 400px;
 	height: 300px;
 	overflow: auto;
 	float: left;
@@ -9,13 +9,13 @@
 }
 #ui #console{
 	clear:both;
-	width: 480px;
+	width: 960;
 }
 #ui #instr{
 	clear: both;
 	float: none;
 	height: auto;
-	width: 480px;
+	width: 960px;
 	font-size: 12px;
 	font-family: verdana;
 }
@@ -27,16 +27,12 @@
 #ui form .input{
 	border: 1px solid #333333;
 	margin-bottom: 10px;
-	width: 200px;
+	width: 400px;
 }
 #ui form textarea{
 	height: 110px;
 }
-#ui form #add{
-	display:block;
-	margin-left:auto;
-	margin-right:auto;
-}
+
 #ui form #update{
 	margin-left: 25px;
 }

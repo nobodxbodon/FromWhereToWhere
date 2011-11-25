@@ -152,6 +152,44 @@ jQuery.extend({
     return {origkeywords : origkeywords, words: quotedWords, optional : words, excluded : excluded, site : site, time : time};
   }
   
+  //if branch, wrap <ol> to get indent
+  //same level wrap by package <ol>
+  this.exportHTML = function(nodes){
+    var src="";
+    //get src for each node in the array
+    for(var i=0;i<nodes.length;i++){
+      src+=this.exportHTMLforNode(nodes[i]);
+      if(i!=nodes.length-1)
+        src+="\n";
+    }
+    return this.exportHelperWrap(src, "ol", "", "");
+  };
+  
+  this.exportHTMLforNode = function(node){
+    var src="";
+    //if branch, type=circle, else type=disc
+    if(node.children.length!=0){
+      src = this.exportHTML(node.children);
+    }
+    var link = this.exportHelperWrap(node.label,"a","href",node.url);
+    if(node.children.length==0){
+      src = this.exportHelperWrap(link,"li","type","disc");
+    }else{
+      src = this.exportHelperWrap(link+src,"li","type","circle");
+    }
+    return src;
+  };
+  
+  //TODO: more general (setAttribute)
+  this.exportHelperWrap = function(orig, tag, attr, value){
+    var src="";
+    if(attr=="")
+      src="<"+tag+">"+orig+"</"+tag+">";
+    else
+      src="<"+tag+" "+attr+"="+value+">"+orig+"</"+tag+">";
+    return src;
+  };
+  
   this.buildFeedback = function(state, words, optional, excluded, site, time){
 		var feedback = "Searching";
 		//state: 0 - searching, 1- found, -1 - failed

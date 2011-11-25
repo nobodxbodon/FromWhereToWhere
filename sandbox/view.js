@@ -116,7 +116,7 @@ jQuery.extend({
 				if(records==null || records[0]==null){
 					that.alertInvalidRecords();
 				}
-				alert(records[0]);
+				//alert(records[0]);
 				if(subj.length == 0){
 					//TODO: get the first note's first non-empty label as subject
 					subj = records[0].label;
@@ -165,7 +165,11 @@ jQuery.extend({
 			$editform.show();
 			$editform.find("#noteId").val(note.getId());
 			$editform.find(".subject").val(note.getSubject());
-			$editform.find(".body").val(note.getBody());
+			$editform.find("#editPart").hide();//val(note.getBody());
+			//update HTML view
+			$htmlView = $editform.find("#htmlView");
+			$htmlView.empty();
+			$htmlView.append(FWTWUtils.exportHTML(JSON.parse(note.getBody())));
 			$editform.find(".subject").focus();
 		}
 		

@@ -1,6 +1,6 @@
 <html>
 <head>
-<link rel="stylesheet" href="demo.css" type="text/css" />
+<link rel="stylesheet" href="demo.css?<?php echo date('l jS \of F Y h:i:s A'); ?>" type="text/css" />
 <script src="jquery.js" type="text/javascript"></script>
 <!--<script src="http://code.jquery.com/jquery-1.7.min.js" type="text/javascript"></script>-->
 <script src="util.js" type="text/javascript"></script>
@@ -33,22 +33,33 @@
 			<label for="subject">Subject:</label>
 			<input name="subject" class="subject input" />
 			<br/>
-			<label for="subject">Body:</label>
+			<div id="inputJSON">
+			<label for="subject">JSON:</label>
 			<textarea name="body" class="body input" ></textarea>
+			</div>
+			<div id="htmlView">
+			</div>
 			<br/>
-			<input type="button" id="add" value="Add a Thread"/>
+			<input type="button" id="add" value="Submit"/>
+			<input type="button" id="back" value="Back" disabled="true"/>
+			<input type="button" id="preview" value="Preview" disabled="true"/>
+			
 		</form>
 		<form id="editform" class='contain'>
-			<h3>Display Thread</h3>
+			<h3>Preview Thread</h3>
+			<div id="editPart">
 			<label for="subject">Subject:</label>
 			<input type="hidden" id="noteId" />
 			<input name="subject" class="subject input" />
 			<br/>
-			<label for="subject">Body:</label>
+			<!--<label for="subject">HTML:</label>-->
 			<textarea name="body" class="body input" ></textarea>
+			</div>
+			<div id="htmlView">
+			</div>
 			<br/>
 			<input type="button" id="update" value="Update" disabled="true"/>
-			<input type="button" id="delete" value="Delete" disabled="true"/>
+			<input type="button" id="delete" value="Delete" hide="true"/>
 			<input type="button" id="cancel" value="Cancel"/>
 		</form>
 		<div id="console" class='contain'>

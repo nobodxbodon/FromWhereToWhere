@@ -53,7 +53,7 @@ try{
 	
 	// get all notes from the DB
 	function sql_getAllNotes(){
-		return "SELECT * FROM `" . TABLE_NAME . "` ORDER BY " . COL_DT . " ASC";
+		return "SELECT * FROM `" . TABLE_NAME . "` ORDER BY " . COL_DT . " DESC";
 	}
 	
 	// delete a note from the DB
