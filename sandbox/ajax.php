@@ -51,6 +51,61 @@ try{
 		return "SELECT * FROM `" . TABLE_NAME . "` WHERE " . COL_BODY . " LIKE '%" . $word . "%'" . " ORDER BY " . COL_DT . " DESC";
 	}
 	
+    function getRightQuote($word){
+		//if it has \', replace sql term with \"
+		if(preg_match("/\'/", $word)){
+			return "\"%" . $word . "%\"";
+		}else{
+			return "'%" . $word . "%'";
+		}
+	}
+    
+    function sql_searchNoteByKeywords($keywords){
+        //add site filter
+		$term = "`" . TABLE_NAME . "`";
+        $site = $keywords->{'site'};
+        $words = $keywords->{'words'};
+        $optional = $keywords->{'optional'};
+        $count = count($site);
+		if($site && $count!=0){
+        for($i = $count-1; $i>=0; $i--){
+          $term = "(SELECT * FROM " . $term . " WHERE " . COL_BODY . " LIKE '%" . $site[$i] . "%')";
+        }
+      }
+      $count = count($words);
+      if($words && $count!=0){
+        for($i = $count-1; $i>=0; $i--){
+          $partTerm = getRightQuote($words[$i]);
+          if($i==$count-1){
+            $term = "SELECT * FROM " . $term . " WHERE " . COL_BODY . " LIKE " . $partTerm;//'%" + words[i] + "%'";
+          } else if($i!=0){
+            $term = "SELECT * FROM (" . $term . ") WHERE " . COL_BODY . " LIKE " . $partTerm;//'%" + words[i] + "%'";
+          }
+        }
+      }
+      $optionalTerm = "";
+      $count = count($optional);
+      if($optional){
+          for($i=0;$i<$count;$i++){
+          $partTerm = getRightQuote($optional[$i]);
+                if($i==0){
+                    $optionalTerm=$optionalTerm . " " . COL_BODY . " LIKE " . $partTerm;//'%" + optional[i] + "%'"
+                }else{
+                    $optionalTerm=$optionalTerm . " OR " . COL_BODY . " LIKE " . $partTerm;//'%" + optional[i] + "%'"
+                }
+            }
+        if($count>0){
+            $term = "SELECT * FROM (" . $term . ") WHERE" . $optionalTerm;
+        }
+      }
+      
+      return $term;
+      
+		//if(!is_array($words)) throw new Exception("argument to " . __METHOD__ . " must be an array");
+		//if(!is_string($word)) throw new Exception("argument to " . __METHOD__ . " must be a string");
+		//return "SELECT * FROM `" . TABLE_NAME . "` WHERE " . COL_BODY . " LIKE '%" . $word . "%'" . " ORDER BY " . COL_DT . " DESC";
+	}
+    
 	// get all notes from the DB
 	function sql_getAllNotes(){
 		return "SELECT * FROM `" . TABLE_NAME . "` ORDER BY " . COL_DT . " DESC";
@@ -122,17 +177,18 @@ try{
 	}else if(isset($_REQUEST["search"])){
 		// request to add search notes
 		$dt = gmdate("Y-m-d H:i:s");
-		//$keywords = $_REQUEST["keywords"];
+		$keywords = $_REQUEST["keywords"];
 		//$word = $_REQUEST["word"];
 		//$words = $subject["words"];
-        $left = $_REQUEST["left"];
-        $right = $_REQUEST["right"];
-        $sqlQuery = $left ." `". TABLE_NAME ."` ". $right . " ORDER BY " . COL_DT . " DESC";
-		$result = query($sqlQuery);
+        //$left = $_REQUEST["left"];
+        //$right = $_REQUEST["right"];
+        //$sqlQuery = $left ." `". TABLE_NAME ."` ". $right . " ORDER BY " . COL_DT . " DESC";
+		$result = query(sql_searchNoteByKeywords(json_decode($keywords)));
 		while($row = mysql_fetch_array($result)){
 			$ret["threads"][] = $row;
 		}
 		echo json_encode($ret);
+        //echo sql_searchNoteByKeywords(json_decode($keywords));
 	}else{
 		// the client asked for something we don't support
 		throw new Exception("not supported operation");

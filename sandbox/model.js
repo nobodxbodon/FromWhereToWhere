@@ -200,14 +200,17 @@ jQuery.extend({
 		
 		this.searchNote = function(keywords){
 			that.notifySearchingNote(keywords);
-            alert(FWTWUtils.buildFeedback(0,keywords.words, keywords.optional, keywords.excluded, keywords.site, keywords.time));
-            var sqlQuery = FWTWUtils.getSQLquerybyKeywords(keywords.words,keywords.optional,keywords.excluded,keywords.site);
+            //alert(FWTWUtils.buildFeedback(0,keywords.words, keywords.optional, keywords.excluded, keywords.site, keywords.time));
+            //var sqlQuery = FWTWUtils.getSQLquerybyKeywords(keywords.words,keywords.optional,keywords.excluded,keywords.site);
 			//TODO: more options in searching, for now only the first 'included'
+            alert(keywords["words"]);
+            alert(keywords["optional"]);
 			$.ajax({
 				url: 'ajax.php',
 				data : { search : true, 
-						 left : sqlQuery.left,
-                         right :sqlQuery.right},
+						 //left : sqlQuery.left,
+                         //right :sqlQuery.right
+                         keywords: JSON.stringify(keywords)},
 				type: 'POST',
 				dataType: 'json',
 				timeout: 1000,
