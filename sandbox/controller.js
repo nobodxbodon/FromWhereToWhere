@@ -52,7 +52,7 @@ jQuery.extend({
 				view.setAddFormEnabled(false);
 			},
 			searchingNote : function(keywords) {
-				view.log("searching");//FWTWUtils.buildFeedback(0, keywords.words, keywords.optional, keywords.excluded, keywords.site, keywords.time));
+				view.log("searching ...");// + FWTWUtils.buildFeedback(0, keywords.words, keywords.optional, keywords.excluded, keywords.site, keywords.time));
 				view.setSearchFormEnabled(false);
 			},
 			searchNoteFailed : function(keywords) {

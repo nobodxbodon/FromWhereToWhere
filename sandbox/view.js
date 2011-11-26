@@ -143,10 +143,11 @@ jQuery.extend({
 			var terms = $searchform.find(".terms").val();
 			alert(terms);
 			var keywords = FWTWUtils.getIncludeExcluded(terms);
-			alert(keywords.origkeywords+"\nwords:"+keywords.words+"\noptional"+keywords.optional+"\nexcluded:"+keywords.excluded+"\nsite:"+keywords.site+"\ntime:"+ keywords.time);
+			alert(keywords.origkeywords+"\nwords:"+keywords.words+"\noptional:"+keywords.optional+"\nexcluded:"+keywords.excluded+"\nsite:"+keywords.site+"\ntime:"+ keywords.time);
 			if(terms==""){
 				alert("Please enter some search terms (\"\" for all)");
 			}else{
+                alert("notify search notes");
 				that.notifySearchNote(keywords);
 			}
 			return false;
@@ -312,6 +313,7 @@ jQuery.extend({
 		
 		this.notifySearchNote = function(keywords){
 			$.each(listeners, function(i){
+                alert(keywords.words);
 				listeners[i].searchNoteClicked(keywords);
 			});
 		}

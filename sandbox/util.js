@@ -216,5 +216,60 @@ jQuery.extend({
 		return feedback;
 	};
 	
+    this.getSQLquerybyKeywords = function(words, optional, excluded, site){
+		//add site filter
+		var left = "";
+        var right = "";
+		if(site && site.length!=0){
+        for(var i = site.length-1; i>=0; i--){
+          left = "(SELECT * FROM " + left;
+          right = right + " WHERE content LIKE '%" + site[i] + "%')";
+        }
+      }
+      alert("in getSQLquery: "+words[0]+"\nleft:"+left+"\nright:"+right);
+      if(words && words.length!=0){
+        for(var i = words.length-1; i>=0; i--){
+          var partTerm = this.getRightQuote(words[i]);
+          if(i==words.length-1){
+            left = "SELECT * FROM " + left;
+            right = right + " WHERE content LIKE "+partTerm;//'%" + words[i] + "%'";
+          } else if(i!=0){
+            left = "SELECT * FROM (" + left;
+            right = right + ") WHERE content LIKE "+partTerm;//'%" + words[i] + "%'";
+          }
+        }
+      }
+      alert("in getSQLquery after words: "+"\nleft:"+left+"\nright:"+right);
+      var optionalTerm = "";
+      if(optional){
+          for(var i=0;i<optional.length;i++){
+          var partTerm = this.getRightQuote(optional[i]);
+                if(i==0){
+                    optionalTerm+=" content LIKE "+partTerm;//'%" + optional[i] + "%'"
+                }else{
+                    optionalTerm+=" OR content LIKE "+partTerm;//'%" + optional[i] + "%'"
+                }
+            }
+        if(optional.length>0){
+            left = "SELECT * FROM (" + left;
+            right = right + ") WHERE" + optionalTerm;
+        }
+      }
+      alert("in getSQLquery after optional: "+"\nleft:"+left+"\nright:"+right);
+      alert(left+" TABLE_NAME "+right);
+      return {left:left,right:right};
+    };
+    
+    this.getRightQuote = function(word){
+		//if it has \', replace sql term with \"
+		var partTerm = "";
+		if(word.match(/\'/)){
+			partTerm = "\"%" + word + "%\"";
+		}else{
+			partTerm = "'%" + word + "%'";
+		}
+		return partTerm;
+	};
+    
 	}
 });

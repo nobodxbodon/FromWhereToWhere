@@ -94,6 +94,7 @@ jQuery.extend({
 	},
 
 	Model: function(){
+		var FWTWUtils = new $.FWTWUtils();
 		// our local cache of $.Note objects
 		var cache = new $.HashTable();
 
@@ -199,11 +200,14 @@ jQuery.extend({
 		
 		this.searchNote = function(keywords){
 			that.notifySearchingNote(keywords);
+            alert(FWTWUtils.buildFeedback(0,keywords.words, keywords.optional, keywords.excluded, keywords.site, keywords.time));
+            var sqlQuery = FWTWUtils.getSQLquerybyKeywords(keywords.words,keywords.optional,keywords.excluded,keywords.site);
 			//TODO: more options in searching, for now only the first 'included'
 			$.ajax({
 				url: 'ajax.php',
 				data : { search : true, 
-						 word : keywords.words[0] },
+						 left : sqlQuery.left,
+                         right :sqlQuery.right},
 				type: 'POST',
 				dataType: 'json',
 				timeout: 1000,
@@ -211,7 +215,8 @@ jQuery.extend({
 					that.notifySearchFailed(keywords);
 				},
 				success: function(data){
-					if(data.error) return that.notifySearchFailed(keywords);
+                    //TODO: if data==null, notify there's no search results
+					if(!data || data.error) return that.notifySearchFailed(keywords);
 					that.notifySearchFinished(returnResponse(data));
 				}
 			});

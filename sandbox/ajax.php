@@ -48,7 +48,7 @@ try{
 	function sql_searchNote($word){
 		//if(!is_array($words)) throw new Exception("argument to " . __METHOD__ . " must be an array");
 		if(!is_string($word)) throw new Exception("argument to " . __METHOD__ . " must be a string");
-		return "SELECT * FROM `" . TABLE_NAME . "` WHERE " . COL_BODY . " LIKE '%" . $word . "%'";
+		return "SELECT * FROM `" . TABLE_NAME . "` WHERE " . COL_BODY . " LIKE '%" . $word . "%'" . " ORDER BY " . COL_DT . " DESC";
 	}
 	
 	// get all notes from the DB
@@ -123,9 +123,12 @@ try{
 		// request to add search notes
 		$dt = gmdate("Y-m-d H:i:s");
 		//$keywords = $_REQUEST["keywords"];
-		$word = $_REQUEST["word"];
+		//$word = $_REQUEST["word"];
 		//$words = $subject["words"];
-		$result = query(sql_searchNote($word));
+        $left = $_REQUEST["left"];
+        $right = $_REQUEST["right"];
+        $sqlQuery = $left ." `". TABLE_NAME ."` ". $right . " ORDER BY " . COL_DT . " DESC";
+		$result = query($sqlQuery);
 		while($row = mysql_fetch_array($result)){
 			$ret["threads"][] = $row;
 		}
