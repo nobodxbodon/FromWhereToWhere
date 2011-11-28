@@ -46,7 +46,12 @@ jQuery.extend({
 	},
 	
 	FWTWUtils: function(){
-		
+		var DEBUG=true;
+        
+        this.dAlert = function(msg){
+            if(DEBUG)
+                alert(msg);
+        }
 //TODO: reg expr instead
   this.splitWithSpaces = function(myString) {
     if(!myString){
@@ -73,14 +78,14 @@ jQuery.extend({
       if(till<t.till)
         t.till = till;
       else
-        alert("Invalid date: "+ts[1]+". Search without it anyway");
+        dAlert("Invalid date: "+ts[1]+". Search without it anyway");
     //if time1-, means since time1
     }if(ts[0]!=""){
       var since = new Date(ts[0]).getTime();
       if(since>t.since)
         t.since = since;
       else
-        alert("Invalid date: "+ts[0]+". Search without it anyway");
+        dAlert("Invalid date: "+ts[0]+". Search without it anyway");
     }
     return t;
   };
@@ -138,7 +143,7 @@ jQuery.extend({
         if(ts.length==1)
           ts = ti.split("~");
         if(ts.length!=2){
-          alert("Fail to parse time interval: "+ti+". Search without it anyway");
+          dAlert("Fail to parse time interval: "+ti+". Search without it anyway");
           words.splice(i,1);
           i--;
           continue;
@@ -226,7 +231,7 @@ jQuery.extend({
           right = right + " WHERE content LIKE '%" + site[i] + "%')";
         }
       }
-      alert("in getSQLquery: "+words[0]+"\nleft:"+left+"\nright:"+right);
+      dAlert("in getSQLquery: "+words[0]+"\nleft:"+left+"\nright:"+right);
       if(words && words.length!=0){
         for(var i = words.length-1; i>=0; i--){
           var partTerm = this.getRightQuote(words[i]);
@@ -239,7 +244,7 @@ jQuery.extend({
           }
         }
       }
-      alert("in getSQLquery after words: "+"\nleft:"+left+"\nright:"+right);
+      dAlert("in getSQLquery after words: "+"\nleft:"+left+"\nright:"+right);
       var optionalTerm = "";
       if(optional){
           for(var i=0;i<optional.length;i++){
@@ -255,8 +260,8 @@ jQuery.extend({
             right = right + ") WHERE" + optionalTerm;
         }
       }
-      alert("in getSQLquery after optional: "+"\nleft:"+left+"\nright:"+right);
-      alert(left+" TABLE_NAME "+right);
+      dAlert("in getSQLquery after optional: "+"\nleft:"+left+"\nright:"+right);
+      dAlert(left+" TABLE_NAME "+right);
       return {left:left,right:right};
     };
     

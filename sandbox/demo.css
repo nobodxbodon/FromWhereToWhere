@@ -2,11 +2,22 @@
 	margin: 20px;
 	padding: 20px;
 	width: 400px;
-	height: 300px;
+	/*height: 300px;*/
 	overflow: auto;
 	float: left;
-	border: 1px solid #333333;
+	/*border: 1px solid #333333;*/
 }
+
+#ui .editView{
+	margin: 20px;
+	padding: 20px;
+	/*width: 400px;
+	height: 300px;*/
+	overflow: auto;
+	float: right;
+	/*border: 1px solid #333333;*/
+}
+
 #ui #console{
 	clear:both;
 	width: 960;

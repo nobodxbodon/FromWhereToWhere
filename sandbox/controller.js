@@ -75,7 +75,6 @@ jQuery.extend({
 			},
 			addingFailed : function() {
 				view.log("adding new note failed");
-				alert("failed adding note");
 				view.setAddFormEnabled(true);
 			},
 			addingFinished : function(newNotes) {
@@ -92,7 +91,6 @@ jQuery.extend({
 			},
 			deletingFailed : function(note_id) {
 				view.log("deleting note " + note_id + " failed");
-				alert("failed deleting note");
 				view.showNote(note_id, true);
 				view.setEditFormEnabled(true);
 			},
@@ -109,7 +107,6 @@ jQuery.extend({
 			},
 			savingFailed : function(note){
 				view.log("saving note " + note.getId() + " failed.");
-				alert("failed saving note");
 				note.revert();
 				view.loadNote(note);
 				view.setEditFormEnabled(true);

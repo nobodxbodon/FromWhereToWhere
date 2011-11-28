@@ -27,6 +27,14 @@ jQuery.extend({
 	},
 
 	View: function(){
+        
+		var DEBUG=true;
+        
+        function dAlert(msg){
+            if(DEBUG)
+                alert(msg);
+        }
+        
 		var FWTWUtils = new $.FWTWUtils();
 		
 		// this will hold the dom nodes that
@@ -116,7 +124,6 @@ jQuery.extend({
 				if(records==null || records[0]==null){
 					that.alertInvalidRecords();
 				}
-				//alert(records[0]);
 				if(subj.length == 0){
 					//TODO: get the first note's first non-empty label as subject
 					subj = records[0].label;
@@ -139,15 +146,14 @@ jQuery.extend({
 		//search for a term in the notes
 		//TODO: if any exception happens, still make the page searchable (input enable!) at least after refreshing page
 		function submitSearchForm(){
-			//alert("in submit search");
 			var terms = $searchform.find(".terms").val();
-			alert(terms);
+			dAlert(terms);
 			var keywords = FWTWUtils.getIncludeExcluded(terms);
-			alert(keywords.origkeywords+"\nwords:"+keywords.words+"\noptional:"+keywords.optional+"\nexcluded:"+keywords.excluded+"\nsite:"+keywords.site+"\ntime:"+ keywords.time);
+			dAlert(keywords.origkeywords+"\nwords:"+keywords.words+"\noptional:"+keywords.optional+"\nexcluded:"+keywords.excluded+"\nsite:"+keywords.site+"\ntime:"+ keywords.time);
 			if(terms==""){
 				alert("Please enter some search terms (\"\" for all)");
 			}else{
-                alert("notify search notes");
+                dAlert("notify search notes");
 				that.notifySearchNote(keywords);
 			}
 			return false;
@@ -313,7 +319,7 @@ jQuery.extend({
 		
 		this.notifySearchNote = function(keywords){
 			$.each(listeners, function(i){
-                alert(keywords.words);
+                dAlert(keywords.words);
 				listeners[i].searchNoteClicked(keywords);
 			});
 		}

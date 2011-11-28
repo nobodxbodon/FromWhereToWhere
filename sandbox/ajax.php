@@ -99,6 +99,8 @@ try{
         }
       }
       
+      error_log($term);
+      error_log("opt count: ".$count);
       return $term;
       
 		//if(!is_array($words)) throw new Exception("argument to " . __METHOD__ . " must be an array");
@@ -183,7 +185,8 @@ try{
         //$left = $_REQUEST["left"];
         //$right = $_REQUEST["right"];
         //$sqlQuery = $left ." `". TABLE_NAME ."` ". $right . " ORDER BY " . COL_DT . " DESC";
-		$result = query(sql_searchNoteByKeywords(json_decode($keywords)));
+                $queryTerm = sql_searchNoteByKeywords(json_decode($keywords));
+		$result = query($queryTerm);
 		while($row = mysql_fetch_array($result)){
 			$ret["threads"][] = $row;
 		}
