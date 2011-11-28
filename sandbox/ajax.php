@@ -78,15 +78,15 @@ try{
           $partTerm = getRightQuote($words[$i]);
           if($i==$count-1){
             $term = "SELECT * FROM " . $term . " WHERE " . COL_BODY . " LIKE " . $partTerm;//'%" + words[i] + "%'";
-          } else if($i!=0){
-            $term = "SELECT * FROM (" . $term . ") WHERE " . COL_BODY . " LIKE " . $partTerm;//'%" + words[i] + "%'";
+          } else{
+            $term = "SELECT * FROM (" . $term . ")" . " AS T" . $i . " WHERE " . COL_BODY . " LIKE " . $partTerm;//'%" + words[i] + "%'";
           }
         }
       }
       $optionalTerm = "";
       $count = count($optional);
       if($optional){
-          for($i=0;$i<$count;$i++){
+        for($i=0;$i<$count;$i++){
           $partTerm = getRightQuote($optional[$i]);
                 if($i==0){
                     $optionalTerm=$optionalTerm . " " . COL_BODY . " LIKE " . $partTerm;//'%" + optional[i] + "%'"
@@ -95,7 +95,7 @@ try{
                 }
             }
         if($count>0){
-            $term = "SELECT * FROM (" . $term . ") WHERE" . $optionalTerm;
+            $term = "SELECT * FROM (" . $term . ") AS beforeOpt WHERE" . $optionalTerm;
         }
       }
       
