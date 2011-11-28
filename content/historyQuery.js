@@ -128,13 +128,20 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
        
   pub.nodefromPlaceidWithChildInfo = function(pid, hasChildren, query) {
     var actualThing = false;
+	var potentialchildren = [];
+	var label = pub.getTitlefromId(pid);
 		//this has to be done because no one is above you doesn't tell if you have ones below
-		if(!hasChildren){
-			var potentialchildren = pub.getAllChildrenfromPlaceId(pid, query);
+		if(label==null || label=="" || !hasChildren){
+			potentialchildren = pub.getAllChildrenfromPlaceId(pid, query);
 			actualThing = (potentialchildren!=null) && (potentialchildren.length>0);
 			hasChildren = actualThing;
 		}
-    return pub.ReferedHistoryNode(null, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
+	if(label==null || label==""){
+	  label = "[SUBJECT] "+ pub.getNonEmptyTitlefromIds(potentialchildren);
+	}
+	if(pub.DEBUG)
+	  alert(label);
+    return pub.ReferedHistoryNode(null, pid, label, pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
 	
   pub.getIdfromUrl = function(url){
@@ -181,7 +188,23 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     var statement = pub.mDBConn.createStatement("SELECT DISTINCT title FROM moz_places where id IN ("+pids+") AND title!=''");
     return pub.queryAll(statement, "str", 0); 
   };
-	
+		
+  pub.getNonEmptyTitlefromIds = function(placeIds){
+	var pids="";
+	  var lastIdx=placeIds.length-1;
+	  for(var i=0;i<placeIds.length;i++){
+		pids+= placeIds[i];
+		if(i!=lastIdx){
+			pids+=",";
+		}
+	}
+	var term = "SELECT title FROM moz_places where id IN ("+pids+") AND title!='' LIMIT 1";
+	if(pub.DEBUG)
+	  alert(term);
+    var statement = pub.mDBConn.createStatement(term);
+    return pub.queryOne(statement, "str", 0); 
+  };
+  
   pub.getTitlefromId = function(id){
     var statement = pub.mDBConn.createStatement("SELECT title FROM moz_places where id=:id");
     statement.params.id=id;
@@ -541,7 +564,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   };
   
   pub.allKnownParentPids = [];
-  pub.DEBUG = true;
+  pub.DEBUG = false;
 	pub.querytime = {};
 	
 	//return all the top ancesters of a placeid, and add to allKnownParents
