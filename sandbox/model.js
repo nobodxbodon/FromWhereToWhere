@@ -138,6 +138,14 @@ jQuery.extend({
 		function returnResponse(data){
 			lastLoad = data.dt;
 			var out = new Array();
+            //find dup by first order then compare same neighbors
+            var tids = FWTWUtils.getDupThreads(data.threads);
+            for(var i in tids){
+                dAlert(i+":"+tids[i]);
+            }
+            if(tids.length!=0){
+                that.reportDupThreads(tids);
+            }
 			$.each(data.threads, function(item){
 				var newNote = data.threads[item];
 				var cachedNote = cache.get(newNote.thread_id);
@@ -178,6 +186,26 @@ jQuery.extend({
 			return cache.toArray();
 		}
 		
+        this.reportDupThreads = function(dups){
+			//that.notifyReportingDup();
+            var dupRep = JSON.stringify(dups);
+            dAlert(dupRep);
+            $.ajax({
+				url: 'ajax.php',
+				data : { report_dup : true, 
+						 dups : dupRep },
+				type: 'POST',
+				dataType: 'json',
+				timeout: 1000,
+				error: function(){
+					that.notifyRepDupFailed();
+				},
+				success: function(data){
+					if(data.error) return that.notifyRepDupFailed();
+					that.notifyRepDupFinished(loadResponse(data));
+				}
+			});
+        }
 		/**
 		 * add a new Note with the input:
 		 * @param subj the subject of the new note

@@ -46,9 +46,9 @@ jQuery.extend({
 	},
 	
 	FWTWUtils: function(){
-		var DEBUG=true;
+		var DEBUG=false;
         
-        this.dAlert = function(msg){
+        function dAlert(msg){
             if(DEBUG)
                 alert(msg);
         }
@@ -276,5 +276,24 @@ jQuery.extend({
 		return partTerm;
 	};
     
+    this.getDupThreads = function(arr) {
+        if(!arr || !arr.length || arr.length<=1)
+            return [];
+        var a = arr.concat();
+        a.sort(function(a,b){return a.content.length<b.content.length;});
+        //only work for string type
+        var origLen = a.length;
+        var repeated = [];
+        for(var i=1; i<origLen; ++i) {
+            dAlert(a[i].content);
+          if(a[i].content == a[i-1].content){
+            if(!repeated[a[i].thread_id])
+                repeated[a[i-1].thread_id] = [a[i].thread_id];
+            else
+                repeated[a[i-1].thread_id].push(a[i].thread_id);
+            }
+        }
+        return repeated;
+      };
 	}
 });

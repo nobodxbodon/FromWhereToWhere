@@ -72,6 +72,7 @@ try{
           $term = "(SELECT * FROM " . $term . " WHERE " . COL_BODY . " LIKE '%" . $site[$i] . "%')";
         }
       }
+      $siteCount = $count;
       $count = count($words);
       if($words && $count!=0){
         for($i = $count-1; $i>=0; $i--){
@@ -83,6 +84,7 @@ try{
           }
         }
       }
+      $must = $count;
       $optionalTerm = "";
       $count = count($optional);
       if($optional){
@@ -94,8 +96,10 @@ try{
                     $optionalTerm=$optionalTerm . " OR " . COL_BODY . " LIKE " . $partTerm;//'%" + optional[i] + "%'"
                 }
             }
-        if($count>0){
+        if($must>0 || $$siteCount>0){
             $term = "SELECT * FROM (" . $term . ") AS beforeOpt WHERE" . $optionalTerm;
+        }else if($count>0){
+            $term = "SELECT * FROM " . $term . " WHERE" . $optionalTerm;
         }
       }
       
@@ -177,9 +181,11 @@ try{
 		}
 		echo json_encode($ret);
 	}else if(isset($_REQUEST["search"])){
+        //TODO: limit return number, to save user potential computing time
 		// request to add search notes
 		$dt = gmdate("Y-m-d H:i:s");
 		$keywords = $_REQUEST["keywords"];
+		$ret = array();
 		//$word = $_REQUEST["word"];
 		//$words = $subject["words"];
         //$left = $_REQUEST["left"];
@@ -192,7 +198,22 @@ try{
 		}
 		echo json_encode($ret);
         //echo sql_searchNoteByKeywords(json_decode($keywords));
-	}else{
+	}else if(isset($_REQUEST["report_dup"])){
+        error_log($_REQUEST["dups"]);
+        $dups = json_decode($_REQUEST["dups"]);
+        //TODO: check if dup is true, then del dup
+        $count = count($dups);
+        for($i=0;$i<$count;$i++){
+            if($dups[$i]){
+                $str="[";
+                for($j=0;$j<count($dups[$i]);$j++){
+                    $str=$str.$dups[$i][$j].", ";
+                }
+                $str=$str."]";
+                error_log("keep".$i." remove".$str);
+            }
+        }
+    }else{
 		// the client asked for something we don't support
 		throw new Exception("not supported operation");
 	}
