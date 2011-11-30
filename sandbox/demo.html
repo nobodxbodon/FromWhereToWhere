@@ -7,11 +7,39 @@
 <script src="model.js" type="text/javascript"></script>
 <script src="view.js" type="text/javascript"></script>
 <script src="controller.js" type="text/javascript"></script>
+    <script src='libs/jquery/jquery-ui.custom.js' type="text/javascript"></script>
+    <script src='libs/jquery/jquery.cookie.js' type="text/javascript"></script>
+
+    <link rel='stylesheet' type='text/css' href='libs/skin/ui.dynatree.css'>
+    <script src='libs/jquery.dynatree.js' type="text/javascript"></script>
+
 <script type="text/javascript">
 	$(function(){
+        $("#ui #notes").dynatree({
+            onActivate: function(node) {
+                // A DynaTreeNode object is passed to the activation handler
+                // Note: we also get this event, if persistence is on, and the page is reloaded.
+                //alert("You activated " + node.data.title);
+                if( node.data.href ){
+					// Open target
+					window.open(node.data.href, node.data.target);
+                    //window.location.href = node.data.href;
+					// or open target in iframe
+//                $("[name=contentFrame]").attr("src", node.data.href);
+				}
+            },
+            onExpand: function(flag, node){
+                node.visit(function(node){
+                    node.expand(true);
+                });
+            },
+            persist: true
+        });
 		var model = new $.Model();
-		var view = new $.View();
+		var view = new $.View($("#ui #notes").dynatree("getRoot"));
 		var controller = new $.Controller(model, view);
+        
+
 	});
 </script>
 </head>
@@ -24,9 +52,10 @@
 	</div>
 	<div id="ui" class="flora">
 		<div id="notes" class='contain'>
-			<h3>List o' Threads</h3>
+			<!--<h3>List o' Threads</h3>
+            <div id="threadList"/>
 			<ul>
-			</ul>
+			</ul>-->
 		</div>
 		<form id="addform" class='contain'>
 			<h3>Add New Thread</h3>

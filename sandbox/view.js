@@ -26,7 +26,7 @@ jQuery.extend({
 		this.refresh();
 	},
 
-	View: function(){
+	View: function(threadPart){
         
 		var DEBUG=true;
         
@@ -54,8 +54,10 @@ jQuery.extend({
 		$console = $("#ui #console");
 		
 		// get the list of notes
-		$notes = $('#ui #notes ul');
-		
+        $notes = threadPart;
+		//var $notes = $("#ui #notes").dynatree("getRoot");
+        //$notesbak = $('#ui #notes').dynatree("getRoot");
+            
 		// get the add form
 		$addform = $("#ui #addform");
 		
@@ -242,7 +244,7 @@ jQuery.extend({
 		
 		this.cleanNotes = function(){
 			this.log("in clean notes")
-			$notes.empty();
+			$notes.removeChildren() ;
 		}
 		
 		/**
@@ -263,10 +265,38 @@ jQuery.extend({
 				// and put it in the list
 				dom = new $.NoteLI(note, that.showEditForm);
 				doms.put(note.getId(), dom);
-				$notes.append(dom.getDOM());
+				//$notes.append(dom.getDOM());
+                
+                var treeNodes = [];
+                var fwtwNodes = JSON.parse(note.getBody());
+                for(var i in fwtwNodes){
+                    treeNodes.push(that.toTreeNode(fwtwNodes[i], true));
+                }
+                //alert($notes);
+                //alert("add:"+note.getBody());
+                //alert($notesbak);
+                
+                $notes.addChild(treeNodes);
+                /*{
+                    title: "My new node",
+                    tooltip: "This folder and all child nodes were added programmatically."
+                });*/
 			}
 		}
 		
+        this.toTreeNode = function(fwtw, isTop){
+            var obj=new Object();
+            
+            obj.title = fwtw.label;
+            obj.href = fwtw.url;
+            obj.isFolder = fwtw.isContainer;
+            obj.children = [];
+            for(var i in fwtw.children){
+                obj.children.push(that.toTreeNode(fwtw.children[i], false));
+            }
+            return obj;
+        }
+        
 		/**
 		 * remove the note from view, but
 		 * don't remove from cache
