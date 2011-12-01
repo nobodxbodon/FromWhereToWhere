@@ -28,7 +28,7 @@ jQuery.extend({
 
 	View: function(threadPart){
         
-		var DEBUG=true;
+		var DEBUG=false;
         
         function dAlert(msg){
             if(DEBUG)
@@ -362,7 +362,6 @@ jQuery.extend({
 				listeners[i].deleteNoteClicked(note_id);
 			});
 		}
-		
 		
 	},
 	

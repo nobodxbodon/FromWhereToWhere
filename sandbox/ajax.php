@@ -9,9 +9,10 @@ mysql_select_db(DB_NAME, $mysql);
 // a problem
 function query($sql){
 	global $mysql;
+    error_log($sql);
 	$result = mysql_query($sql, $mysql);
 	if(mysql_error($mysql)){
-		//echo 'Caught exception when querying sql ',"\n";;
+		error_log('Caught exception when querying sql '.$mysql);
 		throw new Exception("mysql error");
 	}
 	return $result;
@@ -119,8 +120,9 @@ try{
 	
 	// delete a note from the DB
 	function sql_deleteNote($id){
-		if(!is_int($id)) throw new Exception("argument to " . __METHOD__ . " must be an int");
-		return "DELETE FROM `threads` WHERE `thread_id`='" . $id . "'";
+        error_log("deleting note ".$id);
+		if(!is_int($id)) error_log("argument to " . __METHOD__ . " must be an int");//throw new Exception("argument to " . __METHOD__ . " must be an int");
+		return "DELETE FROM `" . TABLE_NAME . "` WHERE `thread_id`=" . $id;
 	}
 	
 	// save a note to the DB
@@ -201,18 +203,24 @@ try{
 	}else if(isset($_REQUEST["report_dup"])){
         error_log($_REQUEST["dups"]);
         $dups = json_decode($_REQUEST["dups"]);
-        //TODO: check if dup is true, then del dup
         $count = count($dups);
+        $ret = array();
+        $ret["type"] = "dup";
         for($i=0;$i<$count;$i++){
             if($dups[$i]){
                 $str="[";
                 for($j=0;$j<count($dups[$i]);$j++){
                     $str=$str.$dups[$i][$j].", ";
+                    //TODO: check if dup is true, then del dup
+                    error_log("keep".$i." remove".$dups[$i][$j]);
+                    $result = query(sql_deleteNote($dups[$i][$j]));
+                    $ret["error"] = !$result;
                 }
                 $str=$str."]";
-                error_log("keep".$i." remove".$str);
+                //error_log("keep".$i." remove".$str);
             }
         }
+        echo json_encode($ret);
     }else{
 		// the client asked for something we don't support
 		throw new Exception("not supported operation");

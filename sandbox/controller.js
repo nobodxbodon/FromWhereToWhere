@@ -114,7 +114,13 @@ jQuery.extend({
 			savingFinished : function(note){
 				view.log("saving note " + note.getId() + " complete.");
 				view.setEditFormEnabled(true);
-			}
+			},
+            reportFail: function(data){
+                view.log("report fail: "+data.type +" : "+data.error);
+            },
+            reportFinished: function(data){
+                view.log("report finish!!!!");//: "+data.type +" : "+data.error);
+            }
 		});
 		model.addListener(mlist);
 		

@@ -140,7 +140,9 @@ jQuery.extend({
 			var out = new Array();
             //find dup by first order then compare same neighbors
             var tids = FWTWUtils.getDupThreads(data.threads);
+            var dupIds = [];
             for(var i in tids){
+                dupIds=dupIds.concat(tids[i]);
                 dAlert(i+":"+tids[i]);
             }
             if(tids.length!=0){
@@ -148,16 +150,18 @@ jQuery.extend({
             }
 			$.each(data.threads, function(item){
 				var newNote = data.threads[item];
-				var cachedNote = cache.get(newNote.thread_id);
-				if(cachedNote){
-					 // already cached, just update it
-					cachedNote.update(newNote);
-				}else{
-					cachedNote = new $.Note(newNote, that);
-					// not yet in cache, add it
-					cache.put(newNote.thread_id, cachedNote);
-				}
-				out.push(cachedNote);
+                if(dupIds.indexOf(newNote.thread_id)<0){
+                    var cachedNote = cache.get(newNote.thread_id);
+                    if(cachedNote){
+                         // already cached, just update it
+                        cachedNote.update(newNote);
+                    }else{
+                        cachedNote = new $.Note(newNote, that);
+                        // not yet in cache, add it
+                        cache.put(newNote.thread_id, cachedNote);
+                    }
+                    out.push(cachedNote);
+                }
 			});
 			return out;
 		}
@@ -201,8 +205,8 @@ jQuery.extend({
 					that.notifyRepDupFailed();
 				},
 				success: function(data){
-					if(data.error) return that.notifyRepDupFailed();
-					that.notifyRepDupFinished(loadResponse(data));
+					if(data.error) return that.notifyRepDupFailed(data);
+					that.notifyRepDupFinished(data);//loadResponse(data));
 				}
 			});
         }
@@ -350,7 +354,7 @@ jQuery.extend({
 				listeners[i].loadFail(data);
 			});
 		}
-		
+        
 		this.notifyCleanNotes = function(){
 			$.each(listeners, function(i){
 				listeners[i].cleanNotes();
@@ -468,6 +472,18 @@ jQuery.extend({
 				listeners[i].savingFinished(note);
 			});
 		}
+        
+        this.notifyRepDupFailed = function(data){
+			$.each(listeners, function(i){
+				listeners[i].reportFail(data);
+			});
+        }
+        
+        this.notifyRepDupFinished = function(data){
+			$.each(listeners, function(i){
+				listeners[i].reportFinished(data);
+			});
+        }
 	},
 	
 	/**
@@ -489,7 +505,9 @@ jQuery.extend({
 			deletingFinished : function() { },
 			savingNote : function() { },
 			savingFailed : function() { },
-			savingFinished : function() { }
+			savingFinished : function() { },
+            reportFail : function() { },
+            reportFinished : function() { }
 		}, list);
 	}
 });
