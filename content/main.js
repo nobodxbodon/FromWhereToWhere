@@ -324,6 +324,39 @@ pub.mainThread.prototype = {
 		return sidebarWindow.location.href == sidebarRef;
 	};
 	
+	//same as local notes, but only send subject & node for now
+	pub.shareToAll = function(){
+	  var select = pub.getCurrentSelected();
+	  var json = JSON.stringify(select);
+	  var recordName = "";
+	  var recordType = -1;
+	  var recordUrl = "";
+	  var searchTerm = "";
+	  var currentURI = "";
+	  if(select.length==0){
+		alert("No record is saved");
+	  } else {
+		recordName = select[0].label;
+		recordUrl = select[0].url;
+		/* recordName can duplicate in the records */
+		/* the order matters now, as keyword searching is allowed when pub.currentURI is valid*/
+		// if there's keywords, recordUrl isn't set
+		if(pub.keywords!=""){  
+		  searchTerm = pub.keywords;
+				  recordType = 1;
+		} else if(pub.currentURI){
+		  currentURI = pub.currentURI;
+				  recordType = 0;
+			  //id is null always, placeId isn't null unless it's imported
+		} else if(select[0].placeId==null) {
+		  // imported: use the label of first top node as name for now
+		  // TODO: pick tags
+				  recordType = 2;
+		}
+		pub.remote.addThread(recordName, json);
+	  }
+	}
+	
   // recordType: 0 - from URI; 1 - from searching keywords; 2 - imported; -1 - invalid.
   // TODO: make constants!
   pub.saveNodetoLocal = function() {

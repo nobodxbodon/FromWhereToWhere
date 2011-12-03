@@ -13,6 +13,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
  
   pub.init = function(){
     pub.localManager = com.wuxuan.fromwheretowhere.localmanager;
+    pub.remote = com.wuxuan.fromwheretowhere.remote;
     pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
     //use function or there'll be 'not found' issue
     pub.treeView = pub.createView();
@@ -162,5 +163,18 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     }
   };
   
+  //same as local notes, but only send subject & node for now
+  pub.shareToAll = function(){
+    //get nodes content first
+    var node = null;
+    if(pub.treeView.selection!=null)
+      node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
+    if(node==null){
+      return;
+    }
+    var json = pub.localManager.getNodeContent(node.id);
+	pub.remote.addThread(node.name, json);
+  }
+    
   return pub;
 }();

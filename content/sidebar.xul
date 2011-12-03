@@ -9,6 +9,8 @@
   <menupopup id="sidebarmenu" onpopupshowing="com.wuxuan.fromwheretowhere.noteSidebar.showMenuItems()">
     <menuitem id="openlocalnote" label="&contextMenu.openlocalnote;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.openNode()"/>
     <menuitem id="delete" label="&contextMenu.delete;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.deleteNotes()"/>
+    <menuseparator/>
+    <menuitem id="share" label="&contextMenu.shareWithWorld;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.shareToAll()"/>
   </menupopup>
 </popupset>
 
@@ -22,8 +24,17 @@
   <treechildren context="sidebarmenu" ondblclick="com.wuxuan.fromwheretowhere.noteSidebar.openNode()"/>  
 </tree>
 
+<panel id="shared_notification" fade="fast">
+  <hbox align="start">
+    <vbox>
+      <description id="shared_note" value="saved"/>
+    </vbox>
+  </hbox>
+</panel>
+
 <script src="namespace.js" />
 <script src="localmanager.js" />
 <script src="noteSidebar.js" />
 <script src="UIutils.js" />
+<script src="remote.js" />
 </page>

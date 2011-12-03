@@ -1,10 +1,39 @@
 
 com.wuxuan.fromwheretowhere.remote = function(){
   var pub={};
+  var xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Components.interfaces.nsIXMLHttpRequest);
+    
+  pub.addThread = function(subject, body){
+    //alert(body);
+    xhr.open("POST", "http://127.0.0.1/fwtw-svr/ajax.php", true);
+
+    var jsonString = 'add=true&subject='+escape(subject)+'&body='+escape(body);//{"words":["spring"],"optional":[]}'//"load=true";//JSON.stringify(obj);
+    xhr.setRequestHeader('Content-Type', "application/x-www-form-urlencoded");//"application/json");//
+    //alert(jsonString);
+    xhr.setRequestHeader("Content-Length",jsonString.length);
+    xhr.onreadystatechange = function (oEvent) {  
+        if (xhr.readyState === 4) {  
+          if (xhr.status === 200) {  
+            var addnote = document.getElementById("saved_note");
+            if(!addnote){
+                addnote = document.getElementById("shared_note");
+                addnote.value = "SHARED: "+subject;
+                document.getElementById("shared_notification").openPopup(null, "", 60, 50, false, false);
+            }else{
+			addnote.value = "SHARED: "+subject;
+			document.getElementById("saved_notification").openPopup(null, "", 60, 50, false, false);
+            }
+          } else {  
+            alert("Error", xhr.statusText);  
+          }  
+        }
+    };
+    xhr.send(jsonString);
+  };
   
+  //TODO: can't search for terms containing '&': escape()
   pub.getAll = function(keywords, topNodes, main){
     //var http = new XMLHttpRequest();
-    var xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Components.interfaces.nsIXMLHttpRequest);
     
     xhr.open("POST", "http://127.0.0.1/fwtw-svr/ajax.php", true);
 

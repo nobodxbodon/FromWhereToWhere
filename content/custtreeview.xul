@@ -38,6 +38,8 @@
     <menuitem id="saveNodetoLocal" label="&contextMenu.saveNodetoLocal;" oncommand="com.wuxuan.fromwheretowhere.main.saveNodetoLocal()"/>
     <menuitem id="opensidebar" label="&contextMenu.showLocalNotes;" oncommand="com.wuxuan.fromwheretowhere.main.showLocalNotes()"/>
     <menuseparator/>
+    <menuitem id="share" label="&contextMenu.shareWithWorld;" oncommand="com.wuxuan.fromwheretowhere.main.shareToAll()"/>
+    <menuseparator/>
     <menuitem id="stats" label="stats" oncommand="com.wuxuan.fromwheretowhere.stats.all()"/>
   </menupopup>
   <popupset>
