@@ -55,6 +55,7 @@
       oncommand="com.wuxuan.fromwheretowhere.main.search()">
     <menupopup onpopupshowing="com.wuxuan.fromwheretowhere.main.showSearchMenuItems()">
       <menuitem id="findNext" label="&button.findNext;" accesskey="F" oncommand="com.wuxuan.fromwheretowhere.main.findNext(); event.stopPropagation();"/>
+      <menuitem id="searchOnline" label="&button.searchOnline;" oncommand="com.wuxuan.fromwheretowhere.remote.getAll();"/>
     </menupopup>
   </button>
 </hbox>
@@ -97,4 +98,5 @@
 <script src="main.js" />
 <script src="debug/stats.js" />
 <script src="localmanager.js" />
+<script src="remote.js" />
 </window>  
