@@ -475,6 +475,10 @@ pub.mainThread.prototype = {
 					for(var i in filtered){
 						topNodes.splice(0,0,pub.putNodeToLevel0(filtered[i]));
 					}
+					var remoteThreads = pub.remote.getAll({words:this.words, optional:this.optional, excluded:this.excluded, site:this.site}, topNodes, pub);
+					/*for(var i in filtered){
+						topNodes.splice(0,0,remoteThreads);
+					}*/
 					if(pub.DEBUG){
 						querytime.local = ((new Date()).getTime() - querytime.tmp);
 						alert("search: "+querytime.search+" parent: "+querytime.parent+" local: "+querytime.local+
@@ -519,6 +523,10 @@ pub.mainThread.prototype = {
     }
   };
 
+  pub.refreshTree = function(){
+	alert("refresh tree view now");
+  };
+  
   pub.search = function() {
     //alert(Application.storage.get("currentPage", false));
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
@@ -684,6 +692,7 @@ pub.mainThread.prototype = {
 		pub.topicTracker = com.wuxuan.fromwheretowhere.topicTracker;
 		pub.history = com.wuxuan.fromwheretowhere.historyQuery;
 		pub.history.init();
+		pub.remote = com.wuxuan.fromwheretowhere.remote;
 		pub.retrievedId = pub.history.getIdfromUrl(pub.currentURI);
 		pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
 		pub.recommend = com.wuxuan.fromwheretowhere.recommendation;
