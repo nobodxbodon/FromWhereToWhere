@@ -65,15 +65,13 @@ com.wuxuan.fromwheretowhere.remote = function(){
 			//threads=threads.filter(function(a){return !(!a||!a.content||!a.content.length);});
 			threads.forEach(function(element, index, array){array[index].content=JSON.parse(array[index].content);});
 			threads=threads.filter(function(a){return !(!a.content[0]||!a.content[0].label||!a.content[0].label.length);})
-			alert(threads.length);
 			//find dup by first order then compare same neighbors
             var tids = pub.getDupThreads(threads);
             var dupIds = [];
             for(var i in tids){
                 dupIds=dupIds.concat(tids[i]);
             }
-			alert(dupIds);
-            if(tids.length!=0){
+			if(tids.length!=0){
                 pub.reportDupThreads(tids);
             }
             var nodes = [];
@@ -86,13 +84,9 @@ com.wuxuan.fromwheretowhere.remote = function(){
             nodes = pub.markRemote(nodes);
             for(var i in nodes){
 				topNodes.splice(0,0,main.putNodeToLevel0(nodes[i]));
-                //alert(nodes[i].label);
 			}
             var updateLen = nodes.length;
-            //alert(updateLen);
             main.treeView.treeBox.rowCountChanged(0, updateLen);
-            //alert(origLen+" -> "+updateLen+":::"+JSON.stringify(nodes));
-            //callback();
           } else {  
             pub.popNotification("Server returns error"+feedback+": "+xhr.statusText);  
           }  
@@ -107,7 +101,6 @@ com.wuxuan.fromwheretowhere.remote = function(){
 
     var jsonString = 'report_dup=true&dups='+JSON.stringify(tids);//{"words":["spring"],"optional":[]}'//"load=true";//JSON.stringify(obj);
     xhr.setRequestHeader('Content-Type', "application/x-www-form-urlencoded");//"application/json");//
-    //alert(jsonString);
     xhr.setRequestHeader("Content-Length",jsonString.length);
     xhr.onreadystatechange = function (oEvent) {  
         if (xhr.readyState === 4) {  
