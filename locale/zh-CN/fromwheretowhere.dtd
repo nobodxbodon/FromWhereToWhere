@@ -12,6 +12,7 @@
 <!ENTITY contextMenu.showLocalNotes "打开/关闭记录侧栏">
 <!ENTITY contextMenu.openlocalnote "打开记录">
 <!ENTITY contextMenu.delete "删除">
+<!ENTITY contextMenu.shareWithWorld "与世界共享">
 
 <!ENTITY related.contextMenu.reverse "按词频反序">
 <!ENTITY related.contextMenu.more "更多...">

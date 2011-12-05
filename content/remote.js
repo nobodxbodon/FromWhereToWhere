@@ -4,7 +4,6 @@ com.wuxuan.fromwheretowhere.remote = function(){
   var xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Components.interfaces.nsIXMLHttpRequest);
     
   pub.addThread = function(subject, body){
-    //alert(body);
     xhr.open("POST", "http://127.0.0.1/fwtw-svr/ajax.php", true);
 
     var jsonString = 'add=true&subject='+escape(subject)+'&body='+escape(body);//{"words":["spring"],"optional":[]}'//"load=true";//JSON.stringify(obj);
@@ -14,24 +13,28 @@ com.wuxuan.fromwheretowhere.remote = function(){
     xhr.onreadystatechange = function (oEvent) {  
         if (xhr.readyState === 4) {  
           if (xhr.status === 200) {  
-            var addnote = document.getElementById("saved_note");
-            if(!addnote){
-                addnote = document.getElementById("shared_note");
-                addnote.value = "SHARED: "+subject;
-                document.getElementById("shared_notification").openPopup(null, "", 60, 50, false, false);
+            var response = JSON.parse(xhr.responseText);
+            if(!response){
+                pub.popNotification("Server returns inrecognizable response.");
+                return;
             }else{
-			addnote.value = "SHARED: "+subject;
-			document.getElementById("saved_notification").openPopup(null, "", 60, 50, false, false);
+                if(response.error){
+                    pub.popNotification("Server error: "+response.info);
+                    return;
+                }else if(response.warn){
+                    pub.popNotification("Server info: "+response.info);
+                }
             }
+            pub.popNotification("SHARED: "+subject);
           } else {  
-            alert("Error", xhr.statusText);  
+            pub.popNotification("Server returns error: "+xhr.statusText);  
           }  
         }
     };
     xhr.send(jsonString);
   };
   
-  //TODO: can't search for terms containing '&': escape()
+  //TODO: can't search for terms containing '&': escape
   pub.getAll = function(keywords, topNodes, main){
     //var http = new XMLHttpRequest();
     
@@ -44,6 +47,17 @@ com.wuxuan.fromwheretowhere.remote = function(){
         if (xhr.readyState === 4) {  
           if (xhr.status === 200) {  
             var response = JSON.parse(xhr.responseText);
+            if(!response){
+                pub.popNotification("Server returns inrecognizable response.");
+                return;
+            }else{
+                if(response.error){
+                    pub.popNotification("Server error: "+response.info);
+                    return;
+                }else if(response.warn){
+                    pub.popNotification("Server info: "+response.info);
+                }
+            }
             var threads = response.threads;
             var nodes = [];
             for(var i in threads){
@@ -51,46 +65,42 @@ com.wuxuan.fromwheretowhere.remote = function(){
             }
             nodes = main.localmanager.filterTree(nodes, keywords.words, keywords.optional, keywords.excluded, keywords.site);
             nodes = pub.markRemote(nodes);
-            var origLen = topNodes.length;
             for(var i in nodes){
 				topNodes.splice(0,0,main.putNodeToLevel0(nodes[i]));
                 //alert(nodes[i].label);
 			}
-            var updateLen = topNodes.length;
+            var updateLen = nodes.length;
+            //alert(updateLen);
+            main.treeView.treeBox.rowCountChanged(0, updateLen);
             //alert(origLen+" -> "+updateLen+":::"+JSON.stringify(nodes));
             //callback();
           } else {  
-            alert("Error", xhr.statusText);  
+            pub.popNotification("Server returns error: "+xhr.statusText);  
           }  
-        }/*else{
-            alert("not ready: "+xhr.readyState);
-        }*/
+        }
     };
     xhr.send(jsonString);
-    //http.send(JSON.stringify({"load":"true"}));
-    /*alert(body);
-    xhr.send(body);*/
+  };
+  
+  pub.popNotification = function(txt){
+    var addnote = document.getElementById("saved_note");
+    if(!addnote){
+      addnote = document.getElementById("shared_note");
+      addnote.value = txt;
+      document.getElementById("shared_notification").openPopup(null, "", 60, 50, false, false);
+    }else{
+	  addnote.value = txt;
+	  document.getElementById("saved_notification").openPopup(null, "", 60, 50, false, false);
+    }
   };
   
   pub.markRemote = function(threads){
     for(var i in threads){
         //TODO: change to style later
-        threads[i].label = "[REMOTE] "+threads[i].label;
+        threads[i].label = "[SHARED] "+threads[i].label;
     }
     return threads;
   };
-  
-  pub.useHttpResponse = function(http){
-    if(http.status == 200)  
-        alert(http.responseText); 
-    if(http.readyState == 4)
-    {
-        //alert(http.readystate);
-        alert("OMG IT WORKS!!!");
-    }else{
-        alert("wth is readystate: "+http.readyState);
-    }
-  }
   
   return pub;
 }();
