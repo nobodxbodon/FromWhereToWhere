@@ -10,7 +10,11 @@
     <menuitem id="openlocalnote" label="&contextMenu.openlocalnote;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.openNode()"/>
     <menuitem id="delete" label="&contextMenu.delete;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.deleteNotes()"/>
     <menuseparator/>
-    <menuitem id="share" label="&contextMenu.shareWithWorld;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.shareToAll()"/>
+    <menu id="share" label="&contextMenu.share;">
+      <menupopup>
+        <menuitem id="withAll" label="&contextMenu.shareWithWorld;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.shareToAll()"/>
+      </menupopup>
+    </menu>
   </menupopup>
 </popupset>
 

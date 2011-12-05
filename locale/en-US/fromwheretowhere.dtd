@@ -12,7 +12,8 @@
 <!ENTITY contextMenu.showLocalNotes "Open/close Notes Sidebar">
 <!ENTITY contextMenu.openlocalnote "Open Note">
 <!ENTITY contextMenu.delete "Delete">
-<!ENTITY contextMenu.shareWithWorld "Share with ENTIRE world">
+<!ENTITY contextMenu.share "Share this thread">
+<!ENTITY contextMenu.shareWithWorld "with ENTIRE world">
 
 <!ENTITY related.contextMenu.reverse "Reverse Order in Frequency">
 <!ENTITY related.contextMenu.more "More...">
