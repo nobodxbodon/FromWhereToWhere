@@ -3,7 +3,12 @@ com.wuxuan.fromwheretowhere.remote = function(){
   var pub={};
   var URL = "http://fromwheretowhere.net/fwtw-svr/ajax.php";
   var xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Components.interfaces.nsIXMLHttpRequest);
-    
+  
+	var DEBUG=false;
+	pub.dalert = function(str){
+		if(DEBUG)
+			alert(str);
+	}
   pub.addThread = function(subject, body){
 	var feedback = " when sharing";
     xhr.open("POST", URL, true);
@@ -46,51 +51,59 @@ com.wuxuan.fromwheretowhere.remote = function(){
     xhr.setRequestHeader('Content-Type', "application/x-www-form-urlencoded");//"application/json");//
     xhr.setRequestHeader("Content-Length",jsonString.length);
     xhr.onreadystatechange = function (oEvent) {  
-        if (xhr.readyState === 4) {  
-          if (xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            if(!response){
-                pub.popNotification("Server returns inrecognizable response"+feedback+".");
+      if (xhr.readyState === 4) {  
+        if (xhr.status === 200) {
+					pub.dalert(xhr.responseText);
+          var response = JSON.parse(xhr.responseText);
+          if(!response){
+              pub.popNotification("Server returns inrecognizable response"+feedback+".");
+              return;
+          }else{
+              if(response.error){
+                pub.popNotification("Server error"+feedback+": "+response.info);
                 return;
-            }else{
-                if(response.error){
-                    pub.popNotification("Server error"+feedback+": "+response.info);
-                    return;
-                }else if(response.warn){
-                    pub.popNotification("Server info"+feedback+": "+response.info);
-                }
-            }
-            var threads = response.threads;
-			//TODO: some content is null somehow...temp fix now! 'velocity...' in note for test
-			//threads=threads.filter(function(a){return !(!a||!a.content||!a.content.length);});
-			threads.forEach(function(element, index, array){array[index].content=JSON.parse(array[index].content);});
-			threads=threads.filter(function(a){return !(!a.content[0]||!a.content[0].label||!a.content[0].label.length);})
-			//find dup by first order then compare same neighbors
-            var tids = pub.getDupThreads(threads);
-            var dupIds = [];
-            for(var i in tids){
-                dupIds=dupIds.concat(tids[i]);
-            }
-			if(tids.length!=0){
-                pub.reportDupThreads(tids);
-            }
-            var nodes = [];
-            for(var i in threads){
-                if(dupIds.indexOf(threads[i].thread_id)<0){
-				  nodes=nodes.concat(threads[i].content);
-				}
-            }
-            nodes = main.localmanager.filterTree(nodes, keywords.words, keywords.optional, keywords.excluded, keywords.site);
-            nodes = pub.markRemote(nodes);
-            for(var i in nodes){
-				topNodes.splice(0,0,main.putNodeToLevel0(nodes[i]));
+              }else if(response.warn){
+                pub.popNotification("Server info"+feedback+": "+response.info);
+              }
+          }
+          var threads = response.threads;
+					pub.dalert(threads.length);
+					//TODO: some content is null somehow...temp fix now! 'velocity...' in note for test
+					threads=threads.filter(function(a){pub.dalert(a.content);return !(!a||!a.content||!a.content.length);});
+					for(var i in threads){
+						pub.dalert(threads[i].content);
+						threads[i].content = JSON.parse(threads[i].content);
+					}
+					//threads.forEach(function(element, index, array){array[index].content=JSON.parse(array[index].content);});
+					//threads=threads.filter(function(a){return !(!a.content[0]||!a.content[0].label||!a.content[0].label.length);})
+					//find dup by first order then compare same neighbors
+					pub.dalert(threads.length);
+					var tids = pub.getDupThreads(threads);
+					var dupIds = [];
+					for(var i in tids){
+						dupIds=dupIds.concat(tids[i]);
+					}
+					pub.dalert("dups:"+dupIds);
+					if(tids.length!=0){
+						pub.reportDupThreads(tids);
+					}
+					var nodes = [];
+					for(var i in threads){
+						if(dupIds.indexOf(threads[i].thread_id)<0){
+							nodes=nodes.concat(threads[i].content);
+						}
+					}
+					nodes = main.localmanager.filterTree(nodes, keywords.words, keywords.optional, keywords.excluded, keywords.site);
+					nodes = pub.markRemote(nodes);
+					for(var i in nodes){
+						topNodes.splice(0,0,main.putNodeToLevel0(nodes[i]));
+					}
+					var updateLen = nodes.length;
+					main.treeView.treeBox.rowCountChanged(0, updateLen);
+				} else {  
+					pub.popNotification("Server returns error"+feedback+": "+xhr.statusText);  
+				}  
 			}
-            var updateLen = nodes.length;
-            main.treeView.treeBox.rowCountChanged(0, updateLen);
-          } else {  
-            pub.popNotification("Server returns error"+feedback+": "+xhr.statusText);  
-          }  
-        }
     };
     xhr.send(jsonString);
   };
@@ -155,7 +168,8 @@ com.wuxuan.fromwheretowhere.remote = function(){
         var origLen = a.length;
         var repeated = [];
         for(var i=1; i<origLen; ++i) {
-          if(pub.sameThreads(a[i].content,a[i-1].content)){
+		  //TODO: only compare the first one here
+          if(pub.sameThreads(a[i].content[0],a[i-1].content[0])){
             if(!repeated[a[i].thread_id])
                 repeated[a[i-1].thread_id] = [a[i].thread_id];
             else
