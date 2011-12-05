@@ -62,7 +62,9 @@ com.wuxuan.fromwheretowhere.remote = function(){
             }
             var threads = response.threads;
 			//TODO: some content is null somehow...temp fix now! 'velocity...' in note for test
-			threads=threads.filter(function(a){return !(!a||!a.content||!a.content.length);});
+			//threads=threads.filter(function(a){return !(!a||!a.content||!a.content.length);});
+			threads.forEach(function(element, index, array){array[index].content=JSON.parse(array[index].content);});
+			threads=threads.filter(function(a){return !(!a.content[0]||!a.content[0].label||!a.content[0].label.length);})
 			alert(threads.length);
 			//find dup by first order then compare same neighbors
             var tids = pub.getDupThreads(threads);
@@ -77,7 +79,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
             var nodes = [];
             for(var i in threads){
                 if(dupIds.indexOf(threads[i].thread_id)<0){
-				  nodes=nodes.concat(JSON.parse(threads[i].content));
+				  nodes=nodes.concat(threads[i].content);
 				}
             }
             nodes = main.localmanager.filterTree(nodes, keywords.words, keywords.optional, keywords.excluded, keywords.site);
@@ -155,12 +157,12 @@ com.wuxuan.fromwheretowhere.remote = function(){
         if(!arr || !arr.length || arr.length<=1)
             return [];
         var a = arr.concat();
-        a.sort(function(a,b){return a.content.length<b.content.length;});
+        a.sort(function(a,b){return a.content[0].label.length<b.content[0].label.length;});
         //only work for string type
         var origLen = a.length;
         var repeated = [];
         for(var i=1; i<origLen; ++i) {
-          if(a[i].content == a[i-1].content){
+          if(pub.sameThreads(a[i].content,a[i-1].content)){
             if(!repeated[a[i].thread_id])
                 repeated[a[i-1].thread_id] = [a[i].thread_id];
             else
@@ -169,7 +171,24 @@ com.wuxuan.fromwheretowhere.remote = function(){
         }
         return repeated;
       };
-	  
+  
+  //if all the nodes are the same (label, url)
+  pub.sameThreads = function(t1, t2){
+	if(!t1||!t2||t1.label!=t2.label||t1.url!=t2.url)
+	  return false;
+	var ch1=t1.children;
+	var ch2=t2.children;
+	if(!ch1&&!ch2)
+	  return true;
+	if((!ch1&&ch2)||(!ch2&&ch1)||ch1.length!=ch2.length)
+	  return false;
+	for(var i=0;i<ch1.length;i++){
+	  if(!pub.sameThreads(ch1[i], ch2[i]))
+		return false;
+	}
+	return true;
+  };
+  
   return pub;
 }();
   
