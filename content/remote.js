@@ -96,7 +96,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
 					nodes = main.localmanager.filterTree(nodes, keywords.words, keywords.optional, keywords.excluded, keywords.site);
 					nodes = pub.markRemote(nodes);
 					for(var i in nodes){
-						topNodes.splice(0,0,main.putNodeToLevel0(nodes[i]));
+						topNodes.splice(0,0,main.putNodeToLevel0(pub.recursiveProcess(nodes[i], unescape)));
 					}
 					var updateLen = nodes.length;
 					main.treeView.treeBox.rowCountChanged(0, updateLen);
@@ -159,6 +159,19 @@ com.wuxuan.fromwheretowhere.remote = function(){
     return threads;
   };
   
+	pub.recursiveProcess = function(node, func){
+		if(!node)
+			return node;
+		if(node.label)
+			node.label=func(node.label);
+		if(node.children){
+			for(var i in node.children){
+				pub.recursiveProcess(node.children[i], func);
+			}
+		}
+		return node;
+	};
+	
   pub.getDupThreads = function(arr) {
         if(!arr || !arr.length || arr.length<=1)
             return [];
