@@ -41,12 +41,20 @@ com.wuxuan.fromwheretowhere.remote = function(){
     xhr.send(jsonString);
   };
   
+	pub.processEach=function(func){
+		return function(element, index, array){array[index]=func(array[index]);}
+	};
+	
   //TODO: can't search for terms containing '&': escape
   pub.getAll = function(keywords, topNodes, main){
     //var http = new XMLHttpRequest();
     var feedback = " when searching";
     xhr.open("POST", URL, true);
 
+		keywords.words.forEach(pub.processEach(escape));
+		keywords.optional.forEach(pub.processEach(escape));
+		keywords.excluded.forEach(pub.processEach(escape));
+		keywords.site.forEach(pub.processEach(escape));
     var jsonString = 'search=true&keywords='+JSON.stringify(keywords);//{"words":["spring"],"optional":[]}'//"load=true";//JSON.stringify(obj);
     xhr.setRequestHeader('Content-Type', "application/x-www-form-urlencoded");//"application/json");//
     xhr.setRequestHeader("Content-Length",jsonString.length);
@@ -60,6 +68,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
               return;
           }else{
               if(response.error){
+								dalert("res error: "+response.error);
                 pub.popNotification("Server error"+feedback+": "+response.info);
                 return;
               }else if(response.warn){
@@ -95,6 +104,11 @@ com.wuxuan.fromwheretowhere.remote = function(){
 					}
 					nodes = main.localmanager.filterTree(nodes, keywords.words, keywords.optional, keywords.excluded, keywords.site);
 					nodes = pub.markRemote(nodes);
+					pub.dalert(topNodes.length);
+					if(topNodes[0].placeId==-1){
+						pub.dalert("rm sus first");
+						main.treeView.delSuspensionPoints(-1);
+					}
 					for(var i in nodes){
 						topNodes.splice(0,0,main.putNodeToLevel0(pub.recursiveProcess(nodes[i], unescape)));
 					}

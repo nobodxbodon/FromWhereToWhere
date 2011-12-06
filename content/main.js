@@ -537,13 +537,9 @@ pub.mainThread.prototype = {
           return;
         }
         //when allPpids = null/[], show "no result with xxx", to distinguish with normal nothing found
-				if(topNodes.length==0){
-          var nodes = [];
-          nodes.push(pub.history.ReferedHistoryNode(-1, -1, pub.utils.buildFeedback(this.words, this.optional, this.excluded, this.site, this.time), null, false, false, [], 1));
-          pub.treeView.visibleData = nodes;
-        }else{
-          pub.treeView.visibleData = topNodes;
-        }
+				if(topNodes.length==0)
+          topNodes.push(pub.history.ReferedHistoryNode(-1, -1, pub.utils.buildFeedback(this.words, this.optional, this.excluded, this.site, this.time), null, false, false, [], 1));
+        pub.treeView.visibleData = topNodes;
         pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
       } catch(err) {
         Components.utils.reportError(err);
