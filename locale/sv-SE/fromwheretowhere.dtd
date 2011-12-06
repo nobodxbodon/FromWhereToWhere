@@ -12,7 +12,7 @@
 <!ENTITY contextMenu.showLocalNotes "Öppna/Stäng sidopanelen Lokala anteckningar">
 <!ENTITY contextMenu.openlocalnote "Öppna Lokala anteckningar">
 <!ENTITY contextMenu.delete "Ta bort">
-<!ENTITY contextMenu.share "Share this thread">
+<!ENTITY contextMenu.share "Share the Selected">
 <!ENTITY contextMenu.shareWithWorld "with ENTIRE world">
 
 <!ENTITY related.contextMenu.reverse "Reverse Order in Frequency">
