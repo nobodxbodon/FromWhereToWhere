@@ -76,7 +76,6 @@ com.wuxuan.fromwheretowhere.remote = function(){
               }
           }
           var threads = response.threads;
-					pub.dalert(threads.length);
 					//TODO: some content is null somehow...temp fix now! 'velocity...' in note for test
 					threads=threads.filter(function(a){pub.dalert(a.content);return !(!a||!a.content||!a.content.length);});
 					for(var i in threads){
