@@ -1,0 +1,37 @@
+<!ENTITY mainMenu.search "Sök i historiken">
+<!ENTITY mainMenu.recommend "Uppdatera sökförslag automatiskt">
+
+<!ENTITY contextMenu.switchToTab "Växla till flik">
+<!ENTITY contextMenu.openinnewtab "Öppna sida i ny flik">
+<!ENTITY contextMenu.openlocalcopy "Öppna lokal kopia">
+<!ENTITY contextMenu.export "Exportera som…">
+<!ENTITY contextMenu.formatJSON "JSON">
+<!ENTITY contextMenu.formatHTML "HTML">
+<!ENTITY contextMenu.import "Importera från…">
+<!ENTITY contextMenu.saveNodetoLocal "Spara till Lokala anteckningar">
+<!ENTITY contextMenu.showLocalNotes "Öppna/Stäng sidopanelen Lokala anteckningar">
+<!ENTITY contextMenu.openlocalnote "Öppna Lokala anteckningar">
+<!ENTITY contextMenu.delete "Ta bort">
+<!ENTITY contextMenu.share "Share the Selected">
+<!ENTITY contextMenu.shareWithWorld "with ENTIRE world">
+
+<!ENTITY related.contextMenu.reverse "Reverse Order in Frequency">
+<!ENTITY related.contextMenu.more "More...">
+
+<!ENTITY button.searchallwords "Sök">
+<!ENTITY button.findNext "Sök nästa">
+
+<!ENTITY notesidebar.title "Lokala anteckningar">
+<!ENTITY table.title "Rubrik">
+<!ENTITY table.url "URL">
+<!ENTITY table.date "Senast besökt">
+<!ENTITY note.savedate "Sparades">
+
+<!ENTITY option.pane.general "General">
+<!ENTITY option.pane.search "Search">
+<!ENTITY option.tbButtonAction "Åtgärd för verktygsfältsknappen">
+<!ENTITY option.none "Ingen">
+<!ENTITY option.searchHistory "Sök i historiken">
+<!ENTITY option.toggleSugPanel "Visa/dölj sökförslagspanelen">
+<!ENTITY option.related.showRelatedKeywords "Show Related Keywords">
+<!ENTITY option.related.highFrequency "High Frequency Largest">
