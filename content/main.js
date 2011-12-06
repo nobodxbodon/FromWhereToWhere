@@ -231,6 +231,7 @@ pub.mainThread.prototype = {
     var localItem = document.getElementById("local");
 		var switchToTab = document.getElementById("switchToTab");
     var openinnewtab = document.getElementById("openinnewtab");
+    var shareThread = document.getElementById("share");
     var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
     if(node){
       var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(node.url);
@@ -246,7 +247,9 @@ pub.mainThread.prototype = {
 		
     var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
     var propertyItem = document.getElementById("export-menu");
-    propertyItem.hidden = (selectedIndex.length==0);
+		var noneSelected = (selectedIndex.length==0);
+    propertyItem.hidden = noneSelected;
+		shareThread.hidden = noneSelected;
   };
   
   pub.showSearchMenuItems = function(){

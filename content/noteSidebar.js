@@ -117,6 +117,9 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     openItem.hidden = (node==null);
     var deleteItem = document.getElementById("delete");
     deleteItem.hidden = (node==null);
+		var shareThread = document.getElementById("share");
+		var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
+    shareThread.hidden = (selectedIndex.length!=1);
   };
   
   pub.deleteNotes = function(){
