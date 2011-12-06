@@ -94,7 +94,7 @@ jQuery.extend({
 	},
 
 	Model: function(){
-        var DEBUG=true;
+        var DEBUG=false;
         
         function dAlert(msg){
             if(DEBUG)

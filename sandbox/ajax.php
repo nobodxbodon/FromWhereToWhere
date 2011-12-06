@@ -97,14 +97,13 @@ try{
                     $optionalTerm=$optionalTerm . " OR " . COL_BODY . " LIKE " . $partTerm;//'%" + optional[i] + "%'"
                 }
             }
-        if($must>0 || $$siteCount>0){
+        if($must>0 || $siteCount>0){
             $term = "SELECT * FROM (" . $term . ") AS beforeOpt WHERE" . $optionalTerm;
         }else if($count>0){
             $term = "SELECT * FROM " . $term . " WHERE" . $optionalTerm;
         }
       }
       
-      error_log($term);
       error_log("opt count: ".$count);
       return $term;
       
@@ -169,6 +168,8 @@ try{
 		$note["content"] = $body;
 		$ret = array();
 		$ret["error"] = false;
+        $ret["warn"] = false;
+        $ret["info"] = "test warn msg";
 		$ret["threads"] = array($note);
 		echo json_encode($ret);
 	}else if(isset($_REQUEST["load"])){
@@ -198,6 +199,9 @@ try{
 		while($row = mysql_fetch_array($result)){
 			$ret["threads"][] = $row;
 		}
+        $ret["error"] = false;
+        $ret["warn"] = false;
+        $ret["info"] = "test warn msg";
 		echo json_encode($ret);
         //echo sql_searchNoteByKeywords(json_decode($keywords));
 	}else if(isset($_REQUEST["report_dup"])){
@@ -222,6 +226,7 @@ try{
         }
         echo json_encode($ret);
     }else{
+        error_log($_REQUEST["data"]);
 		// the client asked for something we don't support
 		throw new Exception("not supported operation");
 	}
