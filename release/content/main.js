@@ -231,6 +231,7 @@ pub.mainThread.prototype = {
     var localItem = document.getElementById("local");
 		var switchToTab = document.getElementById("switchToTab");
     var openinnewtab = document.getElementById("openinnewtab");
+    var shareThread = document.getElementById("share");
     var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
     if(node){
       var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(node.url);
@@ -246,7 +247,9 @@ pub.mainThread.prototype = {
 		
     var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
     var propertyItem = document.getElementById("export-menu");
-    propertyItem.hidden = (selectedIndex.length==0);
+		var noneSelected = (selectedIndex.length==0);
+    propertyItem.hidden = noneSelected;
+		shareThread.hidden = noneSelected;
   };
   
   pub.showSearchMenuItems = function(){
@@ -323,6 +326,39 @@ pub.mainThread.prototype = {
 		var sidebarRef = "chrome://FromWhereToWhere/content/sidebar.xul".toLowerCase();
 		return sidebarWindow.location.href == sidebarRef;
 	};
+	
+	//same as local notes, but only send subject & node for now
+	pub.shareToAll = function(){
+	  var select = pub.getCurrentSelected();
+	  var json = JSON.stringify(select);
+	  var recordName = "";
+	  var recordType = -1;
+	  var recordUrl = "";
+	  var searchTerm = "";
+	  var currentURI = "";
+	  if(select.length==0){
+		alert("No record is saved");
+	  } else {
+		recordName = select[0].label;
+		recordUrl = select[0].url;
+		/* recordName can duplicate in the records */
+		/* the order matters now, as keyword searching is allowed when pub.currentURI is valid*/
+		// if there's keywords, recordUrl isn't set
+		if(pub.keywords!=""){  
+		  searchTerm = pub.keywords;
+				  recordType = 1;
+		} else if(pub.currentURI){
+		  currentURI = pub.currentURI;
+				  recordType = 0;
+			  //id is null always, placeId isn't null unless it's imported
+		} else if(select[0].placeId==null) {
+		  // imported: use the label of first top node as name for now
+		  // TODO: pick tags
+				  recordType = 2;
+		}
+		pub.remote.addThread(recordName, json);
+	  }
+	}
 	
   // recordType: 0 - from URI; 1 - from searching keywords; 2 - imported; -1 - invalid.
   // TODO: make constants!
@@ -411,44 +447,6 @@ pub.mainThread.prototype = {
   
   pub.pidwithKeywords = [];
   	
-	pub.timeInterpret = function(times){
-		var feedback = "";
-		for(var i in times){
-			if(times[i].since!=-1){
-				if(i!=0)
-					feedback = feedback+" AND";
-				feedback = feedback+" since "+(new Date(times[i].since));
-			}
-			if(times[i].till!=Number.MAX_VALUE){
-				if(i!=0)
-					feedback = feedback+" AND";
-				feedback = feedback+" till "+(new Date(times[i].till));
-			}
-		}
-		return feedback;
-	};
-	
-	pub.buildFeedback = function(words, optional, excluded, site, time){
-		var feedback = "No history found";
-		if(words.length>0){
-			feedback += " with all of ["+words+"],";
-		}
-		if(optional.length>0){
-			feedback += " with any of ["+optional+"],";
-		}
-		if(excluded.length>0){
-			feedback += " without " + excluded;
-		}
-		feedback+=" in title";
-		if(site.length>0){
-			feedback+=", AND url with "+site;
-		}
-		if(time.length>0){
-			feedback+=", AND visit time"+pub.timeInterpret(time);
-		}
-		return feedback;
-	};
-	
 	//TODO: call getIncludeExclude here, save passing arguments?
   pub.searchThread = function(threadID, query) {
     this.threadID = threadID;
@@ -513,6 +511,10 @@ pub.mainThread.prototype = {
 					for(var i in filtered){
 						topNodes.splice(0,0,pub.putNodeToLevel0(filtered[i]));
 					}
+					var remoteThreads = pub.remote.getAll({words:this.words, optional:this.optional, excluded:this.excluded, site:this.site}, topNodes, pub);
+					/*for(var i in filtered){
+						topNodes.splice(0,0,remoteThreads);
+					}*/
 					if(pub.DEBUG){
 						querytime.local = ((new Date()).getTime() - querytime.tmp);
 						alert("search: "+querytime.search+" parent: "+querytime.parent+" local: "+querytime.local+
@@ -535,13 +537,9 @@ pub.mainThread.prototype = {
           return;
         }
         //when allPpids = null/[], show "no result with xxx", to distinguish with normal nothing found
-				if(topNodes.length==0){
-          var nodes = [];
-          nodes.push(pub.history.ReferedHistoryNode(-1, -1, pub.buildFeedback(this.words, this.optional, this.excluded, this.site, this.time), null, false, false, [], 1));
-          pub.treeView.visibleData = nodes;
-        }else{
-          pub.treeView.visibleData = topNodes;
-        }
+				if(topNodes.length==0)
+          topNodes.push(pub.history.ReferedHistoryNode(-1, -1, pub.utils.buildFeedback(this.words, this.optional, this.excluded, this.site, this.time), null, false, false, [], 1));
+        pub.treeView.visibleData = topNodes;
         pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
       } catch(err) {
         Components.utils.reportError(err);
@@ -557,6 +555,10 @@ pub.mainThread.prototype = {
     }
   };
 
+  pub.refreshTree = function(){
+	alert("refresh tree view now");
+  };
+  
   pub.search = function() {
     //alert(Application.storage.get("currentPage", false));
     pub.treeView.treeBox.rowCountChanged(0, -pub.treeView.visibleData.length);
@@ -722,6 +724,7 @@ pub.mainThread.prototype = {
 		pub.topicTracker = com.wuxuan.fromwheretowhere.topicTracker;
 		pub.history = com.wuxuan.fromwheretowhere.historyQuery;
 		pub.history.init();
+		pub.remote = com.wuxuan.fromwheretowhere.remote;
 		pub.retrievedId = pub.history.getIdfromUrl(pub.currentURI);
 		pub.UIutils = com.wuxuan.fromwheretowhere.UIutils;
 		pub.recommend = com.wuxuan.fromwheretowhere.recommendation;

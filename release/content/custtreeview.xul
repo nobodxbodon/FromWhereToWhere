@@ -37,6 +37,12 @@
     </menu>
     <menuitem id="saveNodetoLocal" label="&contextMenu.saveNodetoLocal;" oncommand="com.wuxuan.fromwheretowhere.main.saveNodetoLocal()"/>
     <menuitem id="opensidebar" label="&contextMenu.showLocalNotes;" oncommand="com.wuxuan.fromwheretowhere.main.showLocalNotes()"/>
+    <menuseparator/>
+    <menu id="share" label="&contextMenu.share;">
+      <menupopup>
+        <menuitem id="withAll" label="&contextMenu.shareWithWorld;" oncommand="com.wuxuan.fromwheretowhere.main.shareToAll()"/>
+      </menupopup>
+    </menu>
   </menupopup>
   <popupset>
     <menupopup id="related-term-menu" onpopupshowing="com.wuxuan.fromwheretowhere.main.showRelatedMenu();">
@@ -94,4 +100,5 @@
 <script src="historyQuery.js" />
 <script src="main.js" />
 <script src="localmanager.js" />
+<script src="remote.js" />
 </window>  

@@ -128,13 +128,20 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
        
   pub.nodefromPlaceidWithChildInfo = function(pid, hasChildren, query) {
     var actualThing = false;
+	var potentialchildren = [];
+	var label = pub.getTitlefromId(pid);
 		//this has to be done because no one is above you doesn't tell if you have ones below
-		if(!hasChildren){
-			var potentialchildren = pub.getAllChildrenfromPlaceId(pid, query);
+		if(label==null || label=="" || !hasChildren){
+			potentialchildren = pub.getAllChildrenfromPlaceId(pid, query);
 			actualThing = (potentialchildren!=null) && (potentialchildren.length>0);
 			hasChildren = actualThing;
 		}
-    return pub.ReferedHistoryNode(null, pid, pub.getTitlefromId(pid), pub.getUrlfromId(pid), hasChildren, false, [], 0);
+	if(label==null || label==""){
+	  label = "[SUBJECT] "+ pub.getNonEmptyTitlefromIds(potentialchildren);
+	}
+	if(pub.DEBUG)
+	  alert(label);
+    return pub.ReferedHistoryNode(null, pid, label, pub.getUrlfromId(pid), hasChildren, false, [], 0);
   };
 	
   pub.getIdfromUrl = function(url){
@@ -181,7 +188,23 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     var statement = pub.mDBConn.createStatement("SELECT DISTINCT title FROM moz_places where id IN ("+pids+") AND title!=''");
     return pub.queryAll(statement, "str", 0); 
   };
-	
+		
+  pub.getNonEmptyTitlefromIds = function(placeIds){
+	var pids="";
+	  var lastIdx=placeIds.length-1;
+	  for(var i=0;i<placeIds.length;i++){
+		pids+= placeIds[i];
+		if(i!=lastIdx){
+			pids+=",";
+		}
+	}
+	var term = "SELECT title FROM moz_places where id IN ("+pids+") AND title!='' LIMIT 1";
+	if(pub.DEBUG)
+	  alert(term);
+    var statement = pub.mDBConn.createStatement(term);
+    return pub.queryOne(statement, "str", 0); 
+  };
+  
   pub.getTitlefromId = function(id){
     var statement = pub.mDBConn.createStatement("SELECT title FROM moz_places where id=:id");
     statement.params.id=id;
@@ -242,11 +265,11 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 	
 	pub.sqlStMustFilter = function(term, words){
 		if(words.length==0){
-			term = "SELECT id,title FROM (" + term + ")";
+			term = "SELECT id FROM (" + term + ")";
 		}
     else if(words.length==1){
 			var partTerm = pub.utils.getRightQuote(words[0]);
-      term = "SELECT id,title FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[0] + "%'";
+      term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[0] + "%'";
     } else {
 			var titleLike = "";
       for(var i = words.length-1; i>=0; i--){
@@ -256,11 +279,16 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
         } else if(i!=0){
           term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         } else {
-          term = "SELECT id,title FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
+          term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         }
 				// no proof to be faster to use conjunction (AND)
       }
     }
+		return term;
+	};
+	
+	pub.selectIdandTitle = function(term){
+		term = "SELECT id,title FROM moz_places where id IN ("+term+")";
 		return term;
 	};
 	
@@ -289,6 +317,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 		if(term!=oldTerm){
 			alert("new:\n"+term+"\n\n\nold:\n"+ oldTerm);
 		}
+		term = pub.selectIdandTitle(term);
 		//alert(term);
     var statement = pub.mDBConn.createStatement(term);
 		var rtn = {ids:[],titles:[]};
@@ -351,11 +380,11 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 		//alert(optionalTerm);
 		
 		if(words.length==0){
-			term = "SELECT id,title FROM (" + optionalTerm + ")";
+			term = "SELECT id FROM (" + optionalTerm + ")";
 		}
     else if(words.length==1){
 			var partTerm = pub.utils.getRightQuote(words[0]);
-      term = "SELECT id,title FROM (" + optionalTerm + ") WHERE TITLE LIKE "+partTerm;//'%" + words[0] + "%'";
+      term = "SELECT id FROM (" + optionalTerm + ") WHERE TITLE LIKE "+partTerm;//'%" + words[0] + "%'";
     } else {
 			var titleLike = "";
       for(var i = words.length-1; i>=0; i--){
@@ -365,7 +394,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
         } else if(i!=0){
           term = "SELECT * FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         } else {
-          term = "SELECT id,title FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
+          term = "SELECT id FROM (" + term + ") WHERE TITLE LIKE "+partTerm;//'%" + words[i] + "%'";
         }
 				// no proof to be faster
 				/*if(i!=0){
@@ -414,18 +443,18 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 				t = t+fix+"<"+times[i].till*1000;
 			}
 			//if there's no restriction, leave the term as it was
-			if(t==""){
+			/*if(t==""){
 				return term;
-			}
+			}*/
 		//	if(i==idx){
 		//		}else{
 			fterm = fterm + t;
 		//	}
 		}
 		if(singular_table)
-			return "SELECT DISTINCT place_id FROM moz_historyvisits WHERE place_id=("+term+ ")" + t + fterm;
+			return "SELECT DISTINCT place_id FROM moz_historyvisits WHERE place_id=("+term+ ")" + fterm;
 		else
-			return "SELECT DISTINCT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + t + fterm;
+			return "SELECT DISTINCT place_id FROM moz_historyvisits WHERE place_id in ("+term+")" + fterm;
 			
 	};
 	
@@ -541,7 +570,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   };
   
   pub.allKnownParentPids = [];
-  pub.DEBUG = true;
+  pub.DEBUG = false;
 	pub.querytime = {};
 	
 	//return all the top ancesters of a placeid, and add to allKnownParents

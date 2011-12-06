@@ -228,7 +228,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
   //indexOf is case-sensitive!
   pub.walkNode = function(maybe, words, optional, excluded, site){
     //FIXED: label can be null
-    if(!maybe || !maybe.label)
+    if(!maybe.label)
       return [];
     var label = maybe.label.toLowerCase();
     var url = maybe.url.toLowerCase();

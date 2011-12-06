@@ -53,3 +53,9 @@ Feature below (all about link suggestion) is tested in 4.0 under Vista, and 3.6 
 3) if select 'search history' -> 'OK', clicking toolbar button will open history searching view.
 4) if select 'show/hide suggestion panel' -> 'OK', clicking toolbar button will show the panel if it's hidden, and hide it if it's open.
 5) configured option will be kept after restarting ff
+
+------Sharing Related-------
+NOTE: below should work both in 'local note' view or search view.
+1) if select one node or multiple nodes, 'Share' is shown in the context menu.
+2) 'with ENTIRE world' will post the node (if not expanded then only the root node) to public domain, with a notification panel shows success.
+3) searching with keywords will get results from public domain if any (eng and chn tested).

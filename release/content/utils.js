@@ -511,6 +511,45 @@ com.wuxuan.fromwheretowhere.utils = function(){
     return {origkeywords : origkeywords, words: quotedWords, optional : words, excluded : excluded, site : site, time : time};
   };
   
+	pub.buildFeedback = function(words, optional, excluded, site, time){
+		var feedback = "No history found";
+		if(words.length>0){
+			feedback += " with all of ["+words+"],";
+		}
+		if(optional.length>0){
+			feedback += " with any of ["+optional+"],";
+		}
+		if(excluded.length>0){
+			feedback += " without " + excluded;
+		}
+		feedback+=" in title";
+		if(site.length>0){
+			feedback+=", AND url with "+site;
+		}
+		if(time.length>0){
+			feedback+=", AND visit time"+pub.timeInterpret(time);
+		}
+		return feedback;
+	};
+	
+	
+	pub.timeInterpret = function(times){
+		var feedback = "";
+		for(var i in times){
+			if(times[i].since!=-1){
+				if(i!=0)
+					feedback = feedback+" AND";
+				feedback = feedback+" since "+(new Date(times[i].since));
+			}
+			if(times[i].till!=Number.MAX_VALUE){
+				if(i!=0)
+					feedback = feedback+" AND";
+				feedback = feedback+" till "+(new Date(times[i].till));
+			}
+		}
+		return feedback;
+	};
+	
   pub.getFFVersion = function(){
     if (/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){ //test for Firefox/x.x or Firefox x.x (ignoring remaining digits);
       var ffversion=new Number(RegExp.$1) // capture x.x portion and store as a number
