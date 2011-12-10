@@ -64,11 +64,19 @@ jQuery.extend({
 				view.log("in search finished");
 				view.log("empty notes first");
 				view.cleanNotes();
+        var minId = -1;
 				$.each(notes, function(i){
 					ids += (ids.length ? ", " : "") + notes[i].getId();
+          if(minId==-1 || parseInt(minId)>parseInt(notes[i].getId())){
+            //alert("change "+minId+" to "+notes[i].getId());
+            minId=notes[i].getId();
+          }
 					//view.log("force loading single: " + notes[i].getId());
 					view.loadNote(notes[i], true);
 				});
+        var moreHolder = new $.Note({thread_id:minId, subject:"more...", content:'[{"label":"MORE...","url":null,"isContainer":false,"children":[],"more":true}]'}, model);
+        //moreHolder.minId=minId;//setId(-1);
+        view.loadNote(moreHolder, true);
 				view.log("just got search result via ajax: " + ids);
 				view.log("done.");
 				view.setSearchFormEnabled(true);

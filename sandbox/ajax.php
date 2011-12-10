@@ -61,7 +61,7 @@ try{
 		}
 	}
     
-    function sql_searchNoteByKeywords($keywords){
+    function sql_searchNoteByKeywords($keywords, $startId){
         //add site filter
 		$term = "`" . TABLE_NAME . "`";
         $site = $keywords->{'site'};
@@ -70,7 +70,7 @@ try{
         $count = count($site);
 		if($site && $count!=0){
         for($i = $count-1; $i>=0; $i--){
-          $term = "(SELECT * FROM " . $term . " WHERE " . COL_BODY . " LIKE '%" . $site[$i] . "%')";
+          $term = "(SELECT * FROM " . $term . " WHERE " . COL_BODY . " LIKE '%" . $site[$i] . "%') AS S" . $i;
         }
       }
       $siteCount = $count;
@@ -104,7 +104,11 @@ try{
         }
       }
       
-      error_log("opt count: ".$count);
+      
+        if($startId==-1){
+            $term = $term . " AND " . COL_ID . ">" . $startId;
+        }
+        $term = $term . " ORDER BY " . COL_ID . " DESC" . " LIMIT " . NUMLIMIT;
       return $term;
       
 		//if(!is_array($words)) throw new Exception("argument to " . __METHOD__ . " must be an array");
@@ -113,8 +117,13 @@ try{
 	}
     
 	// get all notes from the DB
-	function sql_getAllNotes(){
-		return "SELECT * FROM `" . TABLE_NAME . "` ORDER BY " . COL_DT . " DESC";
+	function sql_getAllNotes($startId){
+		$term = "SELECT * FROM `" . TABLE_NAME . "`";
+        if($startId==-1){
+            return $term . " WHERE " . COL_ID . ">" . $startId . " LIMIT " . NUMLIMIT;
+        } else{
+            return $term;
+        }
 	}
 	
 	// delete a note from the DB
@@ -173,12 +182,13 @@ try{
 		$ret["threads"] = array($note);
 		echo json_encode($ret);
 	}else if(isset($_REQUEST["load"])){
-		// request to load all notes
+		// request to load all notes, limit 10 each time
+        $startId = $_REQUEST["startId"];
 		$ret = array();
 		$ret["error"] = false;
 		$ret["dt"] = gmdate("Y-m-d H:i:s");
 		$ret["threads"] = array();
-		$result = query(sql_getAllNotes());
+		$result = query(sql_getAllNotes($startId));
 		while($row = mysql_fetch_array($result)){
 			$ret["threads"][] = $row;
 		}
@@ -189,12 +199,8 @@ try{
 		$dt = gmdate("Y-m-d H:i:s");
 		$keywords = $_REQUEST["keywords"];
 		$ret = array();
-		//$word = $_REQUEST["word"];
-		//$words = $subject["words"];
-        //$left = $_REQUEST["left"];
-        //$right = $_REQUEST["right"];
-        //$sqlQuery = $left ." `". TABLE_NAME ."` ". $right . " ORDER BY " . COL_DT . " DESC";
-                $queryTerm = sql_searchNoteByKeywords(json_decode($keywords));
+		$startId = $_REQUEST["startId"];
+        $queryTerm = sql_searchNoteByKeywords(json_decode($keywords), $startId);
 		$result = query($queryTerm);
 		while($row = mysql_fetch_array($result)){
 			$ret["threads"][] = $row;

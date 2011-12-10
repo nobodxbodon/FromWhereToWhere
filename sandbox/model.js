@@ -171,11 +171,12 @@ jQuery.extend({
 		 * or return data from cache if it's already
 		 * loaded
 		 */
-		this.getAll = function(){
+		this.getAll = function(startId){
 			that.notifyLoadBegin();
 			$.ajax({
 				url: 'ajax.php',
-				data : { load : true },
+				data : { load : true,
+                startId: startId},
 				type: 'GET',
 				dataType: 'json',
 				timeout: 1000,
@@ -236,7 +237,9 @@ jQuery.extend({
 			return cache.toArray();
 		}
 		
-		this.searchNote = function(keywords){
+		this.searchNote = function(keywords, startId){
+      if (!startId)
+        startId=-1;
 			that.notifySearchingNote(keywords);
             var jsStr = JSON.stringify(keywords);
             dAlert(jsStr);
@@ -246,9 +249,8 @@ jQuery.extend({
 			$.ajax({
 				url: 'ajax.php',
 				data : { search : true, 
-						 //left : sqlQuery.left,
-                         //right :sqlQuery.right
-                         keywords: jsStr},
+                keywords: jsStr,
+                startId: startId},
 				type: 'POST',
 				dataType: 'json',
 				timeout: 1000,

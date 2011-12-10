@@ -20,6 +20,9 @@
                 // A DynaTreeNode object is passed to the activation handler
                 // Note: we also get this event, if persistence is on, and the page is reloaded.
                 //alert("You activated " + node.data.title);
+                if( node.data.more) {
+                    alert("start from id="+node.data.minId);
+                }
                 if( node.data.href ){
 					// Open target
 					window.open(node.data.href, node.data.target);

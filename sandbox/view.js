@@ -59,7 +59,7 @@ jQuery.extend({
         //$notesbak = $('#ui #notes').dynatree("getRoot");
             
 		// get the add form
-		$addform = $("#ui #addform");
+		$addform = $("#ui #addform").hide();
 		
 		// get the edit form (hide it by default)
 		$editform = $("#ui #editform").hide();
@@ -145,12 +145,20 @@ jQuery.extend({
 			alert("wrong format records");
 		}
 		
+    this.processEach=function(func){
+		  return function(element, index, array){array[index]=func(array[index]);}
+	  }
+    
 		//search for a term in the notes
 		//TODO: if any exception happens, still make the page searchable (input enable!) at least after refreshing page
 		function submitSearchForm(){
 			var terms = $searchform.find(".terms").val();
 			dAlert(terms);
 			var keywords = FWTWUtils.getIncludeExcluded(terms);
+      keywords.words.forEach(that.processEach(escape));
+		  keywords.optional.forEach(that.processEach(escape));
+		  keywords.excluded.forEach(that.processEach(escape));
+		  keywords.site.forEach(that.processEach(escape));
 			dAlert(keywords.origkeywords+"\nwords:"+keywords.words+"\noptional:"+keywords.optional+"\nexcluded:"+keywords.excluded+"\nsite:"+keywords.site+"\ntime:"+ keywords.time);
 			if(terms==""){
 				alert("Please enter some search terms (\"\" for all)");
@@ -268,9 +276,15 @@ jQuery.extend({
 				//$notes.append(dom.getDOM());
                 
                 var treeNodes = [];
+                //alert(note.getBody());
                 var fwtwNodes = JSON.parse(note.getBody());
                 for(var i in fwtwNodes){
-                    treeNodes.push(that.toTreeNode(fwtwNodes[i], true));
+                    var fwtwNode = that.toTreeNode(fwtwNodes[i], true);
+                    if(fwtwNode.more){
+                        fwtwNode.minId=note.getId();
+                        //alert("add more node");
+                    }
+                    treeNodes.push(fwtwNode);
                 }
                 //alert($notes);
                 //alert("add:"+note.getBody());
@@ -286,8 +300,9 @@ jQuery.extend({
 		
         this.toTreeNode = function(fwtw, isTop){
             var obj=new Object();
-            
-            obj.title = fwtw.label;
+            //if it's 'more' node, set .more to true
+            obj.more=fwtw.more
+            obj.title = unescape(fwtw.label);
             obj.href = fwtw.url;
             obj.isFolder = fwtw.isContainer;
             obj.children = [];
@@ -296,7 +311,7 @@ jQuery.extend({
             }
             return obj;
         }
-        
+  
 		/**
 		 * remove the note from view, but
 		 * don't remove from cache
