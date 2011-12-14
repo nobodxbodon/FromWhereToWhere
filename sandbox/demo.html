@@ -15,13 +15,15 @@
 
 <script type="text/javascript">
 	$(function(){
+		var model = new $.Model();
         $("#ui #notes").dynatree({
             onActivate: function(node) {
                 // A DynaTreeNode object is passed to the activation handler
                 // Note: we also get this event, if persistence is on, and the page is reloaded.
                 //alert("You activated " + node.data.title);
                 if( node.data.more) {
-                    alert("start from id="+node.data.minId);
+                    //alert("start from id="+node.data.minId);
+                    model.searchNote(null, node.data.minId);
                 }
                 if( node.data.href ){
 					// Open target
@@ -38,7 +40,6 @@
             },
             persist: true
         });
-		var model = new $.Model();
 		var view = new $.View($("#ui #notes").dynatree("getRoot"));
 		var controller = new $.Controller(model, view);
         

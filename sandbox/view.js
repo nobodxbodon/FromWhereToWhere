@@ -255,6 +255,14 @@ jQuery.extend({
 			$notes.removeChildren() ;
 		}
 		
+    this.removeMoreHolder = function(){
+      this.log("in remove more... holder");
+      var allNodes = $notes.getChildren();
+      if(!allNodes||allNodes.length==0)
+        return;
+      var lastNode = allNodes[allNodes.length-1];
+      lastNode.remove();
+    }
 		/**
 		 * a note was loaded/updated from the
 		 * cache, so let's build / update

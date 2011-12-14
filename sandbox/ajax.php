@@ -105,8 +105,8 @@ try{
       }
       
       
-        if($startId==-1){
-            $term = $term . " AND " . COL_ID . ">" . $startId;
+        if($startId!=-1){
+            $term = $term . " AND " . COL_ID . "<" . $startId;
         }
         $term = $term . " ORDER BY " . COL_ID . " DESC" . " LIMIT " . NUMLIMIT;
       return $term;
@@ -183,7 +183,7 @@ try{
 		echo json_encode($ret);
 	}else if(isset($_REQUEST["load"])){
 		// request to load all notes, limit 10 each time
-        $startId = $_REQUEST["startId"];
+        //$startId = $_REQUEST["startId"];
 		$ret = array();
 		$ret["error"] = false;
 		$ret["dt"] = gmdate("Y-m-d H:i:s");

@@ -13,7 +13,7 @@ jQuery.extend({
 				model.addNote(subj, body);
 			},
 			searchNoteClicked : function(keywords){
-				model.searchNote(keywords);
+				model.searchNote(keywords, null);
 			}
 		});
 		view.addListener(vlist);
@@ -59,11 +59,15 @@ jQuery.extend({
 				view.log("search failed");//FWTWUtils.buildFeedback(-1, keywords.words, keywords.optional, keywords.excluded, keywords.site, keywords.time));
 				view.setSearchFormEnabled(true);
 			},
-			searchNoteFinished : function(notes) {
+			searchNoteFinished : function(notes, clearAll) {
 				var ids = "";
 				view.log("in search finished");
-				view.log("empty notes first");
-				view.cleanNotes();
+        if(clearAll){
+            view.log("empty notes first");
+            view.cleanNotes();
+        }else{
+            view.removeMoreHolder();
+        }
         var minId = -1;
 				$.each(notes, function(i){
 					ids += (ids.length ? ", " : "") + notes[i].getId();
@@ -74,9 +78,11 @@ jQuery.extend({
 					//view.log("force loading single: " + notes[i].getId());
 					view.loadNote(notes[i], true);
 				});
-        var moreHolder = new $.Note({thread_id:minId, subject:"more...", content:'[{"label":"MORE...","url":null,"isContainer":false,"children":[],"more":true}]'}, model);
+        if(minId>1 && notes.length>0){
+          var moreHolder = new $.Note({thread_id:minId, subject:"more...", content:'[{"label":"MORE...","url":null,"isContainer":false,"children":[],"more":true}]'}, model);
         //moreHolder.minId=minId;//setId(-1);
-        view.loadNote(moreHolder, true);
+          view.loadNote(moreHolder, true);
+        }
 				view.log("just got search result via ajax: " + ids);
 				view.log("done.");
 				view.setSearchFormEnabled(true);

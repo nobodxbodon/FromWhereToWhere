@@ -114,6 +114,7 @@ jQuery.extend({
 		// a list of who is listening to us
 		var listeners = new Array();
 		
+    var lastKeywords = null;
 		// load a json response from an ajax call
 		function loadResponse(data){
 			lastLoad = data.dt;
@@ -148,6 +149,8 @@ jQuery.extend({
             if(tids.length!=0){
                 that.reportDupThreads(tids);
             }
+      if(!data.threads)
+        return out;
 			$.each(data.threads, function(item){
 				var newNote = data.threads[item];
                 if(dupIds.indexOf(newNote.thread_id)<0){
@@ -238,6 +241,10 @@ jQuery.extend({
 		}
 		
 		this.searchNote = function(keywords, startId){
+      if(keywords==null)
+        keywords=lastKeywords;
+      else
+        lastKeywords=keywords;
       if (!startId)
         startId=-1;
 			that.notifySearchingNote(keywords);
@@ -260,7 +267,7 @@ jQuery.extend({
 				success: function(data){
                     //TODO: if data==null, notify there's no search results
 					if(!data || data.error) return that.notifySearchFailed(keywords);
-					that.notifySearchFinished(returnResponse(data));
+					that.notifySearchFinished(returnResponse(data),(startId==-1));
 				}
 			});
 			return cache.toArray();
@@ -413,9 +420,9 @@ jQuery.extend({
 			});
 		}
 		
-		this.notifySearchFinished = function(notes){
+		this.notifySearchFinished = function(notes, clearAll){
 			$.each(listeners, function(i){
-				listeners[i].searchNoteFinished(notes);
+				listeners[i].searchNoteFinished(notes, clearAll);
 			});
 		}
 		
