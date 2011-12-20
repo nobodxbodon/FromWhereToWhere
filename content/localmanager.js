@@ -227,18 +227,19 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
 	
   //indexOf is case-sensitive!
   pub.walkNode = function(maybe, words, optional, excluded, site){
-    //FIXED: label can be null
-    if(!maybe.label)
-      return [];
-    var label = maybe.label.toLowerCase();
-    var url = maybe.url.toLowerCase();
-		//just to check keywords match
-		if(!pub.matchQuery(maybe, label, url, words, optional, excluded, site)){
-      return pub.walkAll(maybe.children, words, optional, excluded, site);
-    }else{
-			maybe.haveKeywords = true;
-			pub.walkAll(maybe.children, words, optional, excluded, site);
-			return [].push(maybe);
+    if(maybe.label){
+			var label = maybe.label.toLowerCase();
+			var url = maybe.url.toLowerCase();
+			//just to check keywords match
+			if(!pub.matchQuery(maybe, label, url, words, optional, excluded, site)){
+				return pub.walkAll(maybe.children, words, optional, excluded, site);
+			}else{
+				maybe.haveKeywords = true;
+				pub.walkAll(maybe.children, words, optional, excluded, site);
+				return [].push(maybe);
+			}
+		}else{
+			return pub.walkAll(maybe.children, words, optional, excluded, site);
 		}
   };
 	
@@ -312,7 +313,7 @@ com.wuxuan.fromwheretowhere.localmanager = function(){
     var statement = pub.localRecord.createStatement("CREATE TABLE IF NOT EXISTS " + pub.RECORDTABLENAME + "(type INTEGER, name STRING, url STRING, searchterm STRING, currentURI STRING, content STRING, savedate INTEGER)");
     try {
       if (statement.executeStep()) {
-        alert("table opened");
+        //alert("table opened");
       }
       statement.reset();
     } 
