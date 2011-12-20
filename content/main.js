@@ -2,6 +2,9 @@
 com.wuxuan.fromwheretowhere.main = function(){
   var pub={};
 
+	// Get a reference to the strings bundle
+  pub.stringsBundle = document.getElementById("string-bundle");
+	
   pub.getCurrentURI = function() {
     if(!window.opener){
       return "none";
@@ -219,7 +222,7 @@ pub.mainThread.prototype = {
       if(pid){
 	nodes.push(pub.history.nodefromPlaceid(pid, null));
       } else {
-	nodes.push(pub.history.ReferedHistoryNode(-1, -1, "No history found", null, false, false, [], 1));
+	nodes.push(pub.history.ReferedHistoryNode(-1, -1, pub.stringsBundle.getString('main.node.nohistory'), null, false, false, [], 1));
       }
     }
 		
@@ -394,7 +397,7 @@ pub.mainThread.prototype = {
       var saved = pub.localmanager.addRecord(recordType, recordName, recordUrl, searchTerm, currentURI, json, saveDate);
 			if(saved!=-1){
 				var savenote = document.getElementById("saved_note");
-				savenote.value = "SAVED: "+recordName;
+				savenote.value = pub.stringsBundle.getString('main.panel.saved')+" "+recordName;
 				document.getElementById("saved_notification").openPopup(null, "", 60, 50, false, false);
 			}
 			// if sidebar is open, close it first to save the sync trouble
@@ -415,13 +418,13 @@ pub.mainThread.prototype = {
   
   //when the first node is "no result found", remove it first, otherwise FF freezes when the next node is collapsed
   pub.importNodes = function(){
-    var json = window.prompt("Please paste the nodes' property (JSON format):", "[]");
+    var json = window.prompt(pub.stringsBundle.getString('main.view.import'), "[]");
     var newNodes = [];
     try{
       newNodes = JSON.parse(json);
     }catch(err){
       if(json && json!="[]"){
-	alert("Input incomplete or corrupted:\n" + json);
+	alert(pub.stringsBundle.getString('main.view.import.dataError')+"\n" + json);
       }
     }
     if(newNodes.length>0){
@@ -531,7 +534,7 @@ pub.mainThread.prototype = {
 				//refresh tree, remove all visibledata and add new ones
         pub.treeView.delSuspensionPoints(-1);
         if(this.words.length==0 && this.optional.length==0){
-          alert("no keywords input");
+          alert(pub.stringsBundle.getString('main.view.search.noKeyword'));
           //cancel "searching..." after "OK", and redisplay the former result      
           pub.treeView.treeBox.rowCountChanged(0, pub.treeView.visibleData.length);
           return;
@@ -553,10 +556,6 @@ pub.mainThread.prototype = {
       }
       throw Components.results.NS_ERROR_NO_INTERFACE;
     }
-  };
-
-  pub.refreshTree = function(){
-	alert("refresh tree view now");
   };
   
   pub.search = function() {

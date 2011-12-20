@@ -5,6 +5,9 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   var devOptions=false;
   //var testConstruct=(function(){alert("mainView cons here");})();
   
+	// Get a reference to the strings bundle
+  pub.stringsBundle = document.getElementById("string-bundle");
+	
   //TODO: if isRecord, there's no need to check for infinite expansion
   pub.createView = function(main, sb, isRecord){
     return {
@@ -61,7 +64,9 @@ com.wuxuan.fromwheretowhere.mainView = function(){
       } else if (column.id == "url") {
 	return this.visibleData[idx].url;
       } else if (column.id == "date") {
-        if (this.visibleData[idx].placeId){
+				if(this.visibleData[idx].placeId==-1){
+					return null;
+				} else if (this.visibleData[idx].placeId){
             return com.wuxuan.fromwheretowhere.utils.formatDate(main.history.getLastDatefromPid(this.visibleData[idx].placeId));
         } else {
             return null;
@@ -140,7 +145,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   },
   
   addSuspensionPoints: function(level, idx) {
-    var sp = main.history.ReferedHistoryNode(-1, -1, "searching...", null, false, false, [], level+1);
+    var sp = main.history.ReferedHistoryNode(-1, -1, pub.stringsBundle.getString('treeview.searching'), null, false, false, [], level+1);
     this.visibleData.splice(idx+ 1, 0, sp);
     this.treeBox.rowCountChanged(idx + 1, 1);
   },
@@ -158,7 +163,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     for(var i=idx; ;i++){
       var node = this.visibleData[i];
       if(node==null){
-        alert("Reached end");
+        alert(pub.stringsBundle.getString('treeview.findNext.reachEnd'));
         break;
       }
       var pid = node.placeId;

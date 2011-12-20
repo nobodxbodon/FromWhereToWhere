@@ -30,7 +30,7 @@ com.wuxuan.fromwheretowhere.events = function(){
         //only recommond for current page, and when it's loaded
         if(currentDoc == gBrowser.selectedBrowser.contentDocument && currentDoc.title!=lasttitle){
           lasttitle=currentDoc.title;
-          recLinks = com.wuxuan.fromwheretowhere.recommendation.recommendInThread(currentDoc);
+          recLinks = pub.recommend.recommendInThread(currentDoc);
         }
       } catch(err) {
         Components.utils.reportError(err);
@@ -54,6 +54,10 @@ com.wuxuan.fromwheretowhere.events = function(){
     pub.main.dispatch(new pub.recommendThread(1, doc), pub.main.DISPATCH_NORMAL);
   };
   
+  //TODO: when current document is closed, the current suggestion should be closed too
+  //pub.mainWindow.addEventListener("close", pub.closePanel, false);
+  pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
+    
   pub.mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
       .getInterface(Components.interfaces.nsIWebNavigation)
       .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
@@ -81,7 +85,7 @@ com.wuxuan.fromwheretowhere.events = function(){
         other.removeAttribute("checked");
     }
     else{
-      pub.init();
+      pub.auto();
       rec.setAttribute("checked", "true");
       //enable the other one
       var other = pub.getOtherMenuitem(rec);
@@ -102,8 +106,7 @@ com.wuxuan.fromwheretowhere.events = function(){
   pub.toggleSugPanel = function(closeWhenOpen){
     var recPanel = document.getElementById("fwtwRelPanel");
     if(recPanel==null){
-      com.wuxuan.fromwheretowhere.recommendation.init();
-      com.wuxuan.fromwheretowhere.recommendation.popUp("","",[],[]);
+      pub.recommend.popUp("","",[],[]);
     }else{
       if(recPanel.state=="open" && closeWhenOpen){
         recPanel.hidePopup();
@@ -114,13 +117,15 @@ com.wuxuan.fromwheretowhere.events = function(){
   };
   
   pub.init = function(){
-    //TODO: document.? gbrowser.? difference?
-    pub.mainWindow.addEventListener("DOMContentLoaded", pub.onPageLoad, false);
-    //TODO: when current document is closed, the current suggestion should be closed too
-    //pub.mainWindow.addEventListener("close", pub.closePanel, false);
-    pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
+    pub.recommend=com.wuxuan.fromwheretowhere.recommendation;
+    pub.recommend.init();
     pub.toggleSugPanel(false);
   };
+  
+  pub.auto = function(){
+    //TODO: document.? gbrowser.? difference?
+    pub.mainWindow.addEventListener("DOMContentLoaded", pub.onPageLoad, false);
+  }
   
   pub.down = function(){
     pub.mainWindow.removeEventListener("DOMContentLoaded", pub.onPageLoad, false);

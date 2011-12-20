@@ -15,7 +15,10 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 	        getService(Components.interfaces.nsIIOService);
   pub.fis = Components.classes["@mozilla.org/browser/favicon-service;1"].
           getService(Components.interfaces.nsIFaviconService);
-    
+  
+	// Get a reference to the strings bundle
+  pub.stringsBundle = document.getElementById("string-bundle");
+	
   /*type = 32, getInt32; type = 64, getInt64; type = "str", getString */
   pub.queryAll = function(statement, type, idx) {
     var children = [];
@@ -137,7 +140,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
 			hasChildren = actualThing;
 		}
 	if(label==null || label==""){
-	  label = "[SUBJECT] "+ pub.getNonEmptyTitlefromIds(potentialchildren);
+	  label = pub.stringsBundle.getString('historyQuery.node.label')+" "+ pub.getNonEmptyTitlefromIds(potentialchildren);
 	}
 	if(pub.DEBUG)
 	  alert(label);

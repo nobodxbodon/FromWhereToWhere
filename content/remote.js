@@ -5,12 +5,16 @@ com.wuxuan.fromwheretowhere.remote = function(){
   var xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Components.interfaces.nsIXMLHttpRequest);
   
 	var DEBUG=false;
+	
+	// Get a reference to the strings bundle
+  pub.stringsBundle = document.getElementById("string-bundle");
+	
 	pub.dalert = function(str){
 		if(DEBUG)
 			alert(str);
 	}
   pub.addThread = function(subject, body){
-	var feedback = " when sharing";
+	var feedback = pub.stringsBundle.getString('remote.addthread.feedback');
     xhr.open("POST", URL, true);
 
     var jsonString = 'add=true&subject='+escape(subject)+'&body='+escape(body);//{"words":["spring"],"optional":[]}'//"load=true";//JSON.stringify(obj);
@@ -22,19 +26,19 @@ com.wuxuan.fromwheretowhere.remote = function(){
           if (xhr.status === 200) {  
             var response = JSON.parse(xhr.responseText);
             if(!response){
-                pub.popNotification("Server returns inrecognizable response"+feedback+".");
+                pub.popNotification(pub.stringsBundle.getString('remote.feedback.inrecognizable')+feedback+".");
                 return;
             }else{
                 if(response.error){
-                    pub.popNotification("Server error"+feedback+": "+response.info);
+                    pub.popNotification(pub.stringsBundle.getString('remote.feedback.serverError')+feedback+": "+response.info);
                     return;
                 }else if(response.warn){
-                    pub.popNotification("Server info"+feedback+": "+response.info);
+                    pub.popNotification(pub.stringsBundle.getString('remote.feedback.serverInfo')+feedback+": "+response.info);
                 }
             }
-            pub.popNotification("SHARED: "+subject);
+            pub.popNotification(pub.stringsBundle.getString('remote.feedback.shared')+subject);
           } else {  
-            pub.popNotification("Server returns error"+feedback+": "+xhr.statusText);  
+            pub.popNotification(pub.stringsBundle.getString('remote.status.serverError')+feedback+": "+xhr.statusText);  
           }  
         }
     };
@@ -48,7 +52,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
   //TODO: can't search for terms containing '&': escape
   pub.getAll = function(keywords, topNodes, main){
     //var http = new XMLHttpRequest();
-    var feedback = " when searching";
+    var feedback = pub.stringsBundle.getString('remote.search.feedback');
     xhr.open("POST", URL, true);
 
 		keywords.words.forEach(pub.processEach(escape));
@@ -64,20 +68,20 @@ com.wuxuan.fromwheretowhere.remote = function(){
 					pub.dalert(xhr.responseText);
           var response = JSON.parse(xhr.responseText);
           if(!response){
-              pub.popNotification("Server returns inrecognizable response"+feedback+".");
+              pub.popNotification(pub.stringsBundle.getString('remote.feedback.inrecognizable')+feedback+".");
               return;
           }else{
               if(response.error){
-								dalert("res error: "+response.error);
-                pub.popNotification("Server error"+feedback+": "+response.info);
+								pub.dalert("res error: "+response.error);
+                pub.popNotification(pub.stringsBundle.getString('remote.feedback.serverError')+feedback+": "+response.info);
                 return;
               }else if(response.warn){
-                pub.popNotification("Server info"+feedback+": "+response.info);
+                pub.popNotification(pub.stringsBundle.getString('remote.feedback.serverInfo')+feedback+": "+response.info);
               }
           }
           var threads = response.threads;
-					if(!threads){
-						pub.popNotification("No one has shared such threads. You can be the first.");
+					if(!threads||threads.length==0){
+						pub.popNotification(pub.stringsBundle.getString('remote.search.feedback.none'));
 						return;
 					}
 					//TODO: some content is null somehow...temp fix now! 'velocity...' in note for test
@@ -105,7 +109,12 @@ com.wuxuan.fromwheretowhere.remote = function(){
 							nodes=nodes.concat(threads[i].content);
 						}
 					}
+					pub.dalert("words:"+keywords.words+";optional:"+keywords.optional);
 					nodes = main.localmanager.filterTree(nodes, keywords.words, keywords.optional, keywords.excluded, keywords.site);
+					if(nodes.length==0){
+						pub.popNotification(pub.stringsBundle.getString('remote.search.feedback.none'));
+						return;
+					}
 					nodes = pub.markRemote(nodes);
 					pub.dalert(topNodes.length);
 					if(topNodes[0].placeId==-1){
@@ -118,7 +127,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
 					var updateLen = nodes.length;
 					main.treeView.treeBox.rowCountChanged(0, updateLen);
 				} else {  
-					pub.popNotification("Server returns error"+feedback+": "+xhr.statusText);  
+					pub.popNotification(pub.stringsBundle.getString('remote.status.serverError')+feedback+": "+xhr.statusText);  
 				}  
 			}
     };
@@ -126,7 +135,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
   };
   
   pub.reportDupThreads = function(tids){
-	var feedback = " reporting duplicate threads";
+	var feedback = pub.stringsBundle.getString('remote.dupThread.feedback');
     xhr.open("POST", URL, true);
 
     var jsonString = 'report_dup=true&dups='+JSON.stringify(tids);//{"words":["spring"],"optional":[]}'//"load=true";//JSON.stringify(obj);
@@ -137,19 +146,19 @@ com.wuxuan.fromwheretowhere.remote = function(){
           if (xhr.status === 200) {  
             var response = JSON.parse(xhr.responseText);
             if(!response){
-                pub.popNotification("Server returns inrecognizable response"+feedback+".");
+                pub.popNotification(pub.stringsBundle.getString('remote.feedback.inrecognizable')+feedback+".");
                 return;
             }else{
                 if(response.error){
-                    pub.popNotification("Server error"+feedback+": "+response.info);
+                    pub.popNotification(pub.stringsBundle.getString('remote.feedback.serverError')+feedback+": "+response.info);
                     return;
                 }else if(response.warn){
-                    pub.popNotification("Server info"+feedback+": "+response.info);
+                    pub.popNotification(pub.stringsBundle.getString('remote.feedback.serverInfo')+feedback+": "+response.info);
                 }
             }
             //pub.popNotification("SHARED: "+subject);
           } else {  
-            pub.popNotification("Server returns error"+feedback+": "+xhr.statusText);  
+            pub.popNotification(pub.stringsBundle.getString('remote.status.serverError')+feedback+": "+xhr.statusText);  
           }  
         }
     };
@@ -171,7 +180,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
   pub.markRemote = function(threads){
     for(var i in threads){
         //TODO: change to style later
-        threads[i].label = "[SHARED] "+threads[i].label;
+        threads[i].label = pub.stringsBundle.getString('remote.node.label')+" "+threads[i].label;
     }
     return threads;
   };

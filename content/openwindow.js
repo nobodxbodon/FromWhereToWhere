@@ -18,7 +18,11 @@ com.wuxuan.fromwheretowhere.openWindow = function(){
     else if(act==1)
       pub.searchhistory();
     else if(act==2){
-      com.wuxuan.fromwheretowhere.events.toggleSugPanel(true);
+      if(!pub.events){
+        pub.events=com.wuxuan.fromwheretowhere.events;
+        pub.events.init();
+      }
+      pub.events.toggleSugPanel(true);
     }
   };
   

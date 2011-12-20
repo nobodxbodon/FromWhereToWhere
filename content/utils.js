@@ -8,6 +8,9 @@ com.wuxuan.fromwheretowhere.utils = function(){
   pub.MINWORDLENGTH = 1;
   pub.sqltime = {};
   
+	// Get a reference to the strings bundle
+  pub.stringsBundle = document.getElementById("string-bundle");
+	
   // Utils functions from here
   pub.cloneObject = function(obj){
     if(obj==null){
@@ -432,14 +435,14 @@ com.wuxuan.fromwheretowhere.utils = function(){
       if(till<t.till)
         t.till = till;
       else
-        alert("Invalid date: "+ts[1]+". Search without it anyway");
+        alert(pub.stringsBundle.getString('utils.parseTime.warn.1')+" "+ts[1]+pub.stringsBundle.getString('utils.parseTime.warn.2'));
     //if time1-, means since time1
     }if(ts[0]!=""){
       var since = new Date(ts[0]).getTime();
       if(since>t.since)
         t.since = since;
       else
-        alert("Invalid date: "+ts[0]+". Search without it anyway");
+        alert(pub.stringsBundle.getString('utils.parseTime.warn.1')+" "+ts[0]+pub.stringsBundle.getString('utils.parseTime.warn.2'));
     }
     return t;
   };
@@ -497,7 +500,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
         if(ts.length==1)
           ts = ti.split("~");
         if(ts.length!=2){
-          alert("Fail to parse time interval: "+ti+". Search without it anyway");
+          alert(pub.stringsBundle.getString('utils.parseTimeInterval.warn')+" "+ti+pub.stringsBundle.getString('utils.parseTime.warn.2'));
           words.splice(i,1);
           i--;
           continue;
@@ -512,22 +515,22 @@ com.wuxuan.fromwheretowhere.utils = function(){
   };
   
 	pub.buildFeedback = function(words, optional, excluded, site, time){
-		var feedback = "No history found";
+		var feedback = pub.stringsBundle.getString('utils.buildFeedback.1');
 		if(words.length>0){
-			feedback += " with all of ["+words+"],";
+			feedback += " "+pub.stringsBundle.getString('utils.buildFeedback.2')+" ["+words+"],";
 		}
 		if(optional.length>0){
-			feedback += " with any of ["+optional+"],";
+			feedback += " "+pub.stringsBundle.getString('utils.buildFeedback.3')+" ["+optional+"],";
 		}
 		if(excluded.length>0){
-			feedback += " without " + excluded;
+			feedback += " "+pub.stringsBundle.getString('utils.buildFeedback.4')+" " + excluded;
 		}
-		feedback+=" in title";
+		feedback+=" "+pub.stringsBundle.getString('utils.buildFeedback.5');
 		if(site.length>0){
-			feedback+=", AND url with "+site;
+			feedback+=", "+pub.stringsBundle.getString('utils.buildFeedback.site')+" "+site;
 		}
 		if(time.length>0){
-			feedback+=", AND visit time"+pub.timeInterpret(time);
+			feedback+=", "+pub.stringsBundle.getString('utils.buildFeedback.time')+pub.timeInterpret(time);
 		}
 		return feedback;
 	};
@@ -538,13 +541,13 @@ com.wuxuan.fromwheretowhere.utils = function(){
 		for(var i in times){
 			if(times[i].since!=-1){
 				if(i!=0)
-					feedback = feedback+" AND";
-				feedback = feedback+" since "+(new Date(times[i].since));
+					feedback = feedback+pub.stringsBundle.getString('utils.timeInterpret.and');
+				feedback = feedback+pub.stringsBundle.getString('utils.timeInterpret.since')+(new Date(times[i].since));
 			}
 			if(times[i].till!=Number.MAX_VALUE){
 				if(i!=0)
-					feedback = feedback+" AND";
-				feedback = feedback+" till "+(new Date(times[i].till));
+					feedback = feedback+pub.stringsBundle.getString('utils.timeInterpret.and');
+				feedback = feedback+pub.stringsBundle.getString('utils.timeInterpret.till')+(new Date(times[i].till));
 			}
 		}
 		return feedback;
