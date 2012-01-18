@@ -182,7 +182,7 @@ jQuery.extend({
                 startId: startId},
 				type: 'GET',
 				dataType: 'json',
-				timeout: 1000,
+				//timeout: 1000,
 				error: function(){
 					that.notifyLoadFail();
 				},
@@ -245,8 +245,10 @@ jQuery.extend({
         keywords=lastKeywords;
       else
         lastKeywords=keywords;
+        dAlert('startId:'+startId);
       if (!startId)
         startId=-1;
+        dAlert('startId should get init:'+startId);
 			that.notifySearchingNote(keywords);
             var jsStr = JSON.stringify(keywords);
             dAlert(jsStr);
@@ -260,7 +262,7 @@ jQuery.extend({
                 startId: startId},
 				type: 'POST',
 				dataType: 'json',
-				timeout: 1000,
+				//timeout: 1000,
 				error: function(){
 					that.notifySearchFailed(keywords);
 				},

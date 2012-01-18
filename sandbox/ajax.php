@@ -104,11 +104,13 @@ try{
         }
       }
       
-      
-        if($startId!=-1){
+      error_log("start id value:".($startId==null?'null':$startId));
+        if($startId && $startId!=-1){
             $term = $term . " AND " . COL_ID . "<" . $startId;
         }
-        $term = $term . " ORDER BY " . COL_ID . " DESC" . " LIMIT " . NUMLIMIT;
+        $term = $term . " ORDER BY " . COL_ID . " DESC";
+        if($startId)
+            $term = $term . " LIMIT " . NUMLIMIT;
       return $term;
       
 		//if(!is_array($words)) throw new Exception("argument to " . __METHOD__ . " must be an array");
@@ -192,6 +194,7 @@ try{
 		while($row = mysql_fetch_array($result)){
 			$ret["threads"][] = $row;
 		}
+		error_log("load threads:".count($ret["threads"]));
 		echo json_encode($ret);
 	}else if(isset($_REQUEST["search"])){
         //TODO: limit return number, to save user potential computing time

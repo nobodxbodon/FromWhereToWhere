@@ -139,6 +139,8 @@ jQuery.extend({
 		model.addListener(mlist);
 		
 		// let's get the data
-		model.getAll();
+		//model.getAll();
+    //var keywordForAll = FWTWUtils.getIncludeExcluded("\"\"");
+    model.searchNote({origkeywords : "\"\"", words: [""], optional : [], excluded : [], site : [], time : []}, null);
 	}
 });
