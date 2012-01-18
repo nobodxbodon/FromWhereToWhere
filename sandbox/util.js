@@ -286,7 +286,7 @@ jQuery.extend({
                 dAlert('a is null: '+'sub:'+a.subject+' id:'+a.thread_id);
                 return true;
             }
-            if(b.content==null&&a.content!=null){
+            if(b.content==null){
                 dAlert('b is null: '+'sub:'+b.subject+' id:'+b.thread_id);
                 return false;
             }
