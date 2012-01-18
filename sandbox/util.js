@@ -280,7 +280,17 @@ jQuery.extend({
         if(!arr || !arr.length || arr.length<=1)
             return [];
         var a = arr.concat();
-        a.sort(function(a,b){return a.content.length<b.content.length;});
+        a.sort(function(a,b){
+            //temp fix: content can be null because of encoding error in php
+            if(a.content==null&&b.content!=null){
+                dAlert('a is null: '+'sub:'+a.subject+' id:'+a.thread_id);
+                return true;
+            }
+            if(b.content==null&&a.content!=null){
+                dAlert('b is null: '+'sub:'+b.subject+' id:'+b.thread_id);
+                return false;
+            }
+            return a.content.length<b.content.length;});
         //only work for string type
         var origLen = a.length;
         var repeated = [];

@@ -206,6 +206,14 @@ try{
         $queryTerm = sql_searchNoteByKeywords(json_decode($keywords), $startId);
 		$result = query($queryTerm);
 		while($row = mysql_fetch_array($result)){
+            //$count = count($row);
+            //error_log("columns num:".$count);
+            //for($i=0;$i<$count;$i++){
+                //not effective: TODO convert utf-8 somehow
+                //error_log("before: ".$row[$i]);
+            //    $row[$i] = mb_check_encoding($row[$i], 'UTF-8') ? $row[$i] : utf8_encode($row[$i]);
+                //error_log("after utf8: ".$row[$i]);
+            //}
 			$ret["threads"][] = $row;
 		}
         $ret["error"] = false;
