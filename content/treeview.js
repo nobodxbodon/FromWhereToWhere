@@ -71,10 +71,9 @@ com.wuxuan.fromwheretowhere.mainView = function(){
         } else {
             return null;
         }
-      }else {
-        return "NotDefined";
       }
     }
+    return "NotDefined";
   },
     
   isContainer: function(idx){
@@ -101,6 +100,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     if(this.visibleData[idx]){
       return this.visibleData[idx].level;
     }
+    return 0;
   },
   // UNrefed now
   hasNextSibling: function(idx, after) {  
