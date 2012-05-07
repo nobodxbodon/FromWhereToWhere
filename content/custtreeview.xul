@@ -79,7 +79,7 @@
     <treecol id="element" label="&table.title;" primary="true" flex="4"/>
        <splitter resizeafter="closest">
       </splitter>
-    <treecol id="url" label="&table.url;" primary="true" flex="3"/>
+    <treecol id="url" label="&table.url;" hidden="true" flex="3"/>
       <splitter resizeafter="closest">
       </splitter>
      <treecol id="date" label="&table.date;" flex="1"/>
