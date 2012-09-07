@@ -28,7 +28,7 @@
 17) "Export/Import" work when selecting multiple nodes
 
 ------Local Notes Related------
-1) context menu -> "save to local notes" works for all nodes (can multi-select), pop up "saved" if saved successfully and warn if failed
+1) context menu -> "save to local notes" works for all nodes (can multi-select, title of note is the first of the selected nodes), pop up "saved" if saved successfully and warn if failed
    If the note sidebar is open at the moment, a new item will show in it.
 2) context menu -> "open/close notes sidebar", toggle the local notes sidebar
 3) in sidebar, context menu -> "open note" works for each node, open in new tree view if current isn't
