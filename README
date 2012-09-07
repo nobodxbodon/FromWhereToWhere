@@ -21,7 +21,7 @@ Browsing history can be exported to HTML like below (using tags 'ol li a'). Slig
 
 3) To save the trouble of finding a page that's been visited before, I can also search for the words in the titles of visited pages --- also with from-where and to-where pages --- so I can easily see how I searched for the word(s) before. The titles that have all the search terms will be highlighted in blue.
 
-4) <b> SHARING </b> (from 0.14) Some friends ask me questions and then I become a "searching machine". After several minutes, I may be able to give some possible answers(links) but I often send them the search terms as well in case they want to search further. Instead of copying every link plus the terms and send them, now I can use FromWhereToWhere to get the tree(s) of relevant pages like in 1) or 3), and then use "property"/"import" functions to share the experience with my friends (see HOWTO "From 0.14").
+4) <b> SHARING </b> (from 0.14) Some friends ask me questions and then I become a "searching machine". After several minutes, I may be able to give some possible answers(links) but I often send them the search terms as well in case they want to search further. Instead of copying every link plus the terms and send them, now I can use FromWhereToWhere to get the tree(s) of relevant pages like in 1) or 3), and then use "export as"/"import from" functions to share the experience with my friends (see HOWTO "From 0.14"). Also there's a public sharing service provided.
 
 <b>Note: FromWhereToWhere <em>DOESN'T</em> collect browsing history, Firefox does when you let it. FromWhereToWhere only search through the history data kept by Firefox. It also means you can install FromWhereToWhere at the moment you confront similar use cases as above, as it'll search through all the history data that you've chosen not to clean ever since you started using this instance of Firefox.</b>
 
@@ -39,7 +39,7 @@ If according to your browsing history, current URL is linked from nowhere, a nod
 
 From 0.12, if a link had been captured by the add-on Scrapbook, it'll be highlighted in Italic font (olive if the node wasn't red or blue), and you can open it from context menu "Open Local Copy".
 
-From 0.14, "property" and "import" are added to the menu for sharing with other users. Select the nodes that you want to share, right click -> "property", select the property (all the text) in the opened dialog.  <b> NOTE: </b> the sub-nodes won't be included in the property of the node if the node hasn't been expanded ever, so please take this chance to examine if the sub-nodes are the exact content that you want to share. The last visited dates are not included in property for now. Send the text to whoever you want to share, and in their FromWhereToWhere view, select "import", paste the whole text, and the same nodes will be displayed in their view, with all the sub-nodes if you include them in the property.
+From 0.14, "export" and "import" are added to the menu for sharing with other users. Select the nodes that you want to share, right click -> "export as", select the content (all the text) in the opened dialog.  <b> NOTE: </b> the sub-nodes won't be included in the exported content of the node if the node hasn't been expanded ever, so please take this chance to examine if the sub-nodes are the exact content that you want to share. The last visited dates are not included in the exported content for now. Send the text to whoever you want to share, and in their FromWhereToWhere view, select "import from", paste the whole text, and the same nodes will be displayed in their view, with all the sub-nodes if you include them when exporting.
 
 From 0.19 more accurate searching is supported as "key1 key2".  An extreme and potentially time-consuming example is "", which lists all the history in tree structure. Exclusion is supported too, in the form of -keyword3 or -"key4 key5". 
 
@@ -55,8 +55,12 @@ Another will search for those pages visited during the specified time interval (
 (tip for developers: any form is fine as far as the time can be parsed by "new Date()" in Javascript)
 NOTE: the "Last Visit" time shown may be later than the specified time interval, which only means you visited that page later at least once.
 
-Also from 0.19.9, instead of copying the property of a node and saving to local file manually, now similar function is done through "save to local note" in the menu. All the saved notes can be shown in sidebar, and can be deleted one by one. Searching covers both local notes and history, and the results are shown together. The difference is that "time:" doesn't apply to local notes, as there's no visit date information saved. <b> NOTE: </b> the notes are saved in local database under your profile.
+Also from 0.19.9, instead of exporting a node and saving to local file manually, now similar function is done through "save to local note" in the menu. All the saved notes can be shown in sidebar, and can be deleted one by one. Searching covers both local notes and history, and the results are shown together. The difference is that "time:" doesn't apply to local notes, as there's no visit date information saved. <b> NOTE: </b> the notes are saved in local database under your profile.
 
 From 0.21.0, link suggestion is added. Instead of sending any keywords to search engine APIs online, this suggestion is purely based on your local browsing history. From 0.21.3, suggestion also make use of saved local notes. It DOESN'T affect how FF maintains your browsing history. If "Link Suggestion" is selected, a panel will show related or interesting links on the page that's been loaded. 
 From 0.21.9, you can locate the link by clicking the button. In some cases the links are not visible on the page, and clicking the button will open the link in new tab.
+From 0.23.4, Preferences can be configured in Addon Manager to assign action for toolbar button:
+1) none
+2) search history
+3) show or hide suggestion panel (without switching on 'auto-refresh suggestion' in menu);
 NOTE: the first screenshot is taken under FF4. As titlebar is only supported in FF4, in FF3 the panel is closed whenever you click outside it.
