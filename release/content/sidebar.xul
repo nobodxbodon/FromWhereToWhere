@@ -5,6 +5,10 @@
 <page id="emptySidebar" title="&notesidebar.title;" onload="com.wuxuan.fromwheretowhere.noteSidebar.init();"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
 
+<stringbundleset id="stringbundleset">
+	<stringbundle id="string-bundle" src="chrome://FromWhereToWhere/locale/fromwheretowhere.properties"/>
+</stringbundleset>
+
 <popupset>
   <menupopup id="sidebarmenu" onpopupshowing="com.wuxuan.fromwheretowhere.noteSidebar.showMenuItems()">
     <menuitem id="openlocalnote" label="&contextMenu.openlocalnote;" oncommand="com.wuxuan.fromwheretowhere.noteSidebar.openNode()"/>

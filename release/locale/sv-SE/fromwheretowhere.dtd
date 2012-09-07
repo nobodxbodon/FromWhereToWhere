@@ -12,11 +12,11 @@
 <!ENTITY contextMenu.showLocalNotes "Öppna/Stäng sidopanelen Lokala anteckningar">
 <!ENTITY contextMenu.openlocalnote "Öppna Lokala anteckningar">
 <!ENTITY contextMenu.delete "Ta bort">
-<!ENTITY contextMenu.share "Share the Selected">
-<!ENTITY contextMenu.shareWithWorld "with ENTIRE world">
+<!ENTITY contextMenu.share "Dela markerade objekt">
+<!ENTITY contextMenu.shareWithWorld "med hela världen!">
 
-<!ENTITY related.contextMenu.reverse "Reverse Order in Frequency">
-<!ENTITY related.contextMenu.more "More...">
+<!ENTITY related.contextMenu.reverse "Omvänd ordning efter förekomst">
+<!ENTITY related.contextMenu.more "Mer…">
 
 <!ENTITY button.searchallwords "Sök">
 <!ENTITY button.findNext "Sök nästa">
@@ -27,11 +27,11 @@
 <!ENTITY table.date "Senast besökt">
 <!ENTITY note.savedate "Sparades">
 
-<!ENTITY option.pane.general "General">
-<!ENTITY option.pane.search "Search">
+<!ENTITY option.pane.general "Allmänt">
+<!ENTITY option.pane.search "Sökning">
 <!ENTITY option.tbButtonAction "Åtgärd för verktygsfältsknappen">
 <!ENTITY option.none "Ingen">
 <!ENTITY option.searchHistory "Sök i historiken">
 <!ENTITY option.toggleSugPanel "Visa/dölj sökförslagspanelen">
-<!ENTITY option.related.showRelatedKeywords "Show Related Keywords">
-<!ENTITY option.related.highFrequency "High Frequency Largest">
+<!ENTITY option.related.showRelatedKeywords "Visa närliggande nyckelord">
+<!ENTITY option.related.highFrequency "Ju högre förekomst, desto större text">

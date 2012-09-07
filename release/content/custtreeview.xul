@@ -6,6 +6,10 @@
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         xmlns:html="http://www.w3.org/1999/xhtml">  
 
+<stringbundleset id="stringbundleset">
+	<stringbundle id="string-bundle" src="chrome://FromWhereToWhere/locale/fromwheretowhere.properties"/>
+</stringbundleset>
+
 <popupset id="tipPopupSet">
   <tooltip id="tip.JSON">
     <html>Property</html>
@@ -73,7 +77,7 @@
     <treecol id="element" label="&table.title;" primary="true" flex="4"/>
        <splitter resizeafter="closest">
       </splitter>
-    <treecol id="url" label="&table.url;" primary="true" flex="3"/>
+    <treecol id="url" label="&table.url;" hidden="true" flex="3"/>
       <splitter resizeafter="closest">
       </splitter>
      <treecol id="date" label="&table.date;" flex="1"/>

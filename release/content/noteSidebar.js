@@ -11,6 +11,9 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
  .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
  .getInterface(Components.interfaces.nsIDOMWindow);
  
+	// Get a reference to the strings bundle
+  pub.stringsBundle = document.getElementById("string-bundle");
+  
   pub.init = function(){
     pub.localManager = com.wuxuan.fromwheretowhere.localmanager;
     pub.remote = com.wuxuan.fromwheretowhere.remote;
@@ -76,7 +79,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
     },  
     
     addSuspensionPoints: function(level, idx) {
-      var sp = pub.ReferedHistoryNode(-1, -1, "searching...", null, false, false, [], level+1);
+      var sp = pub.ReferedHistoryNode(-1, -1, pub.stringsBundle.getString('treeview.searching'), null, false, false, [], level+1);
       this.visibleData.splice(idx+ 1, 0, sp);
       this.treeBox.rowCountChanged(idx + 1, 1);
     },
@@ -145,7 +148,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
       newNodes = JSON.parse(json);
     }catch(err){
       if(json && json!="[]"){
-        alert("record corrupted:\n" + json + " " + err);
+        alert(pub.stringsBundle.getString('noteSidebar.data.warn')+"\n" + json + " " + err);
       }
     }
     Application.storage.set("fromwheretowhere.currentData", newNodes);

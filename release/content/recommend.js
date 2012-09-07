@@ -498,8 +498,8 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       spendtime = (0.0+((new Date()).getTime()-pub.starttime))/1000;
       ratio = (0.0+Math.round((recLinks.length+0.0)*1000/allLinks.length))/10;
     }
-    outputText += "Time: "+spendtime+"s    ";
-    outputText += "Ratio(No. of suggested/all links): "+ratio+"%\n";
+    outputText += pub.stringsBundle.getString('recommend.panel.label.time')+" "+spendtime+pub.stringsBundle.getString('recommend.panel.label.second')+"    ";
+    outputText += pub.stringsBundle.getString('recommend.panel.label.ratio')+" "+ratio+"%\n";
     return outputText;
   };
   
@@ -535,7 +535,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
       topbar = document.createElement("hbox");
       //refresh button add on top
       var refreshButn = document.createElement("button");
-      refreshButn.textContent="Refresh";
+      refreshButn.textContent=pub.stringsBundle.getString('recommend.panel.button.refresh');
       refreshButn.onclick = pub.recommendCurrent;
       topbar.appendChild(refreshButn);
       //stats info
@@ -624,12 +624,16 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     }
     //document.parentNode.appendChild(savePanel); ->document.parentNode is null
     //document.appendChild(savePanel); -> node can't be inserted
-    
+
+		// Get the strings
+
+		var panelTitle = pub.stringsBundle.getString('recommend.panel.title');
     if(version<4){
       //can't anchor as in 4. WHY?
       savePanel.openPopup(null, "start_end", 60, 80, false, false);
     }else{
-      savePanel.setAttribute("label","Seemingly Related or Interesting Link Titles"+" - "+origTitle);
+      
+      savePanel.setAttribute("label",panelTitle+" - "+origTitle);
       savePanel.openPopup(null, "start_end", 60, 80, false, false);
     }
   };
@@ -666,6 +670,9 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
     pub.initCorp();
     pub.initHistory();
+  
+	// Get a reference to the strings bundle
+  pub.stringsBundle = document.getElementById("string-bundle");
   };
   
   pub.initCorp = function(){
