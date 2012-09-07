@@ -4,14 +4,15 @@
 3) expansion won't go infinite if there's cyclic link
 4) searching returns the same top nodes as last version if the profile hasn't been changed
 5) (double click) OR (context menu -> "open in new tab") works for all the nodes, resulting in opening a new tab with url of the node as url
+5.1) In the case when a url is opened in an existing tab, 'open in new tab' is replaced with 'switch to tab', the same as double clicking action. Instead of opening the url in new tab, it switches to the first tab with that url.
 6) the link that has been captured by Scrapbook are highlighted in Italic font
 7) the link that has been captured by Scrapbook can open the captured page by context menu -> "open local copy"
 8) context menu -> "Export as ..." works for all the nodes. If the node has been opened, the property will include the title and url information of itself and all its children; otherwise it'll only include the title and url information of this node
   8.1) JSON format is the same as 'property' before.
   8.2) HTML format uses tag (li ol a) to struct tree, can embed in web page.
-9) the property can be copied from the opened "property" dialog
+9) (removed) the property can be copied from the opened "property" dialog
 10) context menu -> "Import from ..." works in all circumstances, for now only JSON format is supported
-11) the copied property in step 9 can be pasted into the textbox in "import" dialog
+11) the copied content in step 8.1 can be pasted into the textbox in "import" dialog
 12) click "OK" in import dialog will reconstruct the same tree structure as the nodes that the property was copied from
 13) during searching or opening a node, it won't freeze Firefox
 14) icon will show for the url that has been visited
@@ -23,6 +24,7 @@
   e) time:8/2/2010-9/2/2010
   eg: sqlite site:moz time:4/1/2011- -select "mdc"
 16) columns in the view can be resized using splitters
+16.1) by default 'url' column is hidden. Use drop down menu on the right side of table header to toggle show/hidden for 'url' and 'last visit'.
 17) "Export/Import" work when selecting multiple nodes
 
 ------Local Notes Related------
@@ -34,7 +36,7 @@
 5) in sidebar, context menu -> "delete" works for each node, remove it from the record and sidebar view
 
 ------Link Suggestion Related------
-1) for FF4 and SeaMonkey 2.2, if 'auto-refresh suggestion' is toggled, one floating panel will refresh (be created if not exist, and show it if it's hidden) when a new page is loaded and switched as current page.
+1) for FF>=4 and SeaMonkey 2.2, if 'auto-refresh suggestion' is toggled, one floating panel will refresh (be created if not exist, and show it if it's hidden) when a new page is loaded and switched as current page.
    The panel can be repositioned.
 2) for FF3 and SeaMonkey 2.0, if toggled, one floating panel will be created when a new page is loaded.
    The panel can't be repositioned, and will hide if click outside.
@@ -48,11 +50,13 @@ Feature below (all about link suggestion) is tested in 4.0 under Vista, and 3.6 
 9) mouse over a link button will show the keywords in the title
 
 ------Toolbar button option------
-1) 'option' shows for FWTW in addon manager.
-2) if select 'none' -> 'OK', clicking toolbar button have no effects.
+1) 'Preferences' shows for FWTW in addon manager.
+2) (2-4 'General'->'Toolbar button action') if select 'none' -> 'OK', clicking toolbar button have no effects.
 3) if select 'search history' -> 'OK', clicking toolbar button will open history searching view.
 4) if select 'show/hide suggestion panel' -> 'OK', clicking toolbar button will show the panel if it's hidden, and hide it if it's open.
 5) configured option will be kept after restarting ff
+6) 'Search'
+6.1) 'Search'->'Show Related Keywords' ->'High Frequency Largest' (if off, show the first N related keywords ordered alphabetically)
 
 ------Sharing Related-------
 NOTE: below should work both in 'local note' view or search view.

@@ -8,7 +8,7 @@
     <!-- Extension name displayed in Add-on Manager -->  
     <em:name>FromWhereToWhere</em:name>  
     <!-- Extension version number. There is a version numbering scheme you must follow -->  
-    <em:version>0.24.0</em:version>  
+    <em:version>0.25.1</em:version>  
     <!-- Brief description displayed in Add-on Manager -->  
     <em:description>List the pages from where you visit one page, and all the other pages you visited from those pages. Link suggestion based on current page title and browsing history.</em:description>  
     <!-- Name of extension's primary developer. Change to your name -->  
@@ -24,7 +24,7 @@
       <Description>  
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>  
         <em:minVersion>3.5</em:minVersion>  
-        <em:maxVersion>11.0a1</em:maxVersion>  
+        <em:maxVersion>15.0</em:maxVersion>  
       </Description>  
     </em:targetApplication>
 		<!-- SeaMonkey -->
@@ -32,7 +32,7 @@
 			<Description>
 				<em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
 				<em:minVersion>2.0a3</em:minVersion>
-				<em:maxVersion>2.4.1</em:maxVersion>
+				<em:maxVersion>2.12.*</em:maxVersion>
 			</Description>
 		</em:targetApplication>
   </Description>  
