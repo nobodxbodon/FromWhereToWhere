@@ -9,7 +9,7 @@ com.wuxuan.fromwheretowhere.utils = function(){
   pub.sqltime = {};
   
 	// Get a reference to the strings bundle
-  pub.stringsBundle = document.getElementById("string-bundle");
+  pub.stringsBundle = document.getElementById("fromwheretowhere.string-bundle");
 	
   // Utils functions from here
   pub.cloneObject = function(obj){

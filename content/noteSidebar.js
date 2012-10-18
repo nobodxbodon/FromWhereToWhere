@@ -12,7 +12,7 @@ com.wuxuan.fromwheretowhere.noteSidebar = function(){
  .getInterface(Components.interfaces.nsIDOMWindow);
  
 	// Get a reference to the strings bundle
-  pub.stringsBundle = document.getElementById("string-bundle");
+  pub.stringsBundle = document.getElementById("fromwheretowhere.string-bundle");
   
   pub.init = function(){
     pub.localManager = com.wuxuan.fromwheretowhere.localmanager;

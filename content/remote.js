@@ -7,7 +7,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
 	var DEBUG=false;
 	
 	// Get a reference to the strings bundle
-  pub.stringsBundle = document.getElementById("string-bundle");
+  pub.stringsBundle = document.getElementById("fromwheretowhere.string-bundle");
 	
 	pub.dalert = function(str){
 		if(DEBUG)

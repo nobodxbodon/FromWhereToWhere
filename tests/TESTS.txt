@@ -22,7 +22,7 @@
   c) exclusion: -key3 -"key4 key5"
   d) site:mozilla.org
   e) time:8/2/2010-9/2/2010
-  eg: sqlite site:moz time:4/1/2011- -select "mdc"
+  eg: mdc site:mdc time:9/1/2012- -openpopup "anchor"   => 1 record Sep/3/2011
 16) columns in the view can be resized using splitters
 16.1) by default 'url' column is hidden. Use drop down menu on the right side of table header to toggle show/hidden for 'url' and 'last visit'.
 17) "Export/Import" work when selecting multiple nodes

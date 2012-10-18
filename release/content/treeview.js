@@ -6,7 +6,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   //var testConstruct=(function(){alert("mainView cons here");})();
   
 	// Get a reference to the strings bundle
-  pub.stringsBundle = document.getElementById("string-bundle");
+  pub.stringsBundle = document.getElementById("fromwheretowhere.string-bundle");
 	
   //TODO: if isRecord, there's no need to check for infinite expansion
   pub.createView = function(main, sb, isRecord){

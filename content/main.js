@@ -3,7 +3,7 @@ com.wuxuan.fromwheretowhere.main = function(){
   var pub={};
 
 	// Get a reference to the strings bundle
-  pub.stringsBundle = document.getElementById("string-bundle");
+  pub.stringsBundle = document.getElementById("fromwheretowhere.string-bundle");
 	
   pub.getCurrentURI = function() {
     if(!window.opener){
@@ -402,7 +402,6 @@ pub.mainThread.prototype = {
 			}
 			// if sidebar is open, close it first to save the sync trouble
 			if (pub.isSidebarFWTW()) {
-				//pub.mainWindow.toggleSidebar('viewEmptySidebar');
 				//refresh the note view
 				var ele = pub.mainWindow.document.getElementById("sidebar").contentDocument.getElementById("recordList");
 				var treeView = ele.view;
@@ -441,7 +440,7 @@ pub.mainThread.prototype = {
   };
   
   pub.showLocalNotes = function(){
-    pub.mainWindow.toggleSidebar('viewEmptySidebar');  
+    pub.mainWindow.toggleSidebar('fromwheretowhere.viewEmptySidebar');  
   };
   
   pub.getAllNotes = function() {

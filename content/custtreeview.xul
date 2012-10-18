@@ -7,7 +7,7 @@
         xmlns:html="http://www.w3.org/1999/xhtml">  
 
 <stringbundleset id="stringbundleset">
-	<stringbundle id="string-bundle" src="chrome://FromWhereToWhere/locale/fromwheretowhere.properties"/>
+	<stringbundle id="fromwheretowhere.string-bundle" src="chrome://FromWhereToWhere/locale/fromwheretowhere.properties"/>
 </stringbundleset>
 
 <popupset id="tipPopupSet">

@@ -7,7 +7,7 @@
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 <stringbundleset id="stringbundleset">
-	<stringbundle id="string-bundle" src="chrome://FromWhereToWhere/locale/fromwheretowhere.properties"/>
+	<stringbundle id="fromwheretowhere.string-bundle" src="chrome://FromWhereToWhere/locale/fromwheretowhere.properties"/>
 </stringbundleset>
 
   <toolbarbutton id="custom-button-1"
@@ -18,9 +18,9 @@
       class="toolbarbutton-1 chromeclass-toolbar-additional custombutton"
       />
   
-  <menuitem id="searchitem" label="&mainMenu.search;" accesskey="H"
+  <menuitem id="fromwheretowhere.searchitem" label="&mainMenu.search;" accesskey="H"
         oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory();" />
-  <menuitem id="recommend" label="&mainMenu.recommend;" accesskey="S" type="checkbox" autocheck="false"
+  <menuitem id="fromwheretowhere.recommend" label="&mainMenu.recommend;" accesskey="S" type="checkbox" autocheck="false"
         oncommand="com.wuxuan.fromwheretowhere.events.toggleRecommend(event);"/>
   <menuitem id="toolbar-searchitem" label="&mainMenu.search;" accesskey="H"
          oncommand="com.wuxuan.fromwheretowhere.openWindow.searchhistory(); event.stopPropagation()" />
@@ -38,7 +38,7 @@
   </toolbarpalette>
 
   <broadcasterset id="mainBroadcasterSet"> 
-    <broadcaster id="viewEmptySidebar" 
+    <broadcaster id="fromwheretowhere.viewEmptySidebar" 
                  autoCheck="false"
                  type="checkbox"
                  group="sidebar"
@@ -47,10 +47,10 @@
   </broadcasterset>
 
   <menupopup id="menu_ToolsPopup">  
-    <menu id="fwtwMenuitem" label="FromWhereToWhere" insertbefore="sanitizeSeparator">
-      <menupopup id="new-popup">
-        <menuitem id="searchitem"/>
-        <menuitem id="recommend"/>
+    <menu id="fromwheretowhere.fwtwMenuitem" label="FromWhereToWhere" insertbefore="sanitizeSeparator">
+      <menupopup id="fromwheretowhere.new-popup">
+        <menuitem id="fromwheretowhere.searchitem"/>
+        <menuitem id="fromwheretowhere.recommend"/>
       </menupopup>
     </menu>
   </menupopup>

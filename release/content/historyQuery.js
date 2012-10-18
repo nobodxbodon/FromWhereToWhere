@@ -17,7 +17,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
           getService(Components.interfaces.nsIFaviconService);
   
 	// Get a reference to the strings bundle
-  pub.stringsBundle = document.getElementById("string-bundle");
+  pub.stringsBundle = document.getElementById("fromwheretowhere.string-bundle");
 	
   /*type = 32, getInt32; type = 64, getInt64; type = "str", getString */
   pub.queryAll = function(statement, type, idx) {

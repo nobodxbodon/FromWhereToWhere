@@ -672,7 +672,7 @@ com.wuxuan.fromwheretowhere.recommendation = function(){
     pub.initHistory();
   
 	// Get a reference to the strings bundle
-  pub.stringsBundle = document.getElementById("string-bundle");
+  pub.stringsBundle = document.getElementById("fromwheretowhere.string-bundle");
   };
   
   pub.initCorp = function(){
