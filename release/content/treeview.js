@@ -235,28 +235,30 @@ com.wuxuan.fromwheretowhere.mainView = function(){
     var vis = this.visibleData;
     var pid = vis[row].placeId;
     var haveKeywords = main.pidwithKeywords.indexOf(pid);
+		var prop = "";
     //CAN'T alert here!
     //in case pid is null, which means new imported nodes
     if(pid && pid==main.retrievedId){
-      props.AppendElement(main.aserv.getAtom("makeItRed"));
+      prop+="makeItRed ";
     }else if(haveKeywords!=-1 || (vis[row].placeId==null && vis[row].haveKeywords)){
-      props.AppendElement(main.aserv.getAtom("makeItBlue"));
+      prop+="makeItBlue ";
     }
     //if it's red or blue already, just curve, otherwise make it olive
     if(sb.urls.indexOf(this.visibleData[row].url)!=-1){
       if(haveKeywords!=-1 || (pid && pid==main.retrievedId) ){
-	props.AppendElement(main.aserv.getAtom("makeItCurve"));
+				prop+="makeItCurve ";
       } else {
-	props.AppendElement(main.aserv.getAtom("makeItOlive"));
-	props.AppendElement(main.aserv.getAtom("makeItCurve"));
+				prop+="makeItOlive ";
+				prop+="makeItCurve ";
       }
     }
     if(devOptions){
       var pIdx = this.getParentIndex(row);
       if(pIdx!=-1 && this.visibleData[row].label==this.visibleData[pIdx].label){
-	props.AppendElement(main.aserv.getAtom("makeItSmall"));
+				prop+="makeItSmall";
       }
     }
+		return prop;
   },
   
   getColumnProperties: function(column, element, prop) {},
