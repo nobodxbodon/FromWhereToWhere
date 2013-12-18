@@ -84,7 +84,7 @@
       </splitter>
      <treecol id="date" label="&table.date;" flex="1"/>
   </treecols>
-  <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.main.openlink()"/>  
+  <treechildren context="clipmenu" ondblclick="com.wuxuan.fromwheretowhere.main.doubleClickTreeItem()"/>  
 </tree>  
 
 <panel id="saved_notification" fade="fast">

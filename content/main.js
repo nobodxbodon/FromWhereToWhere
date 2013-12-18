@@ -265,6 +265,12 @@ pub.mainThread.prototype = {
     window.open(uri);
   };
   
+  /* to fix #2, side effect: checking menu items always */
+  pub.doubleClickTreeItem = function(){
+	pub.showMenuItems();
+	pub.openlink();
+  };
+  
   pub.openlink = function(){
     pub.getURLfromNode(pub.treeView);
   };
