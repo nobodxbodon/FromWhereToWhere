@@ -235,24 +235,31 @@ pub.mainThread.prototype = {
 		var switchToTab = document.getElementById("switchToTab");
     var openinnewtab = document.getElementById("openinnewtab");
     var shareThread = document.getElementById("share");
-    var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
-    if(node){
-      var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(node.url);
-      pub.selectNodeLocal = exists;
-      localItem.hidden = (exists == -1);
-    }
+    
+	//if # of selected item > 1, just show "open in new tab"
+	if(pub.treeView.selection.count==1){
+	  var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
+	  if(node){
+		var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(node.url);
+		pub.selectNodeLocal = exists;
+		localItem.hidden = (exists == -1);
+	  }
 		//check if the tab is opened already
 		var foundTab = pub.UIutils.findTabByDocUrl(null, node.url);
-    openinnewtab.hidden = (node==null || foundTab.tab!=null);
+		openinnewtab.hidden = (node==null || foundTab.tab!=null);
 		switchToTab.hidden = (foundTab.tab==null);
 		switchToTab.fromwheretowhere = {};
 		switchToTab.fromwheretowhere.foundTab = foundTab;
-		
-    var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
+	}else if(pub.treeView.selection.count==0){
+    /*var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
     var propertyItem = document.getElementById("export-menu");
-		var noneSelected = (selectedIndex.length==0);
+		var noneSelected = (selectedIndex.length==0);*/
     propertyItem.hidden = noneSelected;
 		shareThread.hidden = noneSelected;
+	}else{
+	  openinnewtab.hidden = false;
+	  switchToTab.hidden =true;
+	}
   };
   
   pub.showSearchMenuItems = function(){

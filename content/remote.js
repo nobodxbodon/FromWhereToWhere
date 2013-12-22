@@ -3,7 +3,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
   var pub={};
   var URL = "http://fromwheretowhere.net/fwtw-svr/ajax.php";
   var xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Components.interfaces.nsIXMLHttpRequest);
-  
+  var BASE_URL="http://localhost:9000";//"10.0.0.3:9000";
 	var DEBUG=false;
 	
 	// Get a reference to the strings bundle
@@ -15,10 +15,11 @@ com.wuxuan.fromwheretowhere.remote = function(){
 	}
   pub.addThread = function(subject, body){
 	var feedback = pub.stringsBundle.getString('remote.addthread.feedback');
-    xhr.open("POST", URL, true);
+    xhr.open("POST", BASE_URL+"/threads/new", true);
 
-    var jsonString = 'add=true&subject='+escape(subject)+'&body='+escape(body);//{"words":["spring"],"optional":[]}'//"load=true";//JSON.stringify(obj);
-    xhr.setRequestHeader('Content-Type', "application/x-www-form-urlencoded");//"application/json");//
+    var jsonString = '{"subject":"'+encodeURIComponent(subject)+'","content":"'+encodeURIComponent(body)+'"}';
+	//{"words":["spring"],"optional":[]}'//"load=true";//JSON.stringify(obj);
+    xhr.setRequestHeader('Content-Type', "application/json");//"application/x-www-form-urlencoded");//
     //alert(jsonString);
     xhr.setRequestHeader("Content-Length",jsonString.length);
     xhr.onreadystatechange = function (oEvent) {  
@@ -51,19 +52,22 @@ com.wuxuan.fromwheretowhere.remote = function(){
 	
   //TODO: can't search for terms containing '&': escape
   pub.getAll = function(keywords, topNodes, main){
+	pub.dalert("in getall");
     //var http = new XMLHttpRequest();
     var feedback = pub.stringsBundle.getString('remote.search.feedback');
-    xhr.open("POST", URL, true);
+    xhr.open("POST", BASE_URL+"/threads", true);
 
 		keywords.words.forEach(pub.processEach(escape));
 		keywords.optional.forEach(pub.processEach(escape));
 		keywords.excluded.forEach(pub.processEach(escape));
 		keywords.site.forEach(pub.processEach(escape));
-    var jsonString = 'search=true&keywords='+JSON.stringify(keywords);//{"words":["spring"],"optional":[]}'//"load=true";//JSON.stringify(obj);
-    xhr.setRequestHeader('Content-Type', "application/x-www-form-urlencoded");//"application/json");//
+    var jsonString = '{"page":"0","filter":"","sortby":"savedate","order":"DESC"}';
+	//'search=true&keywords='+JSON.stringify(keywords);//{"words":["spring"],"optional":[]}'//"load=true";//JSON.stringify(obj);
+    xhr.setRequestHeader('Content-Type', "application/json");//
     xhr.setRequestHeader("Content-Length",jsonString.length);
     xhr.onreadystatechange = function (oEvent) {  
-      if (xhr.readyState === 4) {  
+      if (xhr.readyState === 4) {
+		pub.dalert(xhr.status);
         if (xhr.status === 200) {
 					pub.dalert(xhr.responseText);
           var response = JSON.parse(xhr.responseText);
@@ -89,6 +93,9 @@ com.wuxuan.fromwheretowhere.remote = function(){
 					for(var i in threads){
 						pub.dalert(threads[i].content);
 						threads[i].content = JSON.parse(threads[i].content);
+						if(threads[i].content[0].label==null){
+						  threads[i].content[0].label="";
+						}
 					}
 					//threads.forEach(function(element, index, array){array[index].content=JSON.parse(array[index].content);});
 					//threads=threads.filter(function(a){return !(!a.content[0]||!a.content[0].label||!a.content[0].label.length);})
@@ -100,9 +107,9 @@ com.wuxuan.fromwheretowhere.remote = function(){
 						dupIds=dupIds.concat(tids[i]);
 					}
 					pub.dalert("dups:"+dupIds);
-					if(tids.length!=0){
+					/*if(tids.length!=0){
 						pub.reportDupThreads(tids);
-					}
+					}*/
 					var nodes = [];
 					for(var i in threads){
 						if(dupIds.indexOf(threads[i].thread_id)<0){
@@ -122,7 +129,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
 						main.treeView.delSuspensionPoints(-1);
 					}
 					for(var i in nodes){
-						topNodes.splice(0,0,main.putNodeToLevel0(pub.recursiveProcess(nodes[i], unescape)));
+						topNodes.splice(0,0,main.putNodeToLevel0(nodes[i]));//pub.recursiveProcess(nodes[i], decodeURIComponent)
 					}
 					var updateLen = nodes.length;
 					main.treeView.treeBox.rowCountChanged(0, updateLen);
@@ -202,7 +209,8 @@ com.wuxuan.fromwheretowhere.remote = function(){
         if(!arr || !arr.length || arr.length<=1)
             return [];
         var a = arr.concat();
-        a.sort(function(a,b){return a.content[0].label.length<b.content[0].label.length;});
+        a.sort(function(a,b){
+		  return a.content[0].label.length<b.content[0].label.length;});
         //only work for string type
         var origLen = a.length;
         var repeated = [];
