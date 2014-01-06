@@ -14,6 +14,7 @@
 <!ENTITY contextMenu.delete "删除">
 <!ENTITY contextMenu.share "共享选中项">
 <!ENTITY contextMenu.shareWithWorld "与所有人">
+<!ENTITY contextMenu.seeWeb "在线搜索">
 
 <!ENTITY related.contextMenu.reverse "按词频反序">
 <!ENTITY related.contextMenu.more "更多...">

@@ -526,7 +526,7 @@ pub.mainThread.prototype = {
 					for(var i in filtered){
 						topNodes.splice(0,0,pub.putNodeToLevel0(filtered[i]));
 					}
-					var remoteThreads = pub.remote.getAll({words:this.words, optional:this.optional, excluded:this.excluded, site:this.site}, topNodes, pub);
+					var remoteThreads = pub.remote.getAll({keywords:this.keywords, words:this.words, optional:this.optional, excluded:this.excluded, site:this.site}, topNodes, pub);
 					/*for(var i in filtered){
 						topNodes.splice(0,0,remoteThreads);
 					}*/
@@ -714,6 +714,10 @@ pub.mainThread.prototype = {
       pub.search();
     }
   };
+  
+  pub.seeWeb = function(){
+	window.open("http://www.fromwheretowhere.net");
+  }
   
   pub.mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIWebNavigation)

@@ -14,6 +14,7 @@
 <!ENTITY contextMenu.delete "Ta bort">
 <!ENTITY contextMenu.share "Dela markerade objekt">
 <!ENTITY contextMenu.shareWithWorld "med hela världen!">
+<!ENTITY contextMenu.seeWeb "Sök Online">
 
 <!ENTITY related.contextMenu.reverse "Omvänd ordning efter förekomst">
 <!ENTITY related.contextMenu.more "Mer…">

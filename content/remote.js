@@ -56,12 +56,12 @@ com.wuxuan.fromwheretowhere.remote = function(){
     //var http = new XMLHttpRequest();
     var feedback = pub.stringsBundle.getString('remote.search.feedback');
     xhr.open("POST", BASE_URL+"/threads", true);
-
+		/* these are still needed for client-side filtering response 
 		keywords.words.forEach(pub.processEach(escape));
 		keywords.optional.forEach(pub.processEach(escape));
 		keywords.excluded.forEach(pub.processEach(escape));
-		keywords.site.forEach(pub.processEach(escape));
-    var jsonString = '{"page":"0","filter":"","sortby":"savedate","order":"DESC"}';
+		keywords.site.forEach(pub.processEach(escape));*/
+    var jsonString = '{"page":"0","filter":'+JSON.stringify(keywords)+',"sortby":"savedate","order":"DESC"}';
 	//'search=true&keywords='+JSON.stringify(keywords);//{"words":["spring"],"optional":[]}'//"load=true";//JSON.stringify(obj);
     xhr.setRequestHeader('Content-Type', "application/json");//
     xhr.setRequestHeader("Content-Length",jsonString.length);
