@@ -3,7 +3,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
   var pub={};
   var URL = "http://fromwheretowhere.net/fwtw-svr/ajax.php";
   var xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Components.interfaces.nsIXMLHttpRequest);
-  var BASE_URL="http://localhost:9000";//"10.0.0.3:9000";
+  var BASE_URL="http://www.fromwheretowhere.net";//"10.0.0.3:9000";
 	var DEBUG=false;
 	
 	// Get a reference to the strings bundle
@@ -37,7 +37,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
                     pub.popNotification(pub.stringsBundle.getString('remote.feedback.serverInfo')+feedback+": "+response.info);
                 }
             }
-            pub.popNotification(pub.stringsBundle.getString('remote.feedback.shared')+subject);
+            pub.popNotification(pub.stringsBundle.getString('remote.feedback.shared')+response.info);
           } else {  
             pub.popNotification(pub.stringsBundle.getString('remote.status.serverError')+feedback+": "+xhr.statusText);  
           }  
@@ -141,7 +141,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
     xhr.send(jsonString);
   };
   
-  pub.reportDupThreads = function(tids){
+  /*pub.reportDupThreads = function(tids){
 	var feedback = pub.stringsBundle.getString('remote.dupThread.feedback');
     xhr.open("POST", URL, true);
 
@@ -170,7 +170,7 @@ com.wuxuan.fromwheretowhere.remote = function(){
         }
     };
     xhr.send(jsonString);
-  };
+  };*/
 						 
   pub.popNotification = function(txt){
     var addnote = document.getElementById("saved_note");
