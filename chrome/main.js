@@ -1,22 +1,28 @@
 $(function () {
   // select the tree container using jQuery
   $("#demo1").dynatree({
-            onActivate: function(node) {
-                // A DynaTreeNode object is passed to the activation handler
-                // Note: we also get this event, if persistence is on, and the page is reloaded.
-                //alert("You activated " + node.data.title);
-                if( node.data.more) {
-                    //alert("start from id="+node.data.minId);
-                    model.searchNote(null, node.data.minId);
-                }
-                if( node.data.href ){
-					// Open target
-					window.open(node.data.href, node.data.target);
-                    //window.location.href = node.data.href;
-					// or open target in iframe
-//                $("[name=contentFrame]").attr("src", node.data.href);
-				}
-            },
+    onActivate: function(node, event) {
+      //alert(node.data.title);
+      if( node.data.href ){
+        //event.preventDefault();
+        window.open(node.data.href, node.data.target);
+      }
+    },
+      onCustomRender: function(node) {
+        // Render title as columns
+        if(node.data.lastVisitTime==null){
+          // Default rendering
+          return false;
+        }
+        
+        var html = "<a class='dynatree-title' href='"+node.data.href+"'>";
+        //for(var i=0; i<cols.length; i++){
+          html += "<span class='td'>" + node.data.title + "</span>";
+          html += "<span class='td'>" + node.data.lastVisitTime + "</span>";
+        //}
+        return html + "</a>";
+      },
+
             onExpand: function(flag, node){
                 node.visit(function(node){
                     node.expand(true);
@@ -57,6 +63,7 @@ Set.prototype.remove = function(o) {delete this[o];}
   var typeByVisitId={};
   var idByVisitId={};
   var historyByVisitId={};
+  var timeByVisitId={};
   var children = [];
   
   /* exceptions: ignore these visitItems */
@@ -85,7 +92,8 @@ Set.prototype.remove = function(o) {delete this[o];}
         urlByVisitId[visitId]=url;
         titleByVisitId[visitId]=title;
         typeByVisitId[visitId]=visitItems[v].transition;
-        //console.log(visitItems[v].visitTime +" id:"+visitId+"<- "+visitItems[v].referringVisitId+" title:"+title+" url:"+url);
+        timeByVisitId[visitId]=visitItems[v].visitTime;
+        //console.log("visitid:"+visitId+" <- "+visitItems[v].referringVisitId+" title:"+title+" url:"+url);
       }
     }
     if (!--numRequestsOutstanding) {
@@ -188,7 +196,7 @@ Set.prototype.remove = function(o) {delete this[o];}
   }
 
   function generateTree(visitId){
-    var node={title:titleByVisitId[visitId],href:urlByVisitId[visitId]};
+    var node={title:titleByVisitId[visitId],lastVisitTime:new Date(timeByVisitId[visitId]),href:urlByVisitId[visitId]};
     /*console.log(visitId+" -> "+links[visitId]);*/
     if(notEmptyArray(links[visitId])){
       node.isFolder=true;
@@ -199,12 +207,12 @@ Set.prototype.remove = function(o) {delete this[o];}
     return node;
   }
   
-  var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 1;
+  var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
   var oneWeekAgo = (new Date).getTime() - microsecondsPerWeek;
   chrome.history.search({
     'text': "",              // Return every history item....
-    'startTime': oneWeekAgo  // that was accessed less than one week ago.
-    //'maxResults':1
+    'startTime': oneWeekAgo,  // that was accessed less than one week ago.
+    'maxResults':0
   },
   function(historyItems) {
     // For each history item, get details on all visits.

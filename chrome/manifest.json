@@ -6,7 +6,7 @@
   "permissions": ["history"],
   "icons": {"48": "icon.png"},
   "browser_action": {
-     "default_popup": "fromwheretowhere_threads.html",
+     //"default_popup": "fromwheretowhere_threads.html",
     "default_icon": "icon.png"
   },
   "background": {
