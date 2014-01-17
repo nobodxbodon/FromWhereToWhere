@@ -1,11 +1,16 @@
 {
   "manifest_version": 2,
   "name": "FromWhereToWhere",
-  "version": "1.0",
-  "description": "Open threaded history",
+  "version": "0.1",
+  "description": "Structure browsing history in threads",
   "permissions": ["history"],
+  "icons": {"48": "icon.png"},
   "browser_action": {
-    "default_popup": "popup.html",
+     "default_popup": "fromwheretowhere_threads.html",
     "default_icon": "icon.png"
+  },
+  "background": {
+    "scripts": ["eventPage.js"],
+    "persistent": false
   }
 }

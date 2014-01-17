@@ -62,8 +62,8 @@ Set.prototype.remove = function(o) {delete this[o];}
   /* exceptions: ignore these visitItems */
   /* need to take all visit items into account, as they all can be root (title empty, typed, etc) */
   var processVisits = function(url, title, historyId, visitItems) {
-    //if(title && title!=""){
-      
+      //filter self by url
+    if(url.indexOf("fromwheretowhere_threads.html")==-1){
       for(var v in visitItems){
         var visitId = visitItems[v].visitId;
         /*console.log(visitId);
@@ -73,9 +73,9 @@ Set.prototype.remove = function(o) {delete this[o];}
             console.log(e);*/
         
         //ignore all 'reload' type
-        if(visitItems[v].transition=="reload"){
+        /*if(visitItems[v].transition=="reload"){
           continue;
-        }
+        }*/
         
         /*if(referrByVisitId[visitId]!=null)
           console.log(visitId+": "+referrByVisitId[visitId]);*/
@@ -85,8 +85,9 @@ Set.prototype.remove = function(o) {delete this[o];}
         urlByVisitId[visitId]=url;
         titleByVisitId[visitId]=title;
         typeByVisitId[visitId]=visitItems[v].transition;
-        /*console.log(visitItems[v].visitTime +" "+visitItems[v].referringVisitId+url);*/
+        //console.log(visitItems[v].visitTime +" id:"+visitId+"<- "+visitItems[v].referringVisitId+" title:"+title+" url:"+url);
       }
+    }
     if (!--numRequestsOutstanding) {
       onAllVisitsProcessed();
     }
@@ -114,18 +115,24 @@ Set.prototype.remove = function(o) {delete this[o];}
         if(currentVisitId in walked){
           continue;
         }
+        
+        //visitId can be wrong: no url/title, maybe a redirect? so if it's not urlByVisitId, it's invalid, and be discarded for now
+        if(!(referrByVisitId[currentVisitId] in urlByVisitId))
+          break;
+        
         if(links[referrByVisitId[currentVisitId]]==null)
           links[referrByVisitId[currentVisitId]]=[];
+        //console.log("add "+currentVisitId+"<-"+referrByVisitId[currentVisitId]);
         links[referrByVisitId[currentVisitId]].push(currentVisitId);
         walked.add(currentVisitId);
         currentVisitId=referrByVisitId[currentVisitId];
         
-        /*console.log(currentVisitId+" "+titleByVisitId[currentVisitId]+" <-- "+referrByVisitId[currentVisitId]+" "+titleByVisitId[referrByVisitId[currentVisitId]]);*/
+        //console.log(currentVisitId+" "+titleByVisitId[currentVisitId]+" <-- "+referrByVisitId[currentVisitId]+" "+titleByVisitId[referrByVisitId[currentVisitId]]);
         /*console.log(titleByVisitId[visitId]+" id:"+idByVisitId[visitId]+" "+visitId+" "+urlByVisitId[visitId]+" "+referrByVisitId[visitId]+" "+titleByVisitId[referrByVisitId[visitId]]+" id:"+idByVisitId[referrByVisitId[visitId]]);*/
       }
-      if(!(currentVisitId in walked)){
+      if(!(currentVisitId in walked) && (currentVisitId in urlByVisitId)){
         var historyId = historyByVisitId[currentVisitId];
-        /*console.log("root:"+historyId+" visit:"+currentVisitId+" "+titleByVisitId[currentVisitId]+" url:"+urlByVisitId[currentVisitId]);*/
+        //console.log("root:"+historyId+" visit:"+currentVisitId+" "+titleByVisitId[currentVisitId]+" url:"+urlByVisitId[currentVisitId]);
         walked.add(currentVisitId);
         roots.push(currentVisitId);
         /*if(!(historyId in rootSetByHistoryId)){
@@ -149,7 +156,8 @@ Set.prototype.remove = function(o) {delete this[o];}
       children.push(root);
       return;
     }
-    for(var r=1;r<roots.length;r++){
+    //in reverse order, to make latest on top
+    for(var r=roots.length-1;r>=1;r--){
       //group those that have same url continuously, shown times in front
       var root = generateTree(roots[r]);
       if(lastUrl==root.href){
@@ -205,8 +213,7 @@ Set.prototype.remove = function(o) {delete this[o];}
       var url = historyItems[i].url;
       var title = historyItems[i].title;
       var historyId = historyItems[i].id;
-      for(var e in historyItems[i])
-      /*console.log(title+" "+historyItems[i].id+" from:"+historyItems[i].fromId);*/
+      
       var processVisitsWithUrl = function(url, title, historyId) {
         // We need the url of the visited item to process the visit.
         // Use a closure to bind the  url into the callback's args.
