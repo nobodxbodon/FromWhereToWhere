@@ -1,4 +1,17 @@
 $(function () {
+  $("#submitKeywords").on('click', function(){
+    var keywords = $("#keywords").val();
+    console.log(keywords);
+    searchByKeywords(keywords);
+  });
+  $("#keywords").keypress(function (e) {
+        if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+            $('#submitKeywords').click();
+            return false;
+        } else {
+            return true;
+        }
+    });
   // select the tree container using jQuery
   $("#demo1").dynatree({
     onActivate: function(node, event) {
@@ -23,13 +36,13 @@ $(function () {
         return html + "</a>";
       },
 
-            onExpand: function(flag, node){
-                node.visit(function(node){
-                    node.expand(true);
-                });
-            },
-            persist: true
-        });
+      onExpand: function(flag, node){
+          node.visit(function(node){
+            node.expand(true);
+          });
+      },
+      persist: true
+  });
   /*if(!chrome)
     console.log("NO CHROME@$#)U(%RIFJDPOFPUHF");
   else
@@ -44,9 +57,6 @@ $(function () {
     console.log("history search there");*/
     
   var treeRoot = $("#demo1").dynatree("getRoot");
-  // Maps URLs to a count of the number of times the user typed that URL into
-  // the omnibox.
-  var urlToCount = {};
   // Track the number of callbacks from chrome.history.getVisits()
   // that we expect to get.  When it reaches zero, we have all results.
   var numRequestsOutstanding = 0;
@@ -56,19 +66,18 @@ $(function () {
 Set.prototype.add = function(o) {this[o] = true;}
 Set.prototype.remove = function(o) {delete this[o];}
 
-  var titles = {};
   var titleByVisitId = {}; //visitId->title
-  var urlByVisitId = {};//visitId->url
-  var referrByVisitId = {};//visitId -> referrerId
-  var typeByVisitId={};
-  var idByVisitId={};
-  var historyByVisitId={};
-  var timeByVisitId={};
-  var children = [];
-  
+    var urlByVisitId = {};//visitId->url
+    var referrByVisitId = {};//visitId -> referrerId
+    var typeByVisitId={};
+    var idByVisitId={};
+    var historyByVisitId={};
+    var timeByVisitId={};
+    var children = [];
   /* exceptions: ignore these visitItems */
   /* need to take all visit items into account, as they all can be root (title empty, typed, etc) */
   var processVisits = function(url, title, historyId, visitItems) {
+    
       //filter self by url
     if(url.indexOf("fromwheretowhere_threads.html")==-1){
       for(var v in visitItems){
@@ -102,13 +111,12 @@ Set.prototype.remove = function(o) {delete this[o];}
     
   };
   
-  //var rootSetByHistoryId= new Set();
-  var roots = [];
-  var walked = new Set();
-  var links = {};
   // This function is called when we have the final list of URls to display.
   //TODO: infinite loop somewhere!
   var onAllVisitsProcessed = function() {
+    var roots = [];
+    var walked = new Set();
+    var links = {};
     /*for(var visitId in urlByVisitId){
       console.log(titleByVisitId[visitId]+" id:"+idByVisitId[visitId]+" "+visitId+" "+typeByVisitId[visitId]+" "+referrByVisitId[visitId]+" "+titleByVisitId[referrByVisitId[visitId]]+" id:"+idByVisitId[referrByVisitId[visitId]]);
     }*/
@@ -150,14 +158,14 @@ Set.prototype.remove = function(o) {delete this[o];}
       }
       
     }
-    
+    console.log(roots.length);
     var children = [];
     var lastUrl = "";
     var count=1;
     if(roots.length==0)
       return;
     
-    var lastRoot = generateTree(roots[0]);
+    var lastRoot = generateTree(roots[0], links);
     lastUrl=lastRoot.href;
     if(roots.length==1){
       children.push(lastRoot);
@@ -167,7 +175,7 @@ Set.prototype.remove = function(o) {delete this[o];}
     //in reverse order, to make latest on top
     for(var r=roots.length-1;r>=1;r--){
       //group those that have same url continuously, shown times in front
-      var root = generateTree(roots[r]);
+      var root = generateTree(roots[r], links);
       if(lastUrl==root.href){
         count++;
         continue;
@@ -185,7 +193,8 @@ Set.prototype.remove = function(o) {delete this[o];}
       lastRoot = root;
       lastUrl=root.href;
     }
-    
+    treeRoot.removeChildren();
+    console.log("remove all");
     treeRoot.addChild(children);
   }
   
@@ -195,28 +204,48 @@ Set.prototype.remove = function(o) {delete this[o];}
     return false;
   }
 
-  function generateTree(visitId){
+  function generateTree(visitId, links){
     var node={title:titleByVisitId[visitId],lastVisitTime:new Date(timeByVisitId[visitId]),href:urlByVisitId[visitId]};
     /*console.log(visitId+" -> "+links[visitId]);*/
     if(notEmptyArray(links[visitId])){
       node.isFolder=true;
       node.children=[];
       for(var c in links[visitId])
-        node.children.push(generateTree(links[visitId][c]));
+        node.children.push(generateTree(links[visitId][c], links));
     }
     return node;
   }
   
-  var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 7;
+  var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 1;
   var oneWeekAgo = (new Date).getTime() - microsecondsPerWeek;
-  chrome.history.search({
-    'text': "",              // Return every history item....
-    'startTime': oneWeekAgo,  // that was accessed less than one week ago.
-    'maxResults':0
-  },
+  
+  /* search by keywords, only show the referrers; when keywords is empty, show a week's history */
+  var searchByKeywords = function(keywords){
+    //init the maps
+    titleByVisitId = {}; //visitId->title
+    urlByVisitId = {};//visitId->url
+    referrByVisitId = {};//visitId -> referrerId
+    typeByVisitId={};
+    idByVisitId={};
+    historyByVisitId={};
+    timeByVisitId={};
+    children = [];
+    //init ends
+    
+    var searchOptions = {
+      'text': keywords,              // Return every history item....
+      'startTime': 0,
+      'maxResults':0
+    };
+    if(keywords==''){
+      searchOptions.startTime = oneWeekAgo;
+      searchOptions.text = "";
+    }
+    console.log(searchOptions);
+  chrome.history.search(searchOptions,
   function(historyItems) {
     // For each history item, get details on all visits.
-    
+    console.log("history number:"+historyItems.length);
     for (var i = 0; i < historyItems.length; ++i) {
       var url = historyItems[i].url;
       var title = historyItems[i].title;
@@ -236,6 +265,9 @@ Set.prototype.remove = function(o) {delete this[o];}
       onAllVisitsProcessed();
     }
   });
+  }
+  
+  searchByKeywords("");
   //console.log("after all");
   
 });
