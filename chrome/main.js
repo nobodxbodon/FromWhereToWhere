@@ -104,7 +104,7 @@ Set.prototype.remove = function(o) {delete this[o];}
     //if earliest history retrieving time is earlier than this earliest, no need to retrieve history again
     if(earliestStartTime<currentStartTime){
       //console.log("earliest: "+(new Date(earliestStartTime))+" no need to retrieve");
-      onAllVisitsProcessed(visitIds);
+      onAllVisitsProcessed(visitIds, true);
       return;
     }
     //console.log("earliest: "+(new Date(currentStartTime)));
@@ -191,10 +191,13 @@ Set.prototype.remove = function(o) {delete this[o];}
     
   };
   
+  //save the UI roots if history isn't retrieved
+  
   // This function is called when we have the final list of URls to display.
   //TODO: infinite loop somewhere!
-  var onAllVisitsProcessed = function(visitIds) {
+  var onAllVisitsProcessed = function(visitIds, skipWalk) {
     //console.log("visitIds null or not: "+visitIds);
+    
     var roots = [];
     var walked = new Set();
     var links = {};
@@ -264,7 +267,7 @@ Set.prototype.remove = function(o) {delete this[o];}
     if(roots.length==0)
       return;
     
-    var lastRoot = generateTree(roots[0], links);
+    var lastRoot = generateTree(roots[0], links, visitIds);
     lastUrl=lastRoot.href;
     if(roots.length==1){
       children.push(lastRoot);
@@ -274,7 +277,7 @@ Set.prototype.remove = function(o) {delete this[o];}
     //in reverse order, to make latest on top
     for(var r=roots.length-1;r>=0;r--){
       //group those that have same url continuously, shown times in front
-      var root = generateTree(roots[r], links);
+      var root = generateTree(roots[r], links, visitIds);
       if(lastUrl==root.href){
         count++;
         continue;
@@ -288,7 +291,7 @@ Set.prototype.remove = function(o) {delete this[o];}
         }
         count=1;
       }
-      if(!visitIds || hasKeywords(lastRoot, hasVisit))
+      /*if(!visitIds || hasKeywords(lastRoot, hasVisit))*/
         children.push(lastRoot);
       /*else if(visitIds)
         console.log("no keywords: "+lastRoot.visitId);*/
@@ -296,7 +299,14 @@ Set.prototype.remove = function(o) {delete this[o];}
       lastUrl=root.href;
     }
     //console.log("after filtering roots have: "+children.length);
-    treeRoot.addChild(children);
+    if(!visitIds){
+      treeRoot.addChild(children);
+    }else{
+      treeRoot.addChild(children.filter(function(element){
+        return hasKeywords(element, hasVisit);
+      })
+                        );
+    }
   }
   
   function hasKeywords(node, hasVisit){
@@ -321,14 +331,16 @@ Set.prototype.remove = function(o) {delete this[o];}
     return false;
   }
 
-  function generateTree(visitId, links){
+  function generateTree(visitId, links, visitIds){
     var node={visitId: visitId, title:titleByVisitId[visitId],lastVisitTime:new Date(timeByVisitId[visitId]),href:urlByVisitId[visitId]};
+    if(visitIds && (visitId in visitIds))
+      node.addClass='withkeywords';
     /*console.log(visitId+" -> "+links[visitId]);*/
     if(notEmptyArray(links[visitId])){
       node.isFolder=true;
       node.children=[];
       for(var c in links[visitId])
-        node.children.push(generateTree(links[visitId][c], links));
+        node.children.push(generateTree(links[visitId][c], links, visitIds));
     }
     return node;
   }
@@ -362,6 +374,7 @@ Set.prototype.remove = function(o) {delete this[o];}
       children = [];
       
       searchOptions.startTime = defaultStartTime;
+      earliestStartTime = defaultStartTime;
       searchOptions.text = "";
       //console.log(searchOptions);
       chrome.history.search(searchOptions,
