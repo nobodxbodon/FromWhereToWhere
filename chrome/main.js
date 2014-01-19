@@ -75,6 +75,7 @@ Set.prototype.remove = function(o) {delete this[o];}
     var timeByVisitId={};
     var children = [];
     
+    var earliestStartTime = new Date();
     var earliest = new Date();
     var visitIds = new Set();
     
@@ -99,7 +100,15 @@ Set.prototype.remove = function(o) {delete this[o];}
   };
   
   var searchByEarliest = function(earliest, visitIds){
-    
+    var currentStartTime = earliest-microsecondsPerDay;
+    //if earliest history retrieving time is earlier than this earliest, no need to retrieve history again
+    if(earliestStartTime<currentStartTime){
+      //console.log("earliest: "+(new Date(earliestStartTime))+" no need to retrieve");
+      onAllVisitsProcessed(visitIds);
+      return;
+    }
+    //console.log("earliest: "+(new Date(currentStartTime)));
+    earliestStartTime = currentStartTime;
     //console.log("in searchByEarliest");
     //init the maps
     titleByVisitId = {}; //visitId->title
@@ -113,7 +122,7 @@ Set.prototype.remove = function(o) {delete this[o];}
     //console.log(new Date(earliest));
     var searchOptions = {
       'text': '',              // Return every history item....
-      'startTime': earliest-microsecondsPerDay,
+      'startTime': currentStartTime,
       'maxResults':0
     };
     
@@ -329,18 +338,6 @@ Set.prototype.remove = function(o) {delete this[o];}
   
   /* search by keywords, only show the referrers; when keywords is empty, show a week's history */
   var searchByKeywords = function(keywords){
-    //init the maps
-    titleByVisitId = {}; //visitId->title
-    urlByVisitId = {};//visitId->url
-    referrByVisitId = {};//visitId -> referrerId
-    typeByVisitId={};
-    idByVisitId={};
-    historyByVisitId={};
-    timeByVisitId={};
-    children = [];
-    
-    earliest = new Date();
-    visitIds = new Set();
     
     numRequestsOutstanding = 0;
     treeRoot.removeChildren();
@@ -354,6 +351,16 @@ Set.prototype.remove = function(o) {delete this[o];}
       'maxResults':0
     };
     if(keywords==''){
+      //init the maps only when there's no keywords
+      titleByVisitId = {}; //visitId->title
+      urlByVisitId = {};//visitId->url
+      referrByVisitId = {};//visitId -> referrerId
+      typeByVisitId={};
+      idByVisitId={};
+      historyByVisitId={};
+      timeByVisitId={};
+      children = [];
+      
       searchOptions.startTime = defaultStartTime;
       searchOptions.text = "";
       //console.log(searchOptions);
@@ -384,6 +391,10 @@ Set.prototype.remove = function(o) {delete this[o];}
     //search for the time of the earliest historyItems matching the keywords
     //then use the time to get all visitItems then structure threads
     else{
+      //init the retrieve date when there's keywords
+      earliest = new Date();
+      visitIds = new Set();
+      
       //console.log("go earliest");
       //console.log(searchOptions);
       chrome.history.search(searchOptions,
