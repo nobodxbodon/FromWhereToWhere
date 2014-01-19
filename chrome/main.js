@@ -1,7 +1,7 @@
 $(function () {
   $("#submitKeywords").on('click', function(){
     var keywords = $("#keywords").val();
-    console.log(keywords);
+    //console.log(keywords);
     searchByKeywords(keywords);
   });
   $("#keywords").keypress(function (e) {
@@ -74,9 +74,80 @@ Set.prototype.remove = function(o) {delete this[o];}
     var historyByVisitId={};
     var timeByVisitId={};
     var children = [];
+    
+    var earliest = new Date();
+    var visitIds = new Set();
+    
+  var getEarliestVisits = function(url, visitItems){
+    //console.log("earliest: "+numRequestsOutstanding);
+    if(url.indexOf("fromwheretowhere_threads.html")==-1){
+      for(var v in visitItems){
+        var visitId = visitItems[v].visitId;
+        
+        if(visitItems[v].visitTime<earliest){
+          //console.log(visitItems[v].visitTime+" earlier than: "+earliest);
+          earliest=visitItems[v].visitTime;
+        }
+        visitIds.add(visitId);
+        //console.log("need visitid:"+visitId+" <- "+visitItems[v].referringVisitId+" url:"+url);
+      }
+    }
+    if (!--numRequestsOutstanding) {
+      searchByEarliest(earliest, visitIds);
+    }
+    //console.log("end earliest: "+numRequestsOutstanding);
+  };
+  
+  var searchByEarliest = function(earliest, visitIds){
+    
+    //console.log("in searchByEarliest");
+    //init the maps
+    titleByVisitId = {}; //visitId->title
+    urlByVisitId = {};//visitId->url
+    referrByVisitId = {};//visitId -> referrerId
+    typeByVisitId={};
+    idByVisitId={};
+    historyByVisitId={};
+    timeByVisitId={};
+    children = [];
+    //console.log(new Date(earliest));
+    var searchOptions = {
+      'text': '',              // Return every history item....
+      'startTime': earliest-microsecondsPerDay,
+      'maxResults':0
+    };
+    
+    //console.log(searchOptions);
+    chrome.history.search(searchOptions,
+      function(historyItems) {
+        // For each history item, get details on all visits.
+        //console.log("history number:"+historyItems.length);
+        for (var i = 0; i < historyItems.length; ++i) {
+          var url = historyItems[i].url;
+          var title = historyItems[i].title;
+          var historyId = historyItems[i].id;
+          
+          var processVisitsWithUrl = function(url, title, historyId) {
+            // We need the url of the visited item to process the visit.
+            // Use a closure to bind the  url into the callback's args.
+            return function(visitItems) {
+              processVisits(url, title, historyId, visitItems, visitIds);
+            };
+          };
+          chrome.history.getVisits({url: url}, processVisitsWithUrl(url, title, historyId));
+          numRequestsOutstanding++;
+        }
+        if (!numRequestsOutstanding) {
+          onAllVisitsProcessed(visitIds);
+        }
+      }
+    );
+    
+  };
+  
   /* exceptions: ignore these visitItems */
   /* need to take all visit items into account, as they all can be root (title empty, typed, etc) */
-  var processVisits = function(url, title, historyId, visitItems) {
+  var processVisits = function(url, title, historyId, visitItems, visitIds) {
     
       //filter self by url
     if(url.indexOf("fromwheretowhere_threads.html")==-1){
@@ -106,30 +177,41 @@ Set.prototype.remove = function(o) {delete this[o];}
       }
     }
     if (!--numRequestsOutstanding) {
-      onAllVisitsProcessed();
+      onAllVisitsProcessed(visitIds);
     }
     
   };
   
   // This function is called when we have the final list of URls to display.
   //TODO: infinite loop somewhere!
-  var onAllVisitsProcessed = function() {
+  var onAllVisitsProcessed = function(visitIds) {
+    //console.log("visitIds null or not: "+visitIds);
     var roots = [];
     var walked = new Set();
     var links = {};
     /*for(var visitId in urlByVisitId){
       console.log(titleByVisitId[visitId]+" id:"+idByVisitId[visitId]+" "+visitId+" "+typeByVisitId[visitId]+" "+referrByVisitId[visitId]+" "+titleByVisitId[referrByVisitId[visitId]]+" id:"+idByVisitId[referrByVisitId[visitId]]);
     }*/
-    var LIMIT=3;
+    var LIMIT=100;//too deep to be real, can be loop
+    var hasVisit={};
     for(var visitId in urlByVisitId){
       //loop to get top root
       var i = 0;
       var currentVisitId=visitId;
+      if(visitIds && (currentVisitId in visitIds)){
+        //console.log(currentVisitId+ " in as leaf");
+        hasVisit[currentVisitId]=true;
+      }
       while(referrByVisitId[currentVisitId]!=null&&referrByVisitId[currentVisitId]!=0&&i<LIMIT){
+        if(visitIds && (referrByVisitId[currentVisitId] in visitIds)){
+          //console.log(referrByVisitId[currentVisitId]+ " in as parent of "+currentVisitId);
+          hasVisit[referrByVisitId[currentVisitId]]=true;
+        }
+          
         i++;
-        
+        // if current id has been visited, no need to trace back, as it has been done already
         if(currentVisitId in walked){
-          continue;
+          break;
         }
         
         //visitId can be wrong: no url/title, maybe a redirect? so if it's not urlByVisitId, it's invalid, and be discarded for now
@@ -140,12 +222,17 @@ Set.prototype.remove = function(o) {delete this[o];}
           links[referrByVisitId[currentVisitId]]=[];
         //console.log("add "+currentVisitId+"<-"+referrByVisitId[currentVisitId]);
         links[referrByVisitId[currentVisitId]].push(currentVisitId);
+        /*if(visitIds)
+          console.log("add "+currentVisitId+" to walked");*/
         walked.add(currentVisitId);
         currentVisitId=referrByVisitId[currentVisitId];
         
-        //console.log(currentVisitId+" "+titleByVisitId[currentVisitId]+" <-- "+referrByVisitId[currentVisitId]+" "+titleByVisitId[referrByVisitId[currentVisitId]]);
+        /*if(visitIds)
+          console.log(currentVisitId+" "+titleByVisitId[currentVisitId]+" <-- "+referrByVisitId[currentVisitId]+" "+titleByVisitId[referrByVisitId[currentVisitId]]);*/
         /*console.log(titleByVisitId[visitId]+" id:"+idByVisitId[visitId]+" "+visitId+" "+urlByVisitId[visitId]+" "+referrByVisitId[visitId]+" "+titleByVisitId[referrByVisitId[visitId]]+" id:"+idByVisitId[referrByVisitId[visitId]]);*/
       }
+      /*if(visitIds)
+        console.log(currentVisitId+" "+(!visitIds||hasVisit[currentVisitId])+" "+!(currentVisitId in walked)+" "+(currentVisitId in urlByVisitId));*/
       if(!(currentVisitId in walked) && (currentVisitId in urlByVisitId)){
         var historyId = historyByVisitId[currentVisitId];
         //console.log("root:"+historyId+" visit:"+currentVisitId+" "+titleByVisitId[currentVisitId]+" url:"+urlByVisitId[currentVisitId]);
@@ -158,7 +245,10 @@ Set.prototype.remove = function(o) {delete this[o];}
       }
       
     }
-    console.log(roots.length);
+    
+    /*for(var v in hasVisit )
+      console.log(v+" has keyword");*/
+    //console.log("roots length: "+roots.length);
     var children = [];
     var lastUrl = "";
     var count=1;
@@ -169,11 +259,11 @@ Set.prototype.remove = function(o) {delete this[o];}
     lastUrl=lastRoot.href;
     if(roots.length==1){
       children.push(lastRoot);
-      children.push(root);
+      //children.push(root);
       return;
     }
     //in reverse order, to make latest on top
-    for(var r=roots.length-1;r>=1;r--){
+    for(var r=roots.length-1;r>=0;r--){
       //group those that have same url continuously, shown times in front
       var root = generateTree(roots[r], links);
       if(lastUrl==root.href){
@@ -189,13 +279,31 @@ Set.prototype.remove = function(o) {delete this[o];}
         }
         count=1;
       }
-      children.push(lastRoot);
+      if(!visitIds || hasKeywords(lastRoot, hasVisit))
+        children.push(lastRoot);
+      /*else if(visitIds)
+        console.log("no keywords: "+lastRoot.visitId);*/
       lastRoot = root;
       lastUrl=root.href;
     }
-    treeRoot.removeChildren();
-    console.log("remove all");
+    //console.log("after filtering roots have: "+children.length);
     treeRoot.addChild(children);
+  }
+  
+  function hasKeywords(node, hasVisit){
+    
+    if(hasVisit[node.visitId])
+      return true;
+    else if(node.children){
+      for(var i in node.children){
+        if(hasKeywords(node.children[i], hasVisit))
+          return true;
+        /*else
+          console.log(node.children[i].visitId+" no keyword");*/
+      }
+    }
+    //console.log(node.visitId+" no keyword");
+    return false;
   }
   
   function notEmptyArray(array){
@@ -205,7 +313,7 @@ Set.prototype.remove = function(o) {delete this[o];}
   }
 
   function generateTree(visitId, links){
-    var node={title:titleByVisitId[visitId],lastVisitTime:new Date(timeByVisitId[visitId]),href:urlByVisitId[visitId]};
+    var node={visitId: visitId, title:titleByVisitId[visitId],lastVisitTime:new Date(timeByVisitId[visitId]),href:urlByVisitId[visitId]};
     /*console.log(visitId+" -> "+links[visitId]);*/
     if(notEmptyArray(links[visitId])){
       node.isFolder=true;
@@ -216,8 +324,8 @@ Set.prototype.remove = function(o) {delete this[o];}
     return node;
   }
   
-  var microsecondsPerWeek = 1000 * 60 * 60 * 24 * 1;
-  var oneWeekAgo = (new Date).getTime() - microsecondsPerWeek;
+  var microsecondsPerDay = 1000 * 60 * 60 * 24 * 1;
+  var defaultStartTime = (new Date).getTime() - microsecondsPerDay;
   
   /* search by keywords, only show the referrers; when keywords is empty, show a week's history */
   var searchByKeywords = function(keywords){
@@ -230,41 +338,74 @@ Set.prototype.remove = function(o) {delete this[o];}
     historyByVisitId={};
     timeByVisitId={};
     children = [];
+    
+    earliest = new Date();
+    visitIds = new Set();
+    
+    numRequestsOutstanding = 0;
+    treeRoot.removeChildren();
+    //console.log("remove all");
     //init ends
     
+    //console.log("in searchByKeywords: "+numRequestsOutstanding);
     var searchOptions = {
       'text': keywords,              // Return every history item....
       'startTime': 0,
       'maxResults':0
     };
     if(keywords==''){
-      searchOptions.startTime = oneWeekAgo;
+      searchOptions.startTime = defaultStartTime;
       searchOptions.text = "";
+      //console.log(searchOptions);
+      chrome.history.search(searchOptions,
+      function(historyItems) {
+        // For each history item, get details on all visits.
+        //console.log("history number:"+historyItems.length);
+        for (var i = 0; i < historyItems.length; ++i) {
+          var url = historyItems[i].url;
+          var title = historyItems[i].title;
+          var historyId = historyItems[i].id;
+          
+          var processVisitsWithUrl = function(url, title, historyId) {
+            // We need the url of the visited item to process the visit.
+            // Use a closure to bind the  url into the callback's args.
+            return function(visitItems) {
+              processVisits(url, title, historyId, visitItems);
+            };
+          };
+          chrome.history.getVisits({url: url}, processVisitsWithUrl(url, title, historyId));
+          numRequestsOutstanding++;
+        }
+        if (!numRequestsOutstanding) {
+          onAllVisitsProcessed();
+        }
+      });
     }
-    console.log(searchOptions);
-  chrome.history.search(searchOptions,
-  function(historyItems) {
-    // For each history item, get details on all visits.
-    console.log("history number:"+historyItems.length);
-    for (var i = 0; i < historyItems.length; ++i) {
-      var url = historyItems[i].url;
-      var title = historyItems[i].title;
-      var historyId = historyItems[i].id;
-      
-      var processVisitsWithUrl = function(url, title, historyId) {
-        // We need the url of the visited item to process the visit.
-        // Use a closure to bind the  url into the callback's args.
-        return function(visitItems) {
-          processVisits(url, title, historyId, visitItems);
-        };
-      };
-      chrome.history.getVisits({url: url}, processVisitsWithUrl(url, title, historyId));
-      numRequestsOutstanding++;
+    //search for the time of the earliest historyItems matching the keywords
+    //then use the time to get all visitItems then structure threads
+    else{
+      //console.log("go earliest");
+      //console.log(searchOptions);
+      chrome.history.search(searchOptions,
+      function(historyItems) {
+        //console.log("history items: "+historyItems.length);
+        for (var i = 0; i < historyItems.length; ++i) {
+          var url = historyItems[i].url;
+          var processVisitsWithUrl = function(url) {
+            // We need the url of the visited item to process the visit.
+            // Use a closure to bind the  url into the callback's args.
+            return function(visitItems) {
+              getEarliestVisits(url, visitItems);
+            };
+          };
+          chrome.history.getVisits({url: url}, processVisitsWithUrl(url));
+          numRequestsOutstanding++;
+        }
+        if (!numRequestsOutstanding) {
+          onAllVisitsProcessed();
+        }
+      });
     }
-    if (!numRequestsOutstanding) {
-      onAllVisitsProcessed();
-    }
-  });
   }
   
   searchByKeywords("");
