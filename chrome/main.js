@@ -193,20 +193,20 @@ Set.prototype.remove = function(o) {delete this[o];}
       console.log(titleByVisitId[visitId]+" id:"+idByVisitId[visitId]+" "+visitId+" "+typeByVisitId[visitId]+" "+referrByVisitId[visitId]+" "+titleByVisitId[referrByVisitId[visitId]]+" id:"+idByVisitId[referrByVisitId[visitId]]);
     }*/
     var LIMIT=100;//too deep to be real, can be loop
-    var hasVisit={};
+    var hasVisit=visitIds;
     for(var visitId in urlByVisitId){
       //loop to get top root
       var i = 0;
       var currentVisitId=visitId;
-      if(visitIds && (currentVisitId in visitIds)){
+      /*if(visitIds && (currentVisitId in visitIds)){
         //console.log(currentVisitId+ " in as leaf");
         hasVisit[currentVisitId]=true;
-      }
+      }*/
       while(referrByVisitId[currentVisitId]!=null&&referrByVisitId[currentVisitId]!=0&&i<LIMIT){
-        if(visitIds && (referrByVisitId[currentVisitId] in visitIds)){
+        /*if(visitIds && (referrByVisitId[currentVisitId] in visitIds)){
           //console.log(referrByVisitId[currentVisitId]+ " in as parent of "+currentVisitId);
           hasVisit[referrByVisitId[currentVisitId]]=true;
-        }
+        }*/
           
         i++;
         // if current id has been visited, no need to trace back, as it has been done already
