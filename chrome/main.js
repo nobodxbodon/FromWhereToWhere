@@ -264,8 +264,11 @@ Set.prototype.remove = function(o) {delete this[o];}
     var children = [];
     var lastUrl = "";
     var count=1;
-    if(roots.length==0)
+    /* show 'no match' */
+    if(roots.length==0){
+      treeRoot.addChild(createNoneNode("No history record"));
       return;
+    }
     
     var lastRoot = generateTree(roots[0], links, visitIds);
     lastUrl=lastRoot.href;
@@ -300,13 +303,23 @@ Set.prototype.remove = function(o) {delete this[o];}
     }
     //console.log("after filtering roots have: "+children.length);
     if(!visitIds){
+      //console.log("visitIds null");
       treeRoot.addChild(children);
     }else{
-      treeRoot.addChild(children.filter(function(element){
+      var filtered = children.filter(function(element){
         return hasKeywords(element, hasVisit);
-      })
-                        );
+      });
+      
+      //console.log("visitIds not null, length: "+filtered.length);
+      if(filtered.length==0)
+        treeRoot.addChild(createNoneNode("No matching results"));
+      else
+        treeRoot.addChild(filtered);
     }
+  }
+  
+  function createNoneNode(title){
+    return {title:title};
   }
   
   function hasKeywords(node, hasVisit){
@@ -425,8 +438,9 @@ Set.prototype.remove = function(o) {delete this[o];}
           chrome.history.getVisits({url: url}, processVisitsWithUrl(url));
           numRequestsOutstanding++;
         }
+        /* this only happens when there's no matching history items */
         if (!numRequestsOutstanding) {
-          onAllVisitsProcessed();
+          onAllVisitsProcessed(visitIds);
         }
       });
     }
