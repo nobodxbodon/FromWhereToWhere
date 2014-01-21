@@ -15,12 +15,23 @@ $(function () {
     });
   // select the tree container using jQuery
   $("#demo1").dynatree({
+    /*onClick: function(node, event) {
+      //alert(node.data.title);
+      if( node.data.href ){
+        
+        window.open(node.data.href, node.data.target);
+        return false;
+      }
+      return true;
+    },*/
     onActivate: function(node, event) {
       //alert(node.data.title);
       if( node.data.href ){
-        //event.preventDefault();
-        window.open(node.data.href, node.data.target);
+        
+        window.open(node.data.href);
       }
+      node.toggleExpand();
+      node.deactivate();
     },
       onCustomRender: function(node) {
         // Render title as columns
