@@ -14,7 +14,6 @@ Set.prototype.remove = function(o) {delete this[o];}
     var idByVisitId={};
     var historyByVisitId={};
     var timeByVisitId={};
-    var children = [];
     
     var earliestStartTime = new Date();
     var earliest = new Date();
@@ -35,23 +34,13 @@ Set.prototype.remove = function(o) {delete this[o];}
       }
     }
     if (!--numRequestsOutstanding) {
+      console.log("got earliest: "+((new Date())-benchStart)+" ms");
       searchByEarliest(earliest, visitIds, that);
     }
     //console.log("end earliest: "+numRequestsOutstanding);
   };
   
-  var searchByEarliest = function(earliest, visitIds, that){
-    var currentStartTime = earliest-microsecondsPerDay;
-    //if earliest history retrieving time is earlier than this earliest, no need to retrieve history again
-    if(earliestStartTime<currentStartTime){
-      console.log("earliest: "+(new Date(earliestStartTime))+" no need to retrieve");
-      that.onAllVisitsProcessed(visitIds, true);
-      return;
-    }
-    console.log("searchByEarliest: "+(new Date(currentStartTime)));
-    earliestStartTime = currentStartTime;
-    //console.log("in searchByEarliest");
-    //init the maps
+  var initCachedMaps = function(){
     titleByVisitId = {}; //visitId->title
     urlByVisitId = {};//visitId->url
     referrByVisitId = {};//visitId -> referrerId
@@ -59,7 +48,23 @@ Set.prototype.remove = function(o) {delete this[o];}
     idByVisitId={};
     historyByVisitId={};
     timeByVisitId={};
-    children = [];
+  };
+  
+  var searchByEarliest = function(earliest, visitIds, that){
+    var currentStartTime = earliest-microsecondsPerDay;
+    //if earliest history retrieving time is earlier than this earliest, no need to retrieve history again
+    if(earliestStartTime<currentStartTime){
+      console.log("earliest: "+(new Date(earliestStartTime))+" no need to retrieve");
+      that.rootsRebuild=false;
+      that.onAllVisitsProcessed(visitIds);
+      return;
+    }
+    that.rootsRebuild=true;
+    console.log("searchByEarliest: "+(new Date(currentStartTime)));
+    earliestStartTime = currentStartTime;
+    //console.log("in searchByEarliest");
+    //init the maps
+    initCachedMaps();
     //console.log(new Date(earliest));
     var searchOptions = {
       'text': '',              // Return every history item....
@@ -98,16 +103,10 @@ Set.prototype.remove = function(o) {delete this[o];}
   /* exceptions: ignore these visitItems */
   /* need to take all visit items into account, as they all can be root (title empty, typed, etc) */
   var processVisits = function(that, url, title, historyId, visitItems, visitIds) {
-    //console.log("in process:"+that);
-      //filter self by url
+    //filter self by url
     if(url.indexOf("fromwheretowhere_threads.html")==-1){
       for(var v in visitItems){
         var visitId = visitItems[v].visitId;
-        /*console.log(visitId);
-        
-        if(visitId==58507)
-          for(var e in visitItems[v])
-            console.log(e);*/
         
         //ignore all 'reload' type
         /*if(visitItems[v].transition=="reload"){
@@ -132,79 +131,83 @@ Set.prototype.remove = function(o) {delete this[o];}
     
   };
   
-  //save the UI roots if history isn't retrieved
   
   // This function is called when we have the final list of URls to display.
-  this.onAllVisitsProcessed = function(visitIds, skipWalk) {
+  this.onAllVisitsProcessed = function(visitIds) {
     //console.log("visitIds null or not: "+visitIds);
     var vilen=0;
     for(var i in visitIds)
         vilen++;
     console.log("visitIds length:"+vilen);
-    var roots = [];
     var walked = new Set();
-    var links = {};
+    //var links = this.links;
     var LIMIT=100;//too deep to be real, can be loop
-    for(var visitId in urlByVisitId){
-      //loop to get top root
-      var i = 0;
-      var currentVisitId=visitId;
-      
-      while(referrByVisitId[currentVisitId]!=null&&referrByVisitId[currentVisitId]!=0&&i<LIMIT){
-        
-        i++;
-        // if current id has been visited, no need to trace back, as it has been done already
-        if(currentVisitId in walked){
-          break;
+    //rebuild roots
+    if(this.rootsRebuild){
+        console.log("rebuild roots");
+        this.roots=[];
+        this.links={};
+        for(var visitId in urlByVisitId){
+          //loop to get top root
+          var i = 0;
+          var currentVisitId=visitId;
+          
+          while(referrByVisitId[currentVisitId]!=null&&referrByVisitId[currentVisitId]!=0&&i<LIMIT){
+            
+            i++;
+            // if current id has been visited, no need to trace back, as it has been done already
+            if(currentVisitId in walked){
+              break;
+            }
+            
+            //visitId can be wrong: no url/title, maybe a redirect? so if it's not urlByVisitId, it's invalid, and be discarded for now
+            if(!(referrByVisitId[currentVisitId] in urlByVisitId))
+              break;
+            
+            if(this.links[referrByVisitId[currentVisitId]]==null)
+              this.links[referrByVisitId[currentVisitId]]=[];
+            this.links[referrByVisitId[currentVisitId]].push(currentVisitId);
+            walked.add(currentVisitId);
+            currentVisitId=referrByVisitId[currentVisitId];
+            
+          }
+          
+          if(!(currentVisitId in walked) && (currentVisitId in urlByVisitId)){
+            var historyId = historyByVisitId[currentVisitId];
+            
+            walked.add(currentVisitId);
+            this.roots.push(currentVisitId);
+            
+          }
         }
-        
-        //visitId can be wrong: no url/title, maybe a redirect? so if it's not urlByVisitId, it's invalid, and be discarded for now
-        if(!(referrByVisitId[currentVisitId] in urlByVisitId))
-          break;
-        
-        if(links[referrByVisitId[currentVisitId]]==null)
-          links[referrByVisitId[currentVisitId]]=[];
-        links[referrByVisitId[currentVisitId]].push(currentVisitId);
-        walked.add(currentVisitId);
-        currentVisitId=referrByVisitId[currentVisitId];
-        
-      }
-      
-      if(!(currentVisitId in walked) && (currentVisitId in urlByVisitId)){
-        var historyId = historyByVisitId[currentVisitId];
-        
-        walked.add(currentVisitId);
-        roots.push(currentVisitId);
-        
-      }
-      
     }
     
     var children = [];
     var lastUrl = "";
     var count=1;
     /* show 'no match' */
-    if(roots.length==0){
+    if(this.roots.length==0){
         return createNoneNode("No history record");
       
     }
+    console.log("root number:"+this.roots.length);
     var linkslen =0;
-    for(var l in links){
+    for(var l in this.links){
         linkslen++;
     }
     console.log("links length:"+linkslen);
-    var lastRoot = generateTree(roots[0], links, visitIds);
+    var lastRoot = generateTree(this.roots[0], this.links, visitIds);
     lastUrl=lastRoot.href;
-    if(roots.length==1){
+    if(this.roots.length==1){
         console.log("got 1");
       children.push(lastRoot);
       //children.push(root);
       //return children;
     }else{
         //in reverse order, to make latest on top
-        for(var r=roots.length-1;r>=0;r--){
+        for(var r=this.roots.length-1;r>=0;r--){
           //group those that have same url continuously, shown times in front
-          var root = generateTree(roots[r], links, visitIds);
+          var root = generateTree(this.roots[r], this.links, visitIds);
           if(lastUrl==root.href){
             count++;
             continue;
@@ -236,8 +239,10 @@ Set.prototype.remove = function(o) {delete this[o];}
           });
           
           console.log("visitIds not null, length: "+filtered.length);
-          if(filtered.length==0)
+          if(filtered.length==0){
+            children=[];
             children.push(createNoneNode("No matching results"));
+          }
           else
             children= filtered;
         }
@@ -291,7 +296,7 @@ Set.prototype.remove = function(o) {delete this[o];}
     return node;
   }
   
-  var microsecondsPerDay = 1000 * 60 * 60 * 24 * 1;
+  var microsecondsPerDay = 1000 * 60 * 60 * 24 * 7;
   var defaultStartTime = (new Date).getTime() - microsecondsPerDay;
   
   /* search by keywords, only show the referrers; when keywords is empty, show a week's history */
@@ -310,14 +315,7 @@ Set.prototype.remove = function(o) {delete this[o];}
     };
     if(keywords==''){
       //init the maps only when there's no keywords
-      titleByVisitId = {}; //visitId->title
-      urlByVisitId = {};//visitId->url
-      referrByVisitId = {};//visitId -> referrerId
-      typeByVisitId={};
-      idByVisitId={};
-      historyByVisitId={};
-      timeByVisitId={};
-      children = [];
+      initCachedMaps();
       
       searchOptions.startTime = defaultStartTime;
       earliestStartTime = defaultStartTime;
@@ -365,8 +363,6 @@ Set.prototype.remove = function(o) {delete this[o];}
         for (var i = 0; i < historyItems.length; ++i) {
           var url = historyItems[i].url;
           var processVisitsWithUrl = function(url) {
-            // We need the url of the visited item to process the visit.
-            // Use a closure to bind the  url into the callback's args.
             return function(visitItems) {
               getEarliestVisits(that, url, visitItems);
             };
@@ -390,24 +386,19 @@ Set.prototype.remove = function(o) {delete this[o];}
 
 History.prototype = {
 	constructor: History,
+  //save the UI roots if history isn't retrieved
   roots:[],
+  links:{},
   treeRoot:null,
+  rootsRebuild:true,//flag: when the earliest date of the matched visitItems are later than earliestStartTime, set this to false, meaning no need to rebuild roots
+  
   setView: function(root){
     this.treeRoot = root;
   },
 	getHistory: function(keywords){
     this.test();
-    //console.log("in gethistory: "+this.treeRoot);
     this.searchByKeywords(keywords, this);
-    //test(roots);
-		/*console.log(this.roots[0].title+ " length:"+this.roots.length);
-    return this.roots;*/
 	},
   
 }
 
-function test1(roots){
-    roots.push({title:"test"});
-    console.log("in test");
-    
-}
