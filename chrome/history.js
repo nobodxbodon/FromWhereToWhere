@@ -34,7 +34,7 @@ Set.prototype.remove = function(o) {delete this[o];}
       }
     }
     if (!--numRequestsOutstanding) {
-      console.log("got earliest: "+((new Date())-benchStart)+" ms");
+      //console.log("got earliest: "+((new Date())-benchStart)+" ms");
       searchByEarliest(earliest, visitIds, that);
     }
     //console.log("end earliest: "+numRequestsOutstanding);
@@ -54,13 +54,13 @@ Set.prototype.remove = function(o) {delete this[o];}
     var currentStartTime = earliest-microsecondsPerDay;
     //if earliest history retrieving time is earlier than this earliest, no need to retrieve history again
     if(earliestStartTime<currentStartTime){
-      console.log("earliest: "+(new Date(earliestStartTime))+" no need to retrieve");
+      //console.log("earliest: "+(new Date(earliestStartTime))+" no need to retrieve");
       that.rootsRebuild=false;
       that.onAllVisitsProcessed(visitIds);
       return;
     }
     that.rootsRebuild=true;
-    console.log("searchByEarliest: "+(new Date(currentStartTime)));
+    //console.log("searchByEarliest: "+(new Date(currentStartTime)));
     earliestStartTime = currentStartTime;
     //console.log("in searchByEarliest");
     //init the maps
@@ -138,13 +138,13 @@ Set.prototype.remove = function(o) {delete this[o];}
     var vilen=0;
     for(var i in visitIds)
         vilen++;
-    console.log("visitIds length:"+vilen);
+    //console.log("visitIds length:"+vilen);
     var walked = new Set();
     //var links = this.links;
     var LIMIT=100;//too deep to be real, can be loop
     //rebuild roots
     if(this.rootsRebuild){
-        console.log("rebuild roots");
+        //console.log("rebuild roots");
         this.roots=[];
         this.links={};
         for(var visitId in urlByVisitId){
@@ -190,16 +190,16 @@ Set.prototype.remove = function(o) {delete this[o];}
         return createNoneNode("No history record");
       
     }
-    console.log("root number:"+this.roots.length);
+    //console.log("root number:"+this.roots.length);
     var linkslen =0;
     for(var l in this.links){
         linkslen++;
     }
-    console.log("links length:"+linkslen);
+    //console.log("links length:"+linkslen);
     var lastRoot = generateTree(this.roots[0], this.links, visitIds);
     lastUrl=lastRoot.href;
     if(this.roots.length==1){
-        console.log("got 1");
+        //console.log("got 1");
       children.push(lastRoot);
       //children.push(root);
       //return children;
@@ -229,7 +229,7 @@ Set.prototype.remove = function(o) {delete this[o];}
           lastUrl=root.href;
         }
         
-        console.log("after filtering roots have: "+children.length);
+        //console.log("after filtering roots have: "+children.length);
         if(!visitIds){
           //console.log("visitIds null");
           //return children;
@@ -238,7 +238,7 @@ Set.prototype.remove = function(o) {delete this[o];}
             return hasKeywords(element, visitIds);
           });
           
-          console.log("visitIds not null, length: "+filtered.length);
+          //console.log("visitIds not null, length: "+filtered.length);
           if(filtered.length==0){
             children=[];
             children.push(createNoneNode("No matching results"));
@@ -247,11 +247,11 @@ Set.prototype.remove = function(o) {delete this[o];}
             children= filtered;
         }
     }
-    console.log("finished populating: "+((new Date())-benchStart)+" ms");
+    /*console.log("finished populating: "+((new Date())-benchStart)+" ms");
     if(children.length>0)
-        console.log("first leaf:"+children[0].title);
+        console.log("first leaf:"+children[0].title);*/
     this.treeRoot.addChild(children);
-    console.log("finished populating: "+((new Date())-benchStart)+" ms");
+    //console.log("finished populating: "+((new Date())-benchStart)+" ms");
     return children;
   }
   
@@ -301,7 +301,7 @@ Set.prototype.remove = function(o) {delete this[o];}
   
   /* search by keywords, only show the referrers; when keywords is empty, show a week's history */
   this.searchByKeywords = function(keywords, that){
-    console.log("in search by keywords: "+keywords);
+    //console.log("in search by keywords: "+keywords);
     benchStart = new Date();
     numRequestsOutstanding = 0;
     //console.log("remove all");
@@ -324,15 +324,15 @@ Set.prototype.remove = function(o) {delete this[o];}
       chrome.history.search(searchOptions,
       function(historyItems) {
         // For each history item, get details on all visits.
-        console.log("history number:"+historyItems.length);
+        //console.log("history number:"+historyItems.length);
         for (var i = 0; i < historyItems.length; ++i) {
           var url = historyItems[i].url;
           var title = historyItems[i].title;
           var historyId = historyItems[i].id;
-          if(i==0){
+          /*if(i==0){
             console.log("that should be valid history object:");
             console.log(that);
-          }
+          }*/
           var processVisitsWithUrl = function(url, title, historyId) {
             // We need the url of the visited item to process the visit.
             // Use a closure to bind the  url into the callback's args.
@@ -372,21 +372,18 @@ Set.prototype.remove = function(o) {delete this[o];}
         }
         /* this only happens when there's no matching history items */
         if (!numRequestsOutstanding) {
-          console.log("no search results: "+((new Date())-benchStart)+" ms");
+          //console.log("no search results: "+((new Date())-benchStart)+" ms");
           that.onAllVisitsProcessed(visitIds);
         }
       });
     }
   }
   
-    this.test = function(){
-        console.log("private test:"+this.roots.length);
-    }
 };
 
 History.prototype = {
 	constructor: History,
-  //save the UI roots if history isn't retrieved
+  //save the roots if history isn't retrieved
   roots:[],
   links:{},
   treeRoot:null,
@@ -396,7 +393,6 @@ History.prototype = {
     this.treeRoot = root;
   },
 	getHistory: function(keywords){
-    this.test();
     this.searchByKeywords(keywords, this);
 	},
   

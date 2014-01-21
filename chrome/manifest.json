@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "FromWhereToWhere",
-  "version": "0.1",
+  "version": "0.12",
   "description": "Structure browsing history in threads",
   "permissions": ["history"],
   "icons": {"48": "icon.png"},
