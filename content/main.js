@@ -513,7 +513,7 @@ pub.mainThread.prototype = {
 						pub.history.sugKeywords = (new Date()).getTime()-pub.history.sugKeywords;
 					}
           pub.pidwithKeywords = [].concat(allpids);
-          topNodes = pub.history.createParentNodesCheckDup(allpids, this.query);
+          topNodes = pub.history.getTopNodesByHistoryVisits();//createParentNodesCheckDup(allpids, this.query);
 					if(pub.DEBUG){
 						querytime.parent = ((new Date()).getTime() - querytime.tmp);
 						querytime.tmp = (new Date()).getTime();

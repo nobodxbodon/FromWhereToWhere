@@ -235,24 +235,31 @@ pub.mainThread.prototype = {
 		var switchToTab = document.getElementById("switchToTab");
     var openinnewtab = document.getElementById("openinnewtab");
     var shareThread = document.getElementById("share");
-    var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
-    if(node){
-      var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(node.url);
-      pub.selectNodeLocal = exists;
-      localItem.hidden = (exists == -1);
-    }
+    
+	//if # of selected item > 1, just show "open in new tab"
+	if(pub.treeView.selection.count==1){
+	  var node = pub.treeView.visibleData[pub.treeView.selection.currentIndex];
+	  if(node){
+		var exists = com.wuxuan.fromwheretowhere.sb.urls.indexOf(node.url);
+		pub.selectNodeLocal = exists;
+		localItem.hidden = (exists == -1);
+	  }
 		//check if the tab is opened already
 		var foundTab = pub.UIutils.findTabByDocUrl(null, node.url);
-    openinnewtab.hidden = (node==null || foundTab.tab!=null);
+		openinnewtab.hidden = (node==null || foundTab.tab!=null);
 		switchToTab.hidden = (foundTab.tab==null);
 		switchToTab.fromwheretowhere = {};
 		switchToTab.fromwheretowhere.foundTab = foundTab;
-		
-    var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
+	}else if(pub.treeView.selection.count==0){
+    /*var selectedIndex = pub.UIutils.getAllSelectedIndex(pub.treeView);
     var propertyItem = document.getElementById("export-menu");
-		var noneSelected = (selectedIndex.length==0);
+		var noneSelected = (selectedIndex.length==0);*/
     propertyItem.hidden = noneSelected;
 		shareThread.hidden = noneSelected;
+	}else{
+	  openinnewtab.hidden = false;
+	  switchToTab.hidden =true;
+	}
   };
   
   pub.showSearchMenuItems = function(){
@@ -506,7 +513,7 @@ pub.mainThread.prototype = {
 						pub.history.sugKeywords = (new Date()).getTime()-pub.history.sugKeywords;
 					}
           pub.pidwithKeywords = [].concat(allpids);
-          topNodes = pub.history.createParentNodesCheckDup(allpids, this.query);
+          topNodes = pub.history.getTopNodesByHistoryVisits();//createParentNodesCheckDup(allpids, this.query);
 					if(pub.DEBUG){
 						querytime.parent = ((new Date()).getTime() - querytime.tmp);
 						querytime.tmp = (new Date()).getTime();
@@ -519,7 +526,7 @@ pub.mainThread.prototype = {
 					for(var i in filtered){
 						topNodes.splice(0,0,pub.putNodeToLevel0(filtered[i]));
 					}
-					var remoteThreads = pub.remote.getAll({words:this.words, optional:this.optional, excluded:this.excluded, site:this.site}, topNodes, pub);
+					var remoteThreads = pub.remote.getAll({keywords:this.keywords, words:this.words, optional:this.optional, excluded:this.excluded, site:this.site}, topNodes, pub);
 					/*for(var i in filtered){
 						topNodes.splice(0,0,remoteThreads);
 					}*/
@@ -707,6 +714,10 @@ pub.mainThread.prototype = {
       pub.search();
     }
   };
+  
+  pub.seeWeb = function(){
+	window.open("http://www.fromwheretowhere.net");
+  }
   
   pub.mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
         .getInterface(Components.interfaces.nsIWebNavigation)

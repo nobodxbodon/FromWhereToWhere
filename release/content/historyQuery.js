@@ -546,8 +546,8 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   // Main Datastructure for each Node
   pub.ReferedHistoryNode = function(id, placeId, label, url, isContainer, isFolded, children, level) {
     var obj = new Object();
-		//obsolete...can't remember why it's here in the first place, null for all
-    obj.id = null;
+		//id should be visitId, as moz.historyvisits.id
+    obj.id = id;
     obj.placeId = placeId;
     obj.label = label;
     obj.url = url;
@@ -613,6 +613,23 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return tops;
   };
   
+	//get top nodes not from place_id, but based on moz_historyvisits where from_visit=0. use id to distinguish
+	pub.getTopNodesByHistoryVisits = function(){
+		var statement = pub.mDBConn.createStatement("select hv.id, hv.from_visit, hv.place_id, p.url, p.title from moz_historyvisits hv join moz_places p on hv.place_id=p.id where from_visit=0 order by visit_date DESC LIMIT 100");//id from_visit place_id visit_date visit_type session
+		var nodes = [];
+    try {
+      while (statement.executeStep()) {
+				var node = pub.ReferedHistoryNode(statement.getInt32(0), statement.getInt32(2), statement.getString(4), statement.getString(3), true, true, [], 0);
+				nodes.push(node);
+      }
+      statement.reset();
+    }
+    catch (e) {
+      statement.reset();
+    }
+		return nodes;
+	};
+	
   // those without parent are also added, can't only highlight the keywords instead of the whole title?
   pub.createParentNodesCheckDup = function(pids,query) {
     pub.allKnownParentPids = [];
