@@ -13,8 +13,11 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
   pub.mDBConn = pub.openPlacesDatabase();
   pub.ios = Components.classes["@mozilla.org/network/io-service;1"].
 	        getService(Components.interfaces.nsIIOService);
-  pub.fis = Components.classes["@mozilla.org/browser/favicon-service;1"].
-          getService(Components.interfaces.nsIFaviconService);
+  /*pub.fis = Components.classes["@mozilla.org/browser/favicon-service;1"].
+          getService(Components.interfaces.nsIFaviconService);*/
+  pub.histServ =
+  	Components.classes["@mozilla.org/browser/nav-history-service;1"].
+  	getService(Components.interfaces.nsINavHistoryService);
   
 	// Get a reference to the strings bundle
   pub.stringsBundle = document.getElementById("fromwheretowhere.string-bundle");
@@ -220,7 +223,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return pub.queryOne(statement, 64, 0);
   };
   
-  pub.getImagefromUrl = function(url){
+  /*pub.getImagefromUrl = function(url){
     try{
       var uri = pub.ios.newURI(url, null, null);
       return pub.fis.getFaviconImageForPage(uri).spec;
@@ -228,7 +231,7 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
       //alert(url);
       return null;
     }
-  };
+  };*/
 	
 	pub.sqlStSiteFilter = function(term, site){
 		if(site.length!=0){
@@ -660,8 +663,32 @@ com.wuxuan.fromwheretowhere.historyQuery = function(){
     return nodes;
   };
   
+	pub.mapIcon=null;
+	pub.updateVisitIcons = function(){
+		if(pub.mapIcon!=null)
+			return;
+    pub.mapIcon={};
+    console.log("updateVisitIcons:");
+  	var opts = pub.histServ.getNewQueryOptions();
+		var query = pub.histServ.getNewQuery();
+		
+		var result = pub.histServ.executeQuery(query, opts);
+			// Using the results by traversing a container
+		// see : https://developer.mozilla.org/en/nsINavHistoryContainerResultNode
+		var cont = result.root;
+		cont.containerOpen = true;
+		for (var i = 0; i < cont.childCount; i ++) {
+	
+			var node = cont.getChild(i);
+			pub.mapIcon[node.uri]=node.icon;
+		}
+    // Close container when done
+    cont.containerOpen = false;
+  }
+	
 	pub.init = function(){
-		pub.utils = com.wuxuan.fromwheretowhere.utils;	
+		pub.utils = com.wuxuan.fromwheretowhere.utils;
+		pub.updateVisitIcons();
 	};
 	
   return pub;

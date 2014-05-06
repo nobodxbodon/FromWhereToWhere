@@ -513,7 +513,7 @@ pub.mainThread.prototype = {
 						pub.history.sugKeywords = (new Date()).getTime()-pub.history.sugKeywords;
 					}
           pub.pidwithKeywords = [].concat(allpids);
-          topNodes = pub.history.getTopNodesByHistoryVisits();//createParentNodesCheckDup(allpids, this.query);
+          topNodes = pub.history.createParentNodesCheckDup(allpids, this.query);
 					if(pub.DEBUG){
 						querytime.parent = ((new Date()).getTime() - querytime.tmp);
 						querytime.tmp = (new Date()).getTime();
@@ -668,7 +668,7 @@ pub.mainThread.prototype = {
 			var fontSize = (LARGEST-SMALLEST)*diff+SMALLEST;
 			kw.text = pKeywords[k]+" ";//fontSize+
 			//kw.setAttribute('href', keywords[k]); this makes underline but bad looking
-			kw.setAttribute('onmouseover',"event.target.style.cursor='pointer'");
+			kw.addEventListener('mouseover', function(event){event.target.style.cursor='pointer';});
 			kw.setAttribute('style', 'font-size:'+fontSize+'px;')
 			kw.setAttribute('title', pKeywords[k]+": "+occurrence[pKeywords[k]]);
 			if(keywordBlock){

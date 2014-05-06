@@ -218,7 +218,7 @@ com.wuxuan.fromwheretowhere.mainView = function(){
   getImageSrc: function(idx, column) {
     var vis = this.visibleData;
     if(column.id == "element") {
-      return main.history.getImagefromUrl(vis[idx].url);
+      return main.history.mapIcon[vis[idx].url];
     }
   },
   
