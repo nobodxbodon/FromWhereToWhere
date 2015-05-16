@@ -6,7 +6,7 @@ MakeUseOf review: <a href="http://www.makeuseof.com/tag/structure-firefox-browsi
 
 LifeHacker review: <a href="http://lifehacker.com/5801972/fromwheretowhere-threads-your-firefox-browsing-history">FromWhereToWhere Threads Your Firefox Browsing History</a>
 
-gHacks review: <a href="http://www.ghacks.net/2011/05/18/improve-firefoxs-history-with-from-where-to-where/">Improve Firefox’s History With From Where To Where</a>
+gHacks review: <a href="http://www.ghacks.net/2011/05/18/improve-firefoxs-history-with-from-where-to-where/">Improve Firefox√ïs History With From Where To Where</a>
 
 <b>New in 0.23.4</b>
 Browsing history can be exported to HTML like below (using tags 'ol li a'). Slight difference may exist if embedded in different pages.
@@ -15,7 +15,7 @@ Browsing history can be exported to HTML like below (using tags 'ol li a'). Slig
 
 <b>Everyday Use Case:</b>
 
-1) I'm googling some terms, and opening some pages, but somehow after I find a relevant yet not perfect link, I can't find the searching result page that leads me there. Maybe I closed it, or replaced it with another page. Now I want to continue looking through "that" specific search with those exact search terms I used. Instead of trying all those "xxx search" in Firefox history having different keywords I've tried, I can open FromWhereToWhere based on this particular page, find out which searching result page got me here, and open it. <b>NOTE</b>: according to my experience there's some delay in Firefox updating its history record (up to 2 minutes).
+1) I'm googling some terms, and opening some pages, but somehow after I find a relevant yet not perfect link, I can't find the searching result page that led me there. Maybe I closed it, or replaced it with another page. Now I want to continue looking through "that" specific search with those exact search terms I used. Instead of trying all those "xxx search" in Firefox history with different keywords I've tried, I can open FromWhereToWhere based on this particular page, find out which searching result page got me here, and open it. <b>NOTE</b>: according to my experience there's some delay in Firefox updating its history record (up to 2 minutes).
 
 2) Say some months ago, I spent more than 1 hour searching and trying out all kinds of suggestion in seemingly relevant pages, just to solve a configuration issue under Linux. Pitifully, with a "Hooray" for solving the issue after the boring trying and failures, I forgot to leave a note about the exact steps needed or the pages I consulted. Today "luckily" I bump into the same issue on another installation, and of course start searching again, hoping to "hit" the answer based on my memory. I find some pages familiar, but none of them looks like the one(s) having the final solution. I can use FromWhereToWhere just like in 1) to track only the relevant part of the browsing history instead of going through the searching and trying all over again.
 
