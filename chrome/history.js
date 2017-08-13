@@ -69,7 +69,7 @@ Set.prototype.remove = function(o) {delete this[o];}
     var searchOptions = {
       'text': '',              // Return every history item....
       'startTime': currentStartTime,
-      'maxResults':0
+      'maxResults':10000
     };
     
     //console.log(searchOptions);
@@ -311,7 +311,7 @@ Set.prototype.remove = function(o) {delete this[o];}
     var searchOptions = {
       'text': keywords,              // Return every history item....
       'startTime': 0,
-      'maxResults':0
+      'maxResults':10000
     };
     if(keywords==''){
       //init the maps only when there's no keywords
